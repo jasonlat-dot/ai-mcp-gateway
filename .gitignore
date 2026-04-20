@@ -39,3 +39,4 @@ build/
 /data/
 /ai-mcp-gateway-app/src/main/resources/application-prod.yml
 /.idea/
+/xfg-ai-mcp-gateway/
