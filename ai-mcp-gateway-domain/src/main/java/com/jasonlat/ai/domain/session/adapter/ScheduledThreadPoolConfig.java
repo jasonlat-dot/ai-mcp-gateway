@@ -15,9 +15,9 @@ public class ScheduledThreadPoolConfig {
      */
     @Bean(destroyMethod = "shutdown", name = "sessionCleanupScheduler") // Spring 关闭时自动调用 shutdown
     public ScheduledExecutorService sessionCleanupScheduler() {
+        AtomicInteger threadNum = new AtomicInteger(1);
         // 自定义线程工厂：命名 + 守护线程
         ThreadFactory threadFactory = r -> {
-            AtomicInteger threadNum = new AtomicInteger(1);
             Thread thread = new Thread(r, "session-cleanup-thread-" + threadNum.getAndIncrement());
             thread.setDaemon(true); // 守护线程，JVM 退出自动关闭
             return thread;

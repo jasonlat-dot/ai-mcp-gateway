@@ -60,7 +60,7 @@
         </dependency>
         <dependency>
             <groupId>com.jasonlat.ai</groupId>
-            <artifactId>ai-mcp-gateway-domain</artifactId>
+            <artifactId>ai-mcp-gateway-case</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jasonlat.ai</groupId>

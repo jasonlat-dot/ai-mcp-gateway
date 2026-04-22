@@ -1,5 +1,6 @@
 package com.jasonlat.ai.types.exception;
 
+import com.jasonlat.ai.types.enums.ResponseCode;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
@@ -24,6 +25,12 @@ public class AppException extends RuntimeException {
     public AppException(String info) {
         this.code = "ERROR_0001";
         this.info = info;
+    }
+
+    public AppException(ResponseCode responseCode) {
+        this.code = responseCode.getCode();
+        this.info = responseCode.getInfo();
+        super.initCause(new Throwable(info));
     }
 
     public AppException(String code, Throwable cause) {
