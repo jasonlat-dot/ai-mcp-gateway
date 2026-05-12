@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 public enum ResponseCode {
 
+    METHOD_HANDLER_SERVICE_NOT_FOUND("ERROR_METHOD_HANDLER_SERVICE_NOT_FOUND", "方法处理服务未找到"),
+    METHOD_NOT_FOUND("ERROR_METHOD_NOT_FOUND", "方法不存在"),
     SUCCESS("SUCCESS_0000", "成功"),
     UN_ERROR("ERROR_0001", "未知失败"),
     ILLEGAL_PARAMETER("ERROR_0002", "非法参数"),

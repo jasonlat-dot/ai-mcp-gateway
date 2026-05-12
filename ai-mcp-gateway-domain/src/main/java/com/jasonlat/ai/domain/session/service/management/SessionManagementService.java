@@ -1,4 +1,4 @@
-package com.jasonlat.ai.domain.session.service.impl;
+package com.jasonlat.ai.domain.session.service.management;
 
 import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
 import com.jasonlat.ai.domain.session.service.ISessionManagementService;
@@ -6,6 +6,7 @@ import com.jasonlat.ai.types.snow.SnowflakeIdGenerator;
 import com.jasonlat.ai.types.utils.RandomCodeUtil;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Sinks;
@@ -22,6 +23,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 public class SessionManagementService implements ISessionManagementService {
+
+    @Value("${server.servlet.context-path:/api-gateway}")
+    private String messageEndpointPrefix;
 
     private static final long SESSION_TIMEOUT_MINUTES = 30;
 
@@ -55,7 +59,7 @@ public class SessionManagementService implements ISessionManagementService {
 
         Sinks.Many<ServerSentEvent<String>> sink = Sinks.many().multicast().onBackpressureBuffer();
 
-        String messageEndpoint = "/" + gatewayId + "/mcp/message?sessionId=" + sessionId;
+        String messageEndpoint = messageEndpointPrefix + "/" + gatewayId + "/mcp/sse?sessionId=" + sessionId;
         sink.tryEmitNext(ServerSentEvent.<String>builder()
                 .event("endpoint")
                 .data(messageEndpoint)

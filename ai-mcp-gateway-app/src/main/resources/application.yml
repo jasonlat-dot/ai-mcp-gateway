@@ -3,4 +3,4 @@ spring:
   config:
     name: ai-mcp-gateway-app
   profiles:
-    active: dev
+    active: prod
