@@ -17,6 +17,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -32,6 +33,8 @@ public class ApiTest {
     @Resource
     private OpenAiChatModel.Builder chatModelBuilder;
 
+    @Value("${baidu.api-key}")
+    private String baiduApiKey;
 
     @Test
     public void test() {
@@ -74,7 +77,7 @@ public class ApiTest {
         log.info("sseMcpClient......");
         HttpClientSseClientTransport sse = HttpClientSseClientTransport
                 .builder("http://appbuilder.baidu.com")
-                .sseEndpoint("/v2/ai_search/mcp/sse?api_key=bce-v3/ALTAK-jLp4yendf71g1RdtDuL7Z/3867e2cc9ca03305bda94ce4e2a40ef3a94cd19e")
+                .sseEndpoint("/v2/ai_search/mcp/sse?api_key=" + baiduApiKey)
                 .build();
 
         McpSyncClient mcpSyncClient = McpClient.sync(sse).requestTimeout(Duration.ofMillis(36000)).build();
