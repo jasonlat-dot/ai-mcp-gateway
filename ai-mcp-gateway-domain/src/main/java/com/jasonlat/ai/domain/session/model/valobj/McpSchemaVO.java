@@ -37,8 +37,10 @@ public final class McpSchemaVO {
 
         var map = objectMapper.readValue(jsonText, MAP_TYPE_REF);
 
-        if (map.containsKey("method") && map.containsKey("params")) {
+        if (map.containsKey("method") && map.containsKey("id")) {
             return objectMapper.convertValue(map, JsonRpcRequest.class);
+        } else if (map.containsKey("method") && !map.containsKey("id")) {
+            return objectMapper.convertValue(map, JsonRpcNotification.class);
         } else if (map.containsKey("result") || map.containsKey("error")) {
             return objectMapper.convertValue(map, JsonRpcResponse.class);
         }
@@ -49,8 +51,8 @@ public final class McpSchemaVO {
     /**
      * JSON-RPC 2.0 Message Types
      */
-    public sealed interface JsonRpcMessage permits JsonRpcRequest, JsonRpcResponse {
-
+    public sealed interface JsonRpcMessage permits JsonRpcNotification, JsonRpcRequest, JsonRpcResponse {
+        // 强制所有实现这个接口的类，必须提供一个返回 String 类型的 jsonrpc 字段 / 方法。
         String jsonrpc();
 
     }
@@ -69,6 +71,19 @@ public final class McpSchemaVO {
                                  @JsonProperty("method") String method,
                                  @JsonProperty("id") Object id,
                                  @JsonProperty("params") Object params
+    ) implements JsonRpcMessage {
+    }
+
+    /**
+     * 通知对象
+     *
+     * @param jsonrpc 协议版本 2.0
+     * @param method  请求方法；initialize、tools/list、tools/call、resources/list
+     * @param params  请求参数
+     */
+    public record JsonRpcNotification(@JsonProperty("jsonrpc") String jsonrpc,
+                                         @JsonProperty("method") String method,
+                                         @JsonProperty("params") Object params
     ) implements JsonRpcMessage {
     }
 

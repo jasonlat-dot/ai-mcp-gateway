@@ -9,7 +9,7 @@ server:
   servlet:
     context-path: /api-gateway
 
-# 应用配置 app.config.api-version
+  # 应用配置 app.config.api-version
 app:
   config:
     # 版本，方便通过接口版本升级
@@ -17,7 +17,7 @@ app:
     # 跨域，开发阶段可以设置为 * 不限制
     cross-origin: '*'
 
-# 线程池配置
+  # 线程池配置
 thread:
   pool:
     executor:
@@ -28,25 +28,41 @@ thread:
         block-queue-size: 5000
         policy: CallerRunsPolicy
 
-spring:
-  # 数据库配置
-  datasource:
-    url: jdbc:postgresql://111.230.105.93:13308/order?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=UTC&useSSL=false
-    username: root
-    password: lijiaqiang12@
-    driver-class-name: org.postgresql.Driver
-  hikari:
-    pool-name: Retail_HikariCP
-    minimum-idle: 15 #最小空闲连接数量
-    idle-timeout: 180000 #空闲连接存活最大时间，默认600000（10分钟）
-    maximum-pool-size: 25 #连接池最大连接数，默认是10
-    auto-commit: true  #此属性控制从池返回的连接的默认自动提交行为,默认值：true
-    max-lifetime: 1800000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
-    connection-timeout: 30000 #数据库连接超时时间,默认30秒，即30000
-    connection-test-query: SELECT 1
-  type: com.zaxxer.hikari.HikariDataSource
+baidu:
+  api-key: ${BAIDU_API_KEY}
 
+openai:
+  client:
+    base-url: ${OPENAI_API_BASE_URL}
+    api-key: ${OPENAI_API_KEY}
+    model: gpt-5.4
+    completions-path: v1/chat/completions
+    embeddings-path: v1/embeddings
+
+    http:
+      connect-timeout-ms: 10000
+      response-timeout-ms: 120000
+      connection-request-timeout-ms: 5000
+      max-total: 200
+      max-per-route: 50
+      evict-idle-seconds: 30
+      evict-expired-connections: true
+
+      proxy:
+        enabled: true
+        host: 127.0.0.1
+        port: 7890
+        username:
+        password:
+
+  # mybatis plus 配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #设置sql的日志,有了这句才有打印各种sql的日志在控制台
+  mapper-locations: classpath:mybatis/mapper/*.xml
+
+  # 日志
 logging:
   level:
     root: info
-  config: classpath:logback-spring.xml

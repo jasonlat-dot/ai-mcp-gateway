@@ -53,7 +53,7 @@ public class ApiTest {
 
         ChatResponse response = chatModel.call(new Prompt(
                 UserMessage.builder()
-                        .text("你有什么工具可以调用")
+                        .text("把jsaonlat转换为大写")
                         .build()));
 
         System.out.println("测试结果" + JSON.toJSONString(response));
