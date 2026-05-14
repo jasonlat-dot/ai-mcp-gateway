@@ -13,37 +13,93 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
-    <insert id="insert" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayAuthPO" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO mcp_gateway_auth (gateway_id, api_key, rate_limit, expire_time, status)
-        VALUES (#{gatewayId}, #{apiKey}, #{rateLimit}, #{expireTime}, #{status})
+    <sql id="Base_Column_List">
+        id, gateway_id, api_key, rate_limit, expire_time, status, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayAuthPO" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO mcp_gateway_auth
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gateway_id,
+            <if test="apiKey != null and apiKey.trim().length() > 0">api_key,</if>
+            <if test="rateLimit != null">rate_limit,</if>
+            <if test="expireTime != null">expire_time,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{gatewayId,jdbcType=VARCHAR},
+            <if test="apiKey != null and apiKey.trim().length() > 0">#{apiKey,jdbcType=VARCHAR},</if>
+            <if test="rateLimit != null">#{rateLimit,jdbcType=INTEGER},</if>
+            <if test="expireTime != null">#{expireTime,jdbcType=TIMESTAMP},</if>
+            <if test="status != null">#{status,jdbcType=INTEGER},</if>
+            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
+        </trim>
     </insert>
 
     <delete id="deleteById" parameterType="java.lang.Long">
-        DELETE FROM mcp_gateway_auth WHERE id = #{id}
+        DELETE FROM mcp_gateway_auth
+        <choose>
+            <when test="_parameter != null">
+                WHERE id = #{_parameter,jdbcType=BIGINT}
+            </when>
+            <otherwise>
+                WHERE 1 = 0
+            </otherwise>
+        </choose>
     </delete>
 
     <update id="updateById" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayAuthPO">
         UPDATE mcp_gateway_auth
-        SET gateway_id = #{gatewayId},
-            api_key = #{apiKey},
-            rate_limit = #{rateLimit},
-            expire_time = #{expireTime},
-            status = #{status},
-            update_time = NOW()
-        WHERE id = #{id}
+        <set>
+            <if test="gatewayId != null and gatewayId.trim().length() > 0">gateway_id = #{gatewayId,jdbcType=VARCHAR},</if>
+            <if test="apiKey != null and apiKey.trim().length() > 0">api_key = #{apiKey,jdbcType=VARCHAR},</if>
+            <if test="rateLimit != null">rate_limit = #{rateLimit,jdbcType=INTEGER},</if>
+            <if test="expireTime != null">expire_time = #{expireTime,jdbcType=TIMESTAMP},</if>
+            <if test="status != null">status = #{status,jdbcType=INTEGER},</if>
+            update_time = CURRENT_TIMESTAMP
+        </set>
+        <where>
+            <choose>
+                <when test="id != null">
+                    id = #{id,jdbcType=BIGINT}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+            <if test="(gatewayId == null or gatewayId.trim().length() == 0)
+                      and (apiKey == null or apiKey.trim().length() == 0)
+                      and rateLimit == null
+                      and expireTime == null
+                      and status == null">
+                AND 1 = 0
+            </if>
+        </where>
     </update>
 
     <select id="queryById" parameterType="java.lang.Long" resultMap="McpGatewayAuthMap">
-        SELECT id, gateway_id, api_key, rate_limit, expire_time, status, create_time, update_time
+        SELECT
+        <include refid="Base_Column_List"/>
         FROM mcp_gateway_auth
-        WHERE id = #{id}
+        <choose>
+            <when test="_parameter != null">
+                WHERE id = #{_parameter,jdbcType=BIGINT}
+            </when>
+            <otherwise>
+                WHERE 1 = 0
+            </otherwise>
+        </choose>
     </select>
 
     <select id="queryAll" resultMap="McpGatewayAuthMap">
-        SELECT id, gateway_id, api_key, rate_limit, expire_time, status, create_time, update_time
+        SELECT
+        <include refid="Base_Column_List"/>
         FROM mcp_gateway_auth
         ORDER BY id DESC
     </select>
 
 </mapper>
-

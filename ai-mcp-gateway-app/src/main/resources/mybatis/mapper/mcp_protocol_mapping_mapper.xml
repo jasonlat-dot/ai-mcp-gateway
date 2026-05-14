@@ -20,44 +20,122 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
-    <insert id="insert" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO mcp_protocol_mapping (gateway_id, tool_id, mapping_type, parent_path, field_name, mcp_path, mcp_type, mcp_desc, is_required, http_path, http_location, sort_order)
-        VALUES (#{gatewayId}, #{toolId}, #{mappingType}, #{parentPath}, #{fieldName}, #{mcpPath}, #{mcpType}, #{mcpDesc}, #{isRequired}, #{httpPath}, #{httpLocation}, #{sortOrder})
+    <sql id="Base_Column_List">
+        id, gateway_id, tool_id, mapping_type, parent_path, field_name, mcp_path, mcp_type,
+        mcp_desc, is_required, http_path, http_location, sort_order, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO mcp_protocol_mapping
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            gateway_id,
+            tool_id,
+            mapping_type,
+            <if test="parentPath != null and parentPath.trim().length() > 0">parent_path,</if>
+            field_name,
+            mcp_path,
+            mcp_type,
+            <if test="mcpDesc != null and mcpDesc.trim().length() > 0">mcp_desc,</if>
+            <if test="isRequired != null">is_required,</if>
+            <if test="httpPath != null and httpPath.trim().length() > 0">http_path,</if>
+            <if test="httpLocation != null and httpLocation.trim().length() > 0">http_location,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{gatewayId,jdbcType=VARCHAR},
+            #{toolId,jdbcType=BIGINT},
+            #{mappingType,jdbcType=VARCHAR},
+            <if test="parentPath != null and parentPath.trim().length() > 0">#{parentPath,jdbcType=VARCHAR},</if>
+            #{fieldName,jdbcType=VARCHAR},
+            #{mcpPath,jdbcType=VARCHAR},
+            #{mcpType,jdbcType=VARCHAR},
+            <if test="mcpDesc != null and mcpDesc.trim().length() > 0">#{mcpDesc,jdbcType=VARCHAR},</if>
+            <if test="isRequired != null">#{isRequired,jdbcType=INTEGER},</if>
+            <if test="httpPath != null and httpPath.trim().length() > 0">#{httpPath,jdbcType=VARCHAR},</if>
+            <if test="httpLocation != null and httpLocation.trim().length() > 0">#{httpLocation,jdbcType=VARCHAR},</if>
+            <if test="sortOrder != null">#{sortOrder,jdbcType=INTEGER},</if>
+            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
+        </trim>
     </insert>
 
     <delete id="deleteById" parameterType="java.lang.Long">
-        DELETE FROM mcp_protocol_mapping WHERE id = #{id}
+        DELETE FROM mcp_protocol_mapping
+        <choose>
+            <when test="_parameter != null">
+                WHERE id = #{_parameter,jdbcType=BIGINT}
+            </when>
+            <otherwise>
+                WHERE 1 = 0
+            </otherwise>
+        </choose>
     </delete>
 
     <update id="updateById" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO">
         UPDATE mcp_protocol_mapping
-        SET gateway_id = #{gatewayId},
-            tool_id = #{toolId},
-            mapping_type = #{mappingType},
-            parent_path = #{parentPath},
-            field_name = #{fieldName},
-            mcp_path = #{mcpPath},
-            mcp_type = #{mcpType},
-            mcp_desc = #{mcpDesc},
-            is_required = #{isRequired},
-            http_path = #{httpPath},
-            http_location = #{httpLocation},
-            sort_order = #{sortOrder},
-            update_time = NOW()
-        WHERE id = #{id}
+        <set>
+            <if test="gatewayId != null and gatewayId.trim().length() > 0">gateway_id = #{gatewayId,jdbcType=VARCHAR},</if>
+            <if test="toolId != null">tool_id = #{toolId,jdbcType=BIGINT},</if>
+            <if test="mappingType != null and mappingType.trim().length() > 0">mapping_type = #{mappingType,jdbcType=VARCHAR},</if>
+            <if test="parentPath != null and parentPath.trim().length() > 0">parent_path = #{parentPath,jdbcType=VARCHAR},</if>
+            <if test="fieldName != null and fieldName.trim().length() > 0">field_name = #{fieldName,jdbcType=VARCHAR},</if>
+            <if test="mcpPath != null and mcpPath.trim().length() > 0">mcp_path = #{mcpPath,jdbcType=VARCHAR},</if>
+            <if test="mcpType != null and mcpType.trim().length() > 0">mcp_type = #{mcpType,jdbcType=VARCHAR},</if>
+            <if test="mcpDesc != null and mcpDesc.trim().length() > 0">mcp_desc = #{mcpDesc,jdbcType=VARCHAR},</if>
+            <if test="isRequired != null">is_required = #{isRequired,jdbcType=INTEGER},</if>
+            <if test="httpPath != null and httpPath.trim().length() > 0">http_path = #{httpPath,jdbcType=VARCHAR},</if>
+            <if test="httpLocation != null and httpLocation.trim().length() > 0">http_location = #{httpLocation,jdbcType=VARCHAR},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder,jdbcType=INTEGER},</if>
+            update_time = CURRENT_TIMESTAMP
+        </set>
+        <where>
+            <choose>
+                <when test="id != null">
+                    id = #{id,jdbcType=BIGINT}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+            <if test="(gatewayId == null or gatewayId.trim().length() == 0)
+                      and toolId == null
+                      and (mappingType == null or mappingType.trim().length() == 0)
+                      and (parentPath == null or parentPath.trim().length() == 0)
+                      and (fieldName == null or fieldName.trim().length() == 0)
+                      and (mcpPath == null or mcpPath.trim().length() == 0)
+                      and (mcpType == null or mcpType.trim().length() == 0)
+                      and (mcpDesc == null or mcpDesc.trim().length() == 0)
+                      and isRequired == null
+                      and (httpPath == null or httpPath.trim().length() == 0)
+                      and (httpLocation == null or httpLocation.trim().length() == 0)
+                      and sortOrder == null">
+                AND 1 = 0
+            </if>
+        </where>
     </update>
 
     <select id="queryById" parameterType="java.lang.Long" resultMap="McpProtocolMappingMap">
-        SELECT id, gateway_id, tool_id, mapping_type, parent_path, field_name, mcp_path, mcp_type, mcp_desc, is_required, http_path, http_location, sort_order, create_time, update_time
+        SELECT
+        <include refid="Base_Column_List"/>
         FROM mcp_protocol_mapping
-        WHERE id = #{id}
+        <choose>
+            <when test="_parameter != null">
+                WHERE id = #{_parameter,jdbcType=BIGINT}
+            </when>
+            <otherwise>
+                WHERE 1 = 0
+            </otherwise>
+        </choose>
     </select>
 
     <select id="queryAll" resultMap="McpProtocolMappingMap">
-        SELECT id, gateway_id, tool_id, mapping_type, parent_path, field_name, mcp_path, mcp_type, mcp_desc, is_required, http_path, http_location, sort_order, create_time, update_time
+        SELECT
+        <include refid="Base_Column_List"/>
         FROM mcp_protocol_mapping
         ORDER BY id DESC
     </select>
 
 </mapper>
-
