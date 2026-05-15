@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jasonlat.ai.infrastructure.dao.IMcpProtocolRegistryDao">
 
@@ -43,27 +43,27 @@
         </trim>
         VALUES
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            #{gatewayId,jdbcType=VARCHAR},
-            #{toolId,jdbcType=BIGINT},
-            #{toolName,jdbcType=VARCHAR},
-            <if test="toolType != null and toolType.trim().length() > 0">#{toolType,jdbcType=VARCHAR},</if>
-            <if test="toolDescription != null and toolDescription.trim().length() > 0">#{toolDescription,jdbcType=VARCHAR},</if>
-            #{httpUrl,jdbcType=VARCHAR},
-            <if test="httpMethod != null and httpMethod.trim().length() > 0">#{httpMethod,jdbcType=VARCHAR},</if>
-            <if test="httpHeaders != null and httpHeaders.trim().length() > 0">#{httpHeaders,jdbcType=LONGVARCHAR},</if>
-            <if test="timeout != null">#{timeout,jdbcType=INTEGER},</if>
-            <if test="retryTimes != null">#{retryTimes,jdbcType=INTEGER},</if>
-            <if test="status != null">#{status,jdbcType=INTEGER},</if>
-            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
-            <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
+            #{gatewayId},
+            #{toolId},
+            #{toolName},
+            <if test="toolType != null and toolType.trim().length() > 0">#{toolType},</if>
+            <if test="toolDescription != null and toolDescription.trim().length() > 0">#{toolDescription},</if>
+            #{httpUrl},
+            <if test="httpMethod != null and httpMethod.trim().length() > 0">#{httpMethod},</if>
+            <if test="httpHeaders != null and httpHeaders.trim().length() > 0">#{httpHeaders},</if>
+            <if test="timeout != null">#{timeout},</if>
+            <if test="retryTimes != null">#{retryTimes},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
         </trim>
     </insert>
 
     <delete id="deleteById" parameterType="java.lang.Long">
         DELETE FROM mcp_protocol_registry
         <choose>
-            <when test="_parameter != null">
-                WHERE id = #{_parameter,jdbcType=BIGINT}
+            <when test="id != null">
+                WHERE id = #{id}
             </when>
             <otherwise>
                 WHERE 1 = 0
@@ -74,23 +74,23 @@
     <update id="updateById" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolRegistryPO">
         UPDATE mcp_protocol_registry
         <set>
-            <if test="gatewayId != null and gatewayId.trim().length() > 0">gateway_id = #{gatewayId,jdbcType=VARCHAR},</if>
-            <if test="toolId != null">tool_id = #{toolId,jdbcType=BIGINT},</if>
-            <if test="toolName != null and toolName.trim().length() > 0">tool_name = #{toolName,jdbcType=VARCHAR},</if>
-            <if test="toolType != null and toolType.trim().length() > 0">tool_type = #{toolType,jdbcType=VARCHAR},</if>
-            <if test="toolDescription != null and toolDescription.trim().length() > 0">tool_description = #{toolDescription,jdbcType=VARCHAR},</if>
-            <if test="httpUrl != null and httpUrl.trim().length() > 0">http_url = #{httpUrl,jdbcType=VARCHAR},</if>
-            <if test="httpMethod != null and httpMethod.trim().length() > 0">http_method = #{httpMethod,jdbcType=VARCHAR},</if>
-            <if test="httpHeaders != null and httpHeaders.trim().length() > 0">http_headers = #{httpHeaders,jdbcType=LONGVARCHAR},</if>
-            <if test="timeout != null">timeout = #{timeout,jdbcType=INTEGER},</if>
-            <if test="retryTimes != null">retry_times = #{retryTimes,jdbcType=INTEGER},</if>
-            <if test="status != null">status = #{status,jdbcType=INTEGER},</if>
+            <if test="gatewayId != null and gatewayId.trim().length() > 0">gateway_id = #{gatewayId},</if>
+            <if test="toolId != null">tool_id = #{toolId},</if>
+            <if test="toolName != null and toolName.trim().length() > 0">tool_name = #{toolName},</if>
+            <if test="toolType != null and toolType.trim().length() > 0">tool_type = #{toolType},</if>
+            <if test="toolDescription != null and toolDescription.trim().length() > 0">tool_description = #{toolDescription},</if>
+            <if test="httpUrl != null and httpUrl.trim().length() > 0">http_url = #{httpUrl},</if>
+            <if test="httpMethod != null and httpMethod.trim().length() > 0">http_method = #{httpMethod},</if>
+            <if test="httpHeaders != null and httpHeaders.trim().length() > 0">http_headers = #{httpHeaders},</if>
+            <if test="timeout != null">timeout = #{timeout},</if>
+            <if test="retryTimes != null">retry_times = #{retryTimes},</if>
+            <if test="status != null">status = #{status},</if>
             update_time = CURRENT_TIMESTAMP
         </set>
         <where>
             <choose>
                 <when test="id != null">
-                    id = #{id,jdbcType=BIGINT}
+                    id = #{id}
                 </when>
                 <otherwise>
                     1 = 0
@@ -117,8 +117,8 @@
         <include refid="Base_Column_List"/>
         FROM mcp_protocol_registry
         <choose>
-            <when test="_parameter != null">
-                WHERE id = #{_parameter,jdbcType=BIGINT}
+            <when test="id != null">
+                WHERE id = #{id}
             </when>
             <otherwise>
                 WHERE 1 = 0
