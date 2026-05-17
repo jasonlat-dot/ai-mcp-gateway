@@ -86,7 +86,7 @@ public class McpGatewayController implements IMcpGatewayService {
             McpSchemaVO.JsonRpcMessage jsonRpcRequest = McpSchemaVO.deserializeJsonRpcMessage(messageBody);
             log.info("序列化消息：{}", JSON.toJSONString(jsonRpcRequest));
 
-            McpSchemaVO.JsonRpcResponse jsonRpcResponse = sessionMessageService.processHandleMessage(jsonRpcRequest);
+            McpSchemaVO.JsonRpcResponse jsonRpcResponse = sessionMessageService.processHandleMessage(gatewayId, jsonRpcRequest);
             if (null != jsonRpcResponse) {
                 String responseJson = objectMapper.writeValueAsString(jsonRpcResponse);
                 session.getSink().tryEmitNext(

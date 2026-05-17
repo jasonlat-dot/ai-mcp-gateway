@@ -1,13 +1,13 @@
 package com.jasonlat.ai.infrastructure.dao;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-@Mapper
-public interface IMcpGatewayDao {
+public interface IMcpGatewayDao extends BaseMapper<McpGatewayPO> {
 
     int insert(McpGatewayPO mcpGatewayPO);
 
@@ -18,5 +18,7 @@ public interface IMcpGatewayDao {
     McpGatewayPO queryById(@Param("id")Long id);
 
     List<McpGatewayPO> queryAll();
+
+    McpGatewayPO queryMcpGatewayByGatewayId(@Param("gatewayId")String gatewayId);
 }
 

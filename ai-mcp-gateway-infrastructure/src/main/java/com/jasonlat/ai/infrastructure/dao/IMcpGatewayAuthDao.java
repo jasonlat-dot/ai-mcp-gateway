@@ -1,13 +1,12 @@
 package com.jasonlat.ai.infrastructure.dao;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayAuthPO;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-@Mapper
-public interface IMcpGatewayAuthDao {
+public interface IMcpGatewayAuthDao extends BaseMapper<McpGatewayAuthPO> {
 
     int insert(McpGatewayAuthPO mcpGatewayAuthPO);
 

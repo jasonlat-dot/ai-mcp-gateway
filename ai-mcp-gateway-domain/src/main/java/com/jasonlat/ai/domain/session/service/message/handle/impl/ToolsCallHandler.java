@@ -16,7 +16,7 @@ public class ToolsCallHandler  implements IRequestHandler {
 
 
     @Override
-    public McpSchemaVO.JsonRpcResponse handleMessage(McpSchemaVO.JsonRpcRequest request) {
+    public McpSchemaVO.JsonRpcResponse handleMessage(String gatewayId, McpSchemaVO.JsonRpcRequest request) {
         // {"id":"39eac954-2","jsonrpc":"2.0","method":"tools/call","params":{"name":"toUpperCase","arguments":{"word":"jsaonlat"}}}
         log.info("开始处理工具调用请求: {}", JSON.toJSONString(request));
 

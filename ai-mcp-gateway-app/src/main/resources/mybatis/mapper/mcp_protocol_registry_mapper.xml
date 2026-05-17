@@ -7,6 +7,7 @@
         <result column="gateway_id" property="gatewayId"/>
         <result column="tool_id" property="toolId"/>
         <result column="tool_name" property="toolName"/>
+        <result column="tool_version" property="toolVersion"/>
         <result column="tool_type" property="toolType"/>
         <result column="tool_description" property="toolDescription"/>
         <result column="http_url" property="httpUrl"/>
@@ -20,7 +21,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, gateway_id, tool_id, tool_name, tool_type, tool_description, http_url,
+        id, gateway_id, tool_id, tool_name, tool_version, tool_type, tool_description, http_url,
         http_method, http_headers, timeout, retry_times, status, create_time, update_time
     </sql>
 
@@ -30,6 +31,7 @@
             gateway_id,
             tool_id,
             tool_name,
+            tool_version,
             <if test="toolType != null and toolType.trim().length() > 0">tool_type,</if>
             <if test="toolDescription != null and toolDescription.trim().length() > 0">tool_description,</if>
             http_url,
@@ -46,6 +48,7 @@
             #{gatewayId},
             #{toolId},
             #{toolName},
+            #{toolVersion},
             <if test="toolType != null and toolType.trim().length() > 0">#{toolType},</if>
             <if test="toolDescription != null and toolDescription.trim().length() > 0">#{toolDescription},</if>
             #{httpUrl},
@@ -77,6 +80,7 @@
             <if test="gatewayId != null and gatewayId.trim().length() > 0">gateway_id = #{gatewayId},</if>
             <if test="toolId != null">tool_id = #{toolId},</if>
             <if test="toolName != null and toolName.trim().length() > 0">tool_name = #{toolName},</if>
+            <if test="toolName != null and toolName.trim().length() > 0">tool_version = #{toolVersion},</if>
             <if test="toolType != null and toolType.trim().length() > 0">tool_type = #{toolType},</if>
             <if test="toolDescription != null and toolDescription.trim().length() > 0">tool_description = #{toolDescription},</if>
             <if test="httpUrl != null and httpUrl.trim().length() > 0">http_url = #{httpUrl},</if>
@@ -99,6 +103,7 @@
             <if test="(gatewayId == null or gatewayId.trim().length() == 0)
                       and toolId == null
                       and (toolName == null or toolName.trim().length() == 0)
+                      and (toolVersion == null or toolVersion.trim().length() == 0)
                       and (toolType == null or toolType.trim().length() == 0)
                       and (toolDescription == null or toolDescription.trim().length() == 0)
                       and (httpUrl == null or httpUrl.trim().length() == 0)
@@ -131,6 +136,20 @@
         <include refid="Base_Column_List"/>
         FROM mcp_protocol_registry
         ORDER BY id DESC
+    </select>
+
+    <select id="queryMcpProtocolRegistryByGatewayId" parameterType="java.lang.String" resultMap="McpProtocolRegistryMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mcp_protocol_registry
+        <choose>
+            <when test="gatewayId != null">
+                WHERE gateway_id = #{gatewayId}
+            </when>
+            <otherwise>
+                WHERE 1 = 0
+            </otherwise>
+        </choose>
     </select>
 
 </mapper>

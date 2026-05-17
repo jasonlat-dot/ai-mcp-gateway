@@ -13,7 +13,7 @@ import java.util.Map;
 @Service("toolsListHandler")
 public class ToolsListHandler  implements IRequestHandler {
     @Override
-    public McpSchemaVO.JsonRpcResponse handleMessage(McpSchemaVO.JsonRpcRequest request) {
+    public McpSchemaVO.JsonRpcResponse handleMessage(String gatewayId, McpSchemaVO.JsonRpcRequest request) {
         log.info("开始处理工具列表请求: {}", JSON.toJSONString(request));
         McpSchemaVO.JsonRpcResponse jsonRpcResponse = new McpSchemaVO.JsonRpcResponse("2.0", request.id(), Map.of(
                 "tools", new Object[]{

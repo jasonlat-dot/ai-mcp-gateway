@@ -46,17 +46,32 @@ public class ApiTest {
 
         OpenAiChatModel chatModel = chatModelBuilder.defaultOptions(
                 OpenAiChatOptions.builder()
-                        .model("gpt-5.4")
-                        .toolCallbacks(new SyncMcpToolCallbackProvider(sseMcpClient02()).getToolCallbacks())
+                        .model("gpt-5.5")
+                        .toolCallbacks(new SyncMcpToolCallbackProvider(sseMcpClient03()).getToolCallbacks())
                         .build()
                 ).build();
 
         ChatResponse response = chatModel.call(new Prompt(
                 UserMessage.builder()
-                        .text("把jsaonlat转换为大写")
+                        .text("有哪些工具可以使用？")
                         .build()));
 
         System.out.println("测试结果" + JSON.toJSONString(response));
+    }
+
+    public static McpSyncClient sseMcpClient03() {
+        HttpClientSseClientTransport sseClientTransport = HttpClientSseClientTransport
+                .builder("http://localhost:8888")
+                .sseEndpoint("/api-gateway/gateway_001/mcp/sse")
+                .build();
+
+        McpSyncClient mcpSyncClient = McpClient.sync(sseClientTransport)
+                .requestTimeout(Duration.ofMinutes(360))
+                .build();
+        var init_sse = mcpSyncClient.initialize();
+        log.info("Tool SSE MCP Initialized {}", init_sse);
+
+        return mcpSyncClient;
     }
 
     public McpSyncClient sseMcpClient02() {

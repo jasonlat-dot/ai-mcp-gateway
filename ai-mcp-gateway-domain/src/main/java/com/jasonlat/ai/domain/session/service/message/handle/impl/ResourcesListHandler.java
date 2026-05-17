@@ -14,7 +14,7 @@ import java.util.Map;
 @Service("resourcesListHandler")
 public class ResourcesListHandler implements IRequestHandler {
     @Override
-    public McpSchemaVO.JsonRpcResponse handleMessage(McpSchemaVO.JsonRpcRequest request) {
+    public McpSchemaVO.JsonRpcResponse handleMessage(String gatewayId, McpSchemaVO.JsonRpcRequest request) {
         log.info("模拟处理资源列表请求: {}", JSON.toJSONString(request));
         McpSchemaVO.JsonRpcResponse jsonRpcResponse = new McpSchemaVO.JsonRpcResponse("2.0", request.id(), Map.of(
                 "resources", Map.of(

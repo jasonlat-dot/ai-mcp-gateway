@@ -34,6 +34,10 @@ public class McpProtocolRegistryPO {
      */
     private String toolName;
     /**
+     * 工具版本
+     */
+    private String toolVersion;
+    /**
      * 工具类型：function/resource
      */
     private String toolType;

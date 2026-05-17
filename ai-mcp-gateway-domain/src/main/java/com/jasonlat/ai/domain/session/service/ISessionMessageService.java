@@ -4,5 +4,5 @@ import com.jasonlat.ai.domain.session.model.valobj.McpSchemaVO;
 
 public interface ISessionMessageService {
 
-    McpSchemaVO.JsonRpcResponse processHandleMessage(McpSchemaVO.JsonRpcMessage request);
+    McpSchemaVO.JsonRpcResponse processHandleMessage(String gatewayId, McpSchemaVO.JsonRpcMessage request);
 }

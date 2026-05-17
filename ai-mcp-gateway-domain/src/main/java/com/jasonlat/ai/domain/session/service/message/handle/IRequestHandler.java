@@ -7,6 +7,6 @@ import com.jasonlat.ai.domain.session.model.valobj.McpSchemaVO;
  * 2026-05-12  22:20
  */
 public interface IRequestHandler {
-    McpSchemaVO.JsonRpcResponse handleMessage(McpSchemaVO.JsonRpcRequest request);
+    McpSchemaVO.JsonRpcResponse handleMessage(String gatewayId, McpSchemaVO.JsonRpcRequest request);
 
 }
