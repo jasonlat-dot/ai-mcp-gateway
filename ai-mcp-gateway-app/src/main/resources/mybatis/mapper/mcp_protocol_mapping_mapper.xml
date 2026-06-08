@@ -119,7 +119,7 @@
 
     <select id="queryById" parameterType="java.lang.Long" resultMap="McpProtocolMappingMap">
         SELECT
-        <include refid="Base_Column_List"/>
+            <include refid="Base_Column_List"/>
         FROM mcp_protocol_mapping
         <choose>
             <when test="id != null">
@@ -133,9 +133,17 @@
 
     <select id="queryAll" resultMap="McpProtocolMappingMap">
         SELECT
-        <include refid="Base_Column_List"/>
+            <include refid="Base_Column_List"/>
         FROM mcp_protocol_mapping
         ORDER BY id DESC
+    </select>
+
+    <select id="queryMcpGatewayToolConfigList" resultMap="McpProtocolMappingMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM mcp_protocol_mapping
+        WHERE gateway_id = #{gatewayId}
+        ORDER BY sort_order DESC
     </select>
 
 </mapper>
