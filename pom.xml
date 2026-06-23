@@ -20,6 +20,8 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-ai.version>1.0.0</spring-ai.version>
+
+        <retrofit2.version>2.9.0</retrofit2.version>
     </properties>
 
     <developers>
@@ -170,6 +172,37 @@
                 <artifactId>reactor-core</artifactId>
                 <version>3.7.3</version>
             </dependency>
+
+            <!-- OkHttp 核心 -->
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>3.14.9</version>
+            </dependency>
+            <!-- 日志拦截器，版本必须和上面okhttp3完全一致 -->
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>3.14.9</version>
+            </dependency>
+
+            <!-- Retrofit 配套版本 -->
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>retrofit</artifactId>
+                <version>${retrofit2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>converter-jackson</artifactId>
+                <version>${retrofit2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.retrofit2</groupId>
+                <artifactId>adapter-rxjava2</artifactId>
+                <version>${retrofit2.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>org.springframework.ai</groupId>
