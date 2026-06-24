@@ -53,7 +53,12 @@ public class ApiTest {
 
         ChatResponse response = chatModel.call(new Prompt(
                 UserMessage.builder()
-                        .text("有哪些工具可以使用？")
+                        .text("""
+                                获取公司雇员信息，信息如下：
+                                城市：北京
+                                公司：谷歌
+                                雇员：jasonlat
+                                """)
                         .build()));
 
         System.out.println("测试结果" + JSON.toJSONString(response));
@@ -66,7 +71,7 @@ public class ApiTest {
                 .build();
 
         McpSyncClient mcpSyncClient = McpClient.sync(sseClientTransport)
-                .requestTimeout(Duration.ofMinutes(360))
+                .requestTimeout(Duration.ofMinutes(3600))
                 .build();
         var init_sse = mcpSyncClient.initialize();
         log.info("Tool SSE MCP Initialized {}", init_sse);

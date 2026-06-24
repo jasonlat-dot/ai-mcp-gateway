@@ -23,7 +23,7 @@ public class ToolsListHandler  implements IRequestHandler {
 
     @Override
     public McpSchemaVO.JsonRpcResponse handleMessage(String gatewayId, McpSchemaVO.JsonRpcRequest request) {
-        log.info("开始处理工具列表请求: {}", JSON.toJSONString(request));
+        log.info("ToolsListHandler 开始处理工具列表请求: {}", JSON.toJSONString(request));
 
         // 1. 查询网关配置信息
         McpGatewayConfigVO mcpGatewayConfig = sessionRepository.queryMcpGatewayConfigByGatewayId(gatewayId);
@@ -37,7 +37,7 @@ public class ToolsListHandler  implements IRequestHandler {
                 request.id(),
                 Map.of("tools",  tools),
                 null);
-        log.info("处理工具列表请求结束: {}", JSON.toJSONString(jsonRpcResponse));
+        log.info("ToolsListHandler 处理工具列表请求结束: {}", JSON.toJSONString(jsonRpcResponse));
         return jsonRpcResponse;
 
     }

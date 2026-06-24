@@ -8,6 +8,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import retrofit2.Retrofit;
@@ -35,7 +36,7 @@ public class HttpClientConfig {
         // 全局请求拦截器
         Interceptor headerInterceptor = new Interceptor() {
             @Override
-            public Response intercept(Chain chain) throws IOException {
+            public @NotNull Response intercept(Chain chain) throws IOException {
                 Request original = chain.request();
                 Request.Builder builder = original.newBuilder();
 

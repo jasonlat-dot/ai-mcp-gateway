@@ -1,6 +1,7 @@
 package com.jasonlat.ai.infrastructure.adapter.repository;
 
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayConfigVO;
+import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayProtocolConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayToolConfigVO;
 import com.jasonlat.ai.domain.session.repository.ISessionRepository;
 import com.jasonlat.ai.infrastructure.dao.IMcpGatewayDao;
@@ -88,5 +89,20 @@ public class SessionRepository implements ISessionRepository {
             mcpGatewayToolConfigVOList.add(mcpGatewayToolConfigVO);
         }
         return mcpGatewayToolConfigVOList;
+    }
+
+    @Override
+    public McpGatewayProtocolConfigVO queryMcpGatewayProtocolConfig(String gatewayId) {
+        McpProtocolRegistryPO mcpProtocolRegistryPO = mcpProtocolRegistryDao.queryMcpProtocolRegistryByGatewayId(gatewayId);
+        if (null == mcpProtocolRegistryPO) return null;
+
+        return McpGatewayProtocolConfigVO.builder()
+                .httpConfig(McpGatewayProtocolConfigVO.HTTPConfig.builder()
+                        .url(mcpProtocolRegistryPO.getHttpUrl())
+                        .method(mcpProtocolRegistryPO.getHttpMethod())
+                        .headers(mcpProtocolRegistryPO.getHttpHeaders())
+                        .timeoutMs(mcpProtocolRegistryPO.getTimeout())
+                        .build())
+                .build();
     }
 }
