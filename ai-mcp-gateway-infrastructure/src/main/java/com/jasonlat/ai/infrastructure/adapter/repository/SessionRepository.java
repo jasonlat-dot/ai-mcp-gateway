@@ -1,15 +1,14 @@
 package com.jasonlat.ai.infrastructure.adapter.repository;
 
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayConfigVO;
-import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayProtocolConfigVO;
-import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayToolConfigVO;
+import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolConfigVO;
+import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
 import com.jasonlat.ai.domain.session.repository.ISessionRepository;
-import com.jasonlat.ai.infrastructure.dao.IMcpGatewayDao;
-import com.jasonlat.ai.infrastructure.dao.IMcpProtocolMappingDao;
-import com.jasonlat.ai.infrastructure.dao.IMcpProtocolRegistryDao;
+import com.jasonlat.ai.infrastructure.dao.*;
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO;
+import com.jasonlat.ai.infrastructure.dao.po.McpGatewayToolPO;
 import com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO;
-import com.jasonlat.ai.infrastructure.dao.po.McpProtocolRegistryPO;
+import com.jasonlat.ai.infrastructure.dao.po.McpProtocolHttpPO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -30,7 +29,10 @@ public class SessionRepository implements ISessionRepository {
     private IMcpGatewayDao mcpGatewayDao;
 
     @Resource
-    private IMcpProtocolRegistryDao mcpProtocolRegistryDao;
+    private IMcpProtocolHttpDao mcpProtocolHttpDao;
+
+    @Resource
+    private IMcpGatewayToolDao mcpGatewayToolDao;
 
     @Resource
     private IMcpProtocolMappingDao mcpProtocolMappingDao;
@@ -45,16 +47,11 @@ public class SessionRepository implements ISessionRepository {
         McpGatewayPO mcpGatewayPO = mcpGatewayDao.queryMcpGatewayByGatewayId(gatewayId);
         if (null == mcpGatewayPO) return null;
 
-        McpProtocolRegistryPO mcpProtocolRegistryPO = mcpProtocolRegistryDao.queryMcpProtocolRegistryByGatewayId(gatewayId);
-        if (null == mcpProtocolRegistryPO) return null;
-
         return McpGatewayConfigVO.builder()
                 .gatewayId(mcpGatewayPO.getGatewayId())
                 .gatewayName(mcpGatewayPO.getGatewayName())
-                .toolId(mcpProtocolRegistryPO.getToolId())
-                .toolName(mcpProtocolRegistryPO.getToolName())
-                .toolDesc(mcpProtocolRegistryPO.getToolDescription())
-                .toolVersion(mcpProtocolRegistryPO.getToolVersion())
+                .gatewayDesc(mcpGatewayPO.getGatewayDesc())
+                .version(mcpGatewayPO.getVersion())
                 .build();
     }
 
@@ -64,19 +61,25 @@ public class SessionRepository implements ISessionRepository {
      * @return 网关下工具列表配置
      */
     @Override
-    public List<McpGatewayToolConfigVO> queryMcpGatewayToolConfigListByGatewayId(String gatewayId) {
-        McpProtocolMappingPO reqPO = new McpProtocolMappingPO();
-        reqPO.setGatewayId(gatewayId);
+    public List<McpToolConfigVO> queryMcpGatewayToolConfigListByGatewayId(String gatewayId) {
 
-        List<McpProtocolMappingPO> mcpProtocolMappingPOList = mcpProtocolMappingDao.queryMcpGatewayToolConfigList(reqPO);
-        if (null == mcpProtocolMappingPOList || mcpProtocolMappingPOList.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<McpGatewayToolConfigVO> mcpGatewayToolConfigVOList = new ArrayList<>(mcpProtocolMappingPOList.size());
-        for (McpProtocolMappingPO mcpProtocolMappingPO : mcpProtocolMappingPOList) {
-            McpGatewayToolConfigVO mcpGatewayToolConfigVO = McpGatewayToolConfigVO.builder()
-                        .gatewayId(mcpProtocolMappingPO.getGatewayId())
-                        .toolId(mcpProtocolMappingPO.getToolId())
+
+        // 1. 查询工具列表
+        List<McpGatewayToolPO> mcpGatewayToolPOList = mcpGatewayToolDao.queryEffectiveTools(gatewayId);
+        if (null == mcpGatewayToolPOList || mcpGatewayToolPOList.isEmpty()) return Collections.emptyList();
+
+        List<McpToolConfigVO> mcpToolConfigVOS = new ArrayList<>(mcpGatewayToolPOList.size());
+        // 2. 组装参数信息
+        for (McpGatewayToolPO tool : mcpGatewayToolPOList) {
+
+            // todo 不要在循环中查询数据 后续优化
+            List<McpProtocolMappingPO> mappingPOList = mcpProtocolMappingDao.queryMcpGatewayToolConfigListByProtocolId(tool.getProtocolId());
+
+            List<McpToolProtocolConfigVO.ProtocolMapping> requestProtocolMappings = new ArrayList<>(mappingPOList.size());
+
+            // 协议信息
+            for (McpProtocolMappingPO mcpProtocolMappingPO : mappingPOList) {
+                McpToolProtocolConfigVO.ProtocolMapping protocolMapping = McpToolProtocolConfigVO.ProtocolMapping.builder()
                         .mappingType(mcpProtocolMappingPO.getMappingType())
                         .parentPath(mcpProtocolMappingPO.getParentPath())
                         .fieldName(mcpProtocolMappingPO.getFieldName())
@@ -86,23 +89,45 @@ public class SessionRepository implements ISessionRepository {
                         .isRequired(mcpProtocolMappingPO.getIsRequired())
                         .sortOrder(mcpProtocolMappingPO.getSortOrder())
                         .build();
-            mcpGatewayToolConfigVOList.add(mcpGatewayToolConfigVO);
+                requestProtocolMappings.add(protocolMapping);
+            }
+
+            // 组装数据
+            McpToolConfigVO toolConfigVO = McpToolConfigVO.builder()
+                    .gatewayId(tool.getGatewayId())
+                    .toolId(tool.getToolId())
+                    .toolName(tool.getToolName())
+                    .toolDescription(tool.getToolDescription())
+                    .toolVersion(tool.getToolVersion())
+                    .mcpToolProtocolConfigVO(McpToolProtocolConfigVO.builder()
+                            .requestProtocolMappings(requestProtocolMappings)
+                            .build())
+                    .build();
+
+            mcpToolConfigVOS.add(toolConfigVO);
         }
-        return mcpGatewayToolConfigVOList;
+
+        return mcpToolConfigVOS;
     }
 
     @Override
-    public McpGatewayProtocolConfigVO queryMcpGatewayProtocolConfig(String gatewayId) {
-        McpProtocolRegistryPO mcpProtocolRegistryPO = mcpProtocolRegistryDao.queryMcpProtocolRegistryByGatewayId(gatewayId);
-        if (null == mcpProtocolRegistryPO) return null;
+    public McpToolProtocolConfigVO queryMcpGatewayProtocolConfig(String gatewayId, String toolName) {
+        // 获取协议ID - 根据网关ID + 工具名称
+        McpGatewayToolPO mcpGatewayToolPOReq = new McpGatewayToolPO();
+        mcpGatewayToolPOReq.setGatewayId(gatewayId);
+        mcpGatewayToolPOReq.setToolName(toolName);
+        Long protocolId = mcpGatewayToolDao.queryToolProtocolIdByToolName(mcpGatewayToolPOReq);
 
-        return McpGatewayProtocolConfigVO.builder()
-                .httpConfig(McpGatewayProtocolConfigVO.HTTPConfig.builder()
-                        .url(mcpProtocolRegistryPO.getHttpUrl())
-                        .method(mcpProtocolRegistryPO.getHttpMethod())
-                        .headers(mcpProtocolRegistryPO.getHttpHeaders())
-                        .timeoutMs(mcpProtocolRegistryPO.getTimeout())
-                        .build())
-                .build();
+        // 查询协议
+        McpProtocolHttpPO mcpProtocolHttpPO = mcpProtocolHttpDao.queryMcpProtocolHttpByProtocolId(protocolId);
+        if (null == mcpProtocolHttpPO) return null;
+
+        McpToolProtocolConfigVO.HTTPConfig httpConfig = new McpToolProtocolConfigVO.HTTPConfig();
+        httpConfig.setUrl(mcpProtocolHttpPO.getHttpUrl());
+        httpConfig.setHeaders(mcpProtocolHttpPO.getHttpHeaders());
+        httpConfig.setMethod(mcpProtocolHttpPO.getHttpMethod());
+        httpConfig.setTimeoutMs(mcpProtocolHttpPO.getTimeout());
+
+        return McpToolProtocolConfigVO.builder().httpConfig(httpConfig).build();
     }
 }

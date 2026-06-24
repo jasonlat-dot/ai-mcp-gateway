@@ -4,8 +4,7 @@
 
     <resultMap id="McpProtocolMappingMap" type="com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO">
         <id column="id" property="id"/>
-        <result column="gateway_id" property="gatewayId"/>
-        <result column="tool_id" property="toolId"/>
+        <id column="protocol_id" property="protocolId"/>
         <result column="mapping_type" property="mappingType"/>
         <result column="parent_path" property="parentPath"/>
         <result column="field_name" property="fieldName"/>
@@ -13,16 +12,14 @@
         <result column="mcp_type" property="mcpType"/>
         <result column="mcp_desc" property="mcpDesc"/>
         <result column="is_required" property="isRequired"/>
-        <result column="http_path" property="httpPath"/>
-        <result column="http_location" property="httpLocation"/>
         <result column="sort_order" property="sortOrder"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, gateway_id, tool_id, mapping_type, parent_path, field_name, mcp_path, mcp_type,
-        mcp_desc, is_required, http_path, http_location, sort_order, create_time, update_time
+        id, protocol_id,mapping_type, parent_path, field_name, mcp_path, mcp_type,
+        mcp_desc, is_required, sort_order, create_time, update_time
     </sql>
 
     <insert id="insert" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
@@ -138,11 +135,11 @@
         ORDER BY id DESC
     </select>
 
-    <select id="queryMcpGatewayToolConfigList" resultMap="McpProtocolMappingMap">
+    <select id="queryMcpGatewayToolConfigListByProtocolId" parameterType="java.lang.Long" resultMap="McpProtocolMappingMap">
         SELECT
             <include refid="Base_Column_List"/>
         FROM mcp_protocol_mapping
-        WHERE gateway_id = #{gatewayId}
+        WHERE protocol_id = #{protocolId}
         ORDER BY sort_order DESC
     </select>
 

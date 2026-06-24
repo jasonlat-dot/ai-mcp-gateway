@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -15,36 +14,18 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class McpProtocolRegistryPO {
+public class McpProtocolHttpPO {
 
     /**
      * 主键ID
      */
     private Long id;
+
     /**
-     * 所属网关ID
+     * 协议 ID
      */
-    private String gatewayId;
-    /**
-     * 工具ID
-     */
-    private Long toolId;
-    /**
-     * MCP工具名称（如：JavaSDKMCPClient_getCompanyEmployee）
-     */
-    private String toolName;
-    /**
-     * 工具版本
-     */
-    private String toolVersion;
-    /**
-     * 工具类型：function/resource
-     */
-    private String toolType;
-    /**
-     * 工具描述
-     */
-    private String toolDescription;
+    private Long protocolId;
+
     /**
      * HTTP接口地址
      */

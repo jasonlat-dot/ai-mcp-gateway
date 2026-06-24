@@ -20,6 +20,6 @@ public interface IMcpProtocolMappingDao extends BaseMapper<McpProtocolMappingPO>
 
     List<McpProtocolMappingPO> queryAll();
 
-    List<McpProtocolMappingPO> queryMcpGatewayToolConfigList(McpProtocolMappingPO reqPO);
+    List<McpProtocolMappingPO> queryMcpGatewayToolConfigListByProtocolId(@Param("protocolId") Long protocolId);
 }
 

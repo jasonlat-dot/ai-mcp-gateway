@@ -71,8 +71,8 @@ public class InitializeHandler implements IRequestHandler {
                         new McpSchemaVO.ServerCapabilities.PromptCapabilities(true),
                         new McpSchemaVO.ServerCapabilities.ResourceCapabilities(false, true),
                         new McpSchemaVO.ServerCapabilities.ToolCapabilities(true)),
-                new McpSchemaVO.Implementation(mcpGatewayConfigVO.getToolName(), mcpGatewayConfigVO.getToolVersion()),
-                mcpGatewayConfigVO.getToolDesc());
+                new McpSchemaVO.Implementation(mcpGatewayConfigVO.getGatewayName(), mcpGatewayConfigVO.getVersion()),
+                mcpGatewayConfigVO.getGatewayDesc());
 
         McpSchemaVO.JsonRpcResponse jsonRpcResponse =
                 new McpSchemaVO.JsonRpcResponse(McpSchemaVO.JSONRPC_VERSION, message.id(), initializeResult, null);

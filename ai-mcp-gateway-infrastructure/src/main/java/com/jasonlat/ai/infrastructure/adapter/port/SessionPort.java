@@ -1,14 +1,12 @@
-package com.jasonlat.ai.infrastructure.gateway.adapter.port;
+package com.jasonlat.ai.infrastructure.adapter.port;
 
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jasonlat.ai.domain.session.adapter.port.ISessionPort;
-import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayProtocolConfigVO;
+import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
 import com.jasonlat.ai.infrastructure.gateway.GenericHttpGateway;
 import com.jasonlat.ai.types.enums.ResponseCode;
 import com.jasonlat.ai.types.exception.AppException;
-import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -35,7 +33,7 @@ public class SessionPort implements ISessionPort {
     private final ObjectMapper objectMapper;
 
     @Override
-    public Object toolCall(McpGatewayProtocolConfigVO.HTTPConfig httpConfig, Object params) throws IOException {
+    public Object toolCall(McpToolProtocolConfigVO.HTTPConfig httpConfig, Object params) throws IOException {
 
         // params 是map 不是就抛异常  --> {"word":"jsaonlat"}  key-value 形式
         if (!(params instanceof Map<?,?> arguments)) {
