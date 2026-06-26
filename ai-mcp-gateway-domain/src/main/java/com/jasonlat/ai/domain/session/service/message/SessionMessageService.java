@@ -1,6 +1,7 @@
 package com.jasonlat.ai.domain.session.service.message;
 
 import com.alibaba.fastjson2.JSON;
+import com.jasonlat.ai.domain.session.model.entity.HandleMessageCommandEntity;
 import com.jasonlat.ai.domain.session.model.valobj.McpSchemaVO;
 import com.jasonlat.ai.domain.session.model.valobj.enums.SessionMessageHandlerMethodEnum;
 import com.jasonlat.ai.domain.session.service.ISessionMessageService;
@@ -59,5 +60,10 @@ public class SessionMessageService implements ISessionMessageService {
         }
 
         return null;
+    }
+
+    @Override
+    public McpSchemaVO.JsonRpcResponse processHandleMessage(HandleMessageCommandEntity messageCommandEntity) {
+        return this.processHandleMessage(messageCommandEntity.getGatewayId(), messageCommandEntity.getJsonRpcMessage());
     }
 }

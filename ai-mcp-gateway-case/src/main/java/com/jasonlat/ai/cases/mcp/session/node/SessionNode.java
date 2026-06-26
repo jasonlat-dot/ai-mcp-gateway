@@ -1,6 +1,6 @@
 package com.jasonlat.ai.cases.mcp.session.node;
 
-import com.jasonlat.ai.cases.mcp.session.AbstractMcpMessageSupport;
+import com.jasonlat.ai.cases.mcp.session.AbstractMcpSessionSupport;
 import com.jasonlat.ai.cases.mcp.session.factory.DefaultMcpSessionFactory;
 import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
 import com.jasonlat.design.framework.tree.StrategyHandler;
@@ -15,10 +15,10 @@ import reactor.core.publisher.Flux;
  * 2026-04-22  20:31
  */
 @Slf4j
-@Service
-public class SessionNode extends AbstractMcpMessageSupport {
+@Service("mcpSessionSessionNode")
+public class SessionNode extends AbstractMcpSessionSupport {
 
-    @Resource
+    @Resource(name = "mcpSessionEndNode")
     private EndNode endNode;
 
     /**

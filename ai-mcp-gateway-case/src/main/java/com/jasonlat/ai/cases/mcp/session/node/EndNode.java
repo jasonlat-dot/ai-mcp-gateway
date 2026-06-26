@@ -1,6 +1,6 @@
 package com.jasonlat.ai.cases.mcp.session.node;
 
-import com.jasonlat.ai.cases.mcp.session.AbstractMcpMessageSupport;
+import com.jasonlat.ai.cases.mcp.session.AbstractMcpSessionSupport;
 import com.jasonlat.ai.cases.mcp.session.factory.DefaultMcpSessionFactory;
 import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
 import com.jasonlat.design.framework.tree.StrategyHandler;
@@ -17,8 +17,8 @@ import java.time.Duration;
  * 2026-04-22  20:28
  */
 @Slf4j
-@Service
-public class EndNode extends AbstractMcpMessageSupport {
+@Service("mcpSessionEndNode")
+public class EndNode extends AbstractMcpSessionSupport {
     /**
      * 业务流程处理方法
      * <p>

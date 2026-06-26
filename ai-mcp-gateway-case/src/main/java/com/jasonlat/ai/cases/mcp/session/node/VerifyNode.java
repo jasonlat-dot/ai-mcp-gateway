@@ -1,6 +1,6 @@
 package com.jasonlat.ai.cases.mcp.session.node;
 
-import com.jasonlat.ai.cases.mcp.session.AbstractMcpMessageSupport;
+import com.jasonlat.ai.cases.mcp.session.AbstractMcpSessionSupport;
 import com.jasonlat.ai.cases.mcp.session.factory.DefaultMcpSessionFactory;
 import com.jasonlat.design.framework.tree.StrategyHandler;
 import jakarta.annotation.Resource;
@@ -14,10 +14,10 @@ import reactor.core.publisher.Flux;
  * 2026-04-22  20:28
  */
 @Slf4j
-@Service
-public class VerifyNode extends AbstractMcpMessageSupport {
+@Service("mcpSessionVerifyNode")
+public class VerifyNode extends AbstractMcpSessionSupport {
 
-    @Resource
+    @Resource(name = "mcpSessionSessionNode")
     private SessionNode sessionNode;
 
     /**

@@ -13,5 +13,5 @@ public interface IMcpGatewayService {
      */
     Flux<ServerSentEvent<String>> establishSseConnection(String gatewayId);
 
-    Mono<ResponseEntity<Object>> handleMessage(String gatewayId, String sessionId, String messageBody);
+    Mono<ResponseEntity<Void>> handleMessage(String gatewayId, String sessionId, String messageBody);
 }
