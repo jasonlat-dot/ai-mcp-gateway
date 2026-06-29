@@ -67,7 +67,7 @@ public class ApiTest {
     public static McpSyncClient sseMcpClient03() {
         HttpClientSseClientTransport sseClientTransport = HttpClientSseClientTransport
                 .builder("http://localhost:8888")
-                .sseEndpoint("/api-gateway/gateway_002/mcp/sse")
+                .sseEndpoint("/api-gateway/gateway_001/mcp/sse")
                 .build();
 
         McpSyncClient mcpSyncClient = McpClient.sync(sseClientTransport)

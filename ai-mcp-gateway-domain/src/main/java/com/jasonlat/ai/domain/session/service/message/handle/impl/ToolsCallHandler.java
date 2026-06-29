@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.jasonlat.ai.domain.session.adapter.port.ISessionPort;
 import com.jasonlat.ai.domain.session.model.valobj.McpSchemaVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
-import com.jasonlat.ai.domain.session.repository.ISessionRepository;
+import com.jasonlat.ai.domain.session.adapter.repository.ISessionRepository;
 import com.jasonlat.ai.domain.session.service.message.handle.IRequestHandler;
 import com.jasonlat.ai.types.enums.McpErrorCodes;
 import com.jasonlat.ai.types.enums.ResponseCode;

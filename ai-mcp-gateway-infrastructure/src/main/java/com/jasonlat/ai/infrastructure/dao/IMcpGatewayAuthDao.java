@@ -17,5 +17,7 @@ public interface IMcpGatewayAuthDao extends BaseMapper<McpGatewayAuthPO> {
     McpGatewayAuthPO queryById(@Param("id")Long id);
 
     List<McpGatewayAuthPO> queryAll();
+
+    McpGatewayAuthPO queryMcpGatewayAuthPO(McpGatewayAuthPO poReq);
 }
 

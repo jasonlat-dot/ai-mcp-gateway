@@ -4,14 +4,13 @@ import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.jasonlat.ai.domain.session.model.valobj.McpSchemaVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayConfigVO;
-import com.jasonlat.ai.domain.session.repository.ISessionRepository;
+import com.jasonlat.ai.domain.session.adapter.repository.ISessionRepository;
 import com.jasonlat.ai.domain.session.service.message.handle.IRequestHandler;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.Map;
 
 
 @Slf4j

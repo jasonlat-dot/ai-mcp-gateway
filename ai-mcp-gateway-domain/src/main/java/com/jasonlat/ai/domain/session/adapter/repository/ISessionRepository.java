@@ -1,4 +1,4 @@
-package com.jasonlat.ai.domain.session.repository;
+package com.jasonlat.ai.domain.session.adapter.repository;
 
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolConfigVO;

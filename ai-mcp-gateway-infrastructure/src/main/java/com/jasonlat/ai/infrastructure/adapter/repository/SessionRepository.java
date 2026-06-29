@@ -3,7 +3,7 @@ package com.jasonlat.ai.infrastructure.adapter.repository;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
-import com.jasonlat.ai.domain.session.repository.ISessionRepository;
+import com.jasonlat.ai.domain.session.adapter.repository.ISessionRepository;
 import com.jasonlat.ai.infrastructure.dao.*;
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO;
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayToolPO;

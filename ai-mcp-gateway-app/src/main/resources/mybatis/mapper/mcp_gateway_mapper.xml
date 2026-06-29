@@ -8,13 +8,14 @@
         <result column="gateway_name" property="gatewayName"/>
         <result column="gateway_desc" property="gatewayDesc"/>
         <result column="version" property="version"/>
+        <result column="auth" property="auth"/>
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, gateway_id, gateway_name, gateway_desc, version, status, create_time, update_time
+        id, gateway_id, gateway_name, gateway_desc, version, auth, status, create_time, update_time
     </sql>
 
     <insert id="insert" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
@@ -23,6 +24,7 @@
             gateway_id,
             gateway_name,
             version,
+            auth,
             <if test="gatewayDesc != null and gatewayDesc.trim().length() > 0">gateway_desc,</if>
             <if test="status != null">status,</if>
             <if test="createTime != null">create_time,</if>
@@ -33,6 +35,7 @@
             #{gatewayId},
             #{gatewayName},
             #{version},
+            #{auth},
             <if test="gatewayDesc != null and gatewayDesc.trim().length() > 0">#{gatewayDesc},</if>
             <if test="status != null">#{status},</if>
             <if test="createTime != null">#{createTime},</if>
@@ -56,6 +59,7 @@
         UPDATE mcp_gateway
         <set>
             <if test="version != null and gatewayId.trim().length() > 0">version = #{version},</if>
+            <if test="auth != null">auth = #{auth},</if>
             <if test="gatewayId != null and gatewayId.trim().length() > 0">gateway_id = #{gatewayId},</if>
             <if test="gatewayName != null and gatewayName.trim().length() > 0">gateway_name = #{gatewayName},</if>
             <if test="gatewayDesc != null and gatewayDesc.trim().length() > 0">gateway_desc = #{gatewayDesc},</if>

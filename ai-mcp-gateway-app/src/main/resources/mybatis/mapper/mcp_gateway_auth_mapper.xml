@@ -101,5 +101,11 @@
         FROM mcp_gateway_auth
         ORDER BY id DESC
     </select>
+    <select id="queryMcpGatewayAuthPO" resultType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayAuthPO">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mcp_gateway_auth
+        WHERE gateway_id = #{gatewayId} and api_key = #{apiKey}
+    </select>
 
 </mapper>

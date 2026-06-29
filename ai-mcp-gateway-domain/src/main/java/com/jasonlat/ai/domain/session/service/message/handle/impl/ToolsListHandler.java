@@ -2,17 +2,15 @@ package com.jasonlat.ai.domain.session.service.message.handle.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.jasonlat.ai.domain.session.model.valobj.McpSchemaVO;
-import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
-import com.jasonlat.ai.domain.session.repository.ISessionRepository;
+import com.jasonlat.ai.domain.session.adapter.repository.ISessionRepository;
 import com.jasonlat.ai.domain.session.service.message.handle.IRequestHandler;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Slf4j

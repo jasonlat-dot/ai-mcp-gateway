@@ -9,6 +9,13 @@ import lombok.NoArgsConstructor;
 @Getter
 public enum ResponseCode {
 
+    // GATEWAY-apikey非法
+    GATEWAY_APIKEY_ILLEGAL("ERROR_GATEWAY_APIKEY_ILLEGAL", "网关apikey非法"),
+    // 限流值不正确
+    LIMIT_VALUE_ERROR("ERROR_LIMIT_VALUE_ERROR", "限流值不正确"),
+    // "未配置限流"
+    LIMIT_NOT_CONFIG("ERROR_LIMIT_NOT_CONFIG", "未配置限流"),
+    ENUM_NOT_FOUND("ERROR_ENUM_NOT_FOUND", "枚举未找到"),
     METHOD_HANDLER_SERVICE_NOT_FOUND("ERROR_METHOD_HANDLER_SERVICE_NOT_FOUND", "方法处理服务未找到"),
     METHOD_NOT_FOUND("ERROR_METHOD_NOT_FOUND", "方法不存在"),
     SUCCESS("SUCCESS_0000", "成功"),

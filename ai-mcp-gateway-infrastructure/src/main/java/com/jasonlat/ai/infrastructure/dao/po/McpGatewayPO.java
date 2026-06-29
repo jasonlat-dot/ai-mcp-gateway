@@ -35,6 +35,11 @@ public class McpGatewayPO {
     private String gatewayDesc;
 
     /**
+     * 状态：0-不校验，1-强校验
+     */
+    private Integer auth;
+
+    /**
      * 协议版本
      */
     private String version;
