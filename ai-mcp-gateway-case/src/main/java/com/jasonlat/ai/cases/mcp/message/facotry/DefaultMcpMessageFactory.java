@@ -26,7 +26,7 @@ public class DefaultMcpMessageFactory {
     @Resource(name = "mcpMessageRootNode")
     private RootNode rootNode;
 
-    public StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Void>> strategyHandler() {
+    public StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Object>> strategyHandler() {
         return rootNode;
     }
 

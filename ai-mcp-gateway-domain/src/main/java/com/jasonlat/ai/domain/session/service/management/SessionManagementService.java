@@ -6,12 +6,14 @@ import com.jasonlat.ai.types.snow.SnowflakeIdGenerator;
 import com.jasonlat.ai.types.utils.RandomCodeUtil;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Sinks;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -53,13 +55,16 @@ public class SessionManagementService implements ISessionManagementService {
      * @return 会话配置
      */
     @Override
-    public SessionConfigVO createSession(String gatewayId) {
+    public SessionConfigVO createSession(String gatewayId, String apiKey) {
         log.info("创建会话 gatewayId:{}", gatewayId);
-        String sessionId = RandomCodeUtil.generateRandomCode(6, true) + snowflakeIdGenerator.nextId();
+        String sessionId = "s-" + UUID.randomUUID();
 
         Sinks.Many<ServerSentEvent<String>> sink = Sinks.many().multicast().onBackpressureBuffer();
 
         String messageEndpoint = messageEndpointPrefix + "/" + gatewayId + "/mcp/sse?sessionId=" + sessionId;
+        if (StringUtils.isNotBlank(apiKey)) {
+            messageEndpoint += "&api_key=" + apiKey;
+        }
         sink.tryEmitNext(ServerSentEvent.<String>builder()
                 .event("endpoint")
                 .data(messageEndpoint)

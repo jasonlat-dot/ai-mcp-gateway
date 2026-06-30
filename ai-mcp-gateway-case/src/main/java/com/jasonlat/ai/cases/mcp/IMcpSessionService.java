@@ -7,6 +7,7 @@ public interface IMcpSessionService {
     /**
      * 创建SSE会话连接
      * @param gatewayId 网关ID
+     * @param apiKey apiKey
      */
-    Flux<ServerSentEvent<String>> establishSseConnection(String gatewayId) throws Exception;
+    Flux<ServerSentEvent<String>> establishSseConnection(String gatewayId, String apiKey) throws Exception;
 }

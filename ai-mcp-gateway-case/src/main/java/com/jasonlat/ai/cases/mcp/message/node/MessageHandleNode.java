@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class MessageHandleNode extends AbstractMcpMessageSupport {
 
     @Override
-    protected ResponseEntity<Void> doApply(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
+    protected ResponseEntity<Object> doApply(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
         log.info("MessageHandleNode handle mcp message: {}", requestParameter.toString());
 
         McpSchemaVO.JsonRpcResponse jsonRpcResponse = sessionMessageService.processHandleMessage(requestParameter);
@@ -38,7 +38,7 @@ public class MessageHandleNode extends AbstractMcpMessageSupport {
     }
 
     @Override
-    public StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Void>> get(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
+    public StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Object>> get(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
         return super.get(requestParameter, dynamicContext);
     }
 }

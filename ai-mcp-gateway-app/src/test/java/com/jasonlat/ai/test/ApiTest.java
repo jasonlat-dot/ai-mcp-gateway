@@ -42,7 +42,7 @@ public class ApiTest {
     }
 
     @Test
-    public void test_mcp() {
+    public void test_mcp() throws InterruptedException {
 
         OpenAiChatModel chatModel = chatModelBuilder.defaultOptions(
                 OpenAiChatOptions.builder()
@@ -51,23 +51,38 @@ public class ApiTest {
                         .build()
                 ).build();
 
-        ChatResponse response = chatModel.call(new Prompt(
-                UserMessage.builder()
-                        .text("""
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                System.out.println("开始测试");
+                try {
+                    Prompt prompt = new Prompt(
+                            UserMessage.builder()
+                                    .text("""
                                 获取公司雇员信息，信息如下：
                                 城市：北京
                                 公司：谷歌
                                 雇员：jasonlat
                                 """)
-                        .build()));
+                                    .build()
+                    );
+                    ChatResponse response = chatModel.call(prompt);
+                    System.out.println("测试结果：" + JSON.toJSONString(response));
+                } catch (Exception e) {
+                    // 捕获所有异常，打印堆栈，方便定位接口/网络问题
+                    System.err.println("调用大模型异常：" + e.getMessage());
+                    e.printStackTrace();
+                }
+            }, "ai-chat-test-thread").start();
+        }
 
-        System.out.println("测试结果" + JSON.toJSONString(response));
+        Thread.sleep(1000000);
     }
 
+    // http://localhost:8888/api-gateway/gateway_001/mcp/sse?api_key=gw-SjnhpA5S6CI5bx9Vxvh8ATyezZzqclNNP2ikf18wSHHJMR1H
     public static McpSyncClient sseMcpClient03() {
         HttpClientSseClientTransport sseClientTransport = HttpClientSseClientTransport
                 .builder("http://localhost:8888")
-                .sseEndpoint("/api-gateway/gateway_001/mcp/sse")
+                .sseEndpoint("/api-gateway/gateway_001/mcp/sse?api_key=gw-SjnhpA5S6CI5bx9Vxvh8ATyezZzqclNNP2ikf18wSHHJMR1H")
                 .build();
 
         McpSyncClient mcpSyncClient = McpClient.sync(sseClientTransport)

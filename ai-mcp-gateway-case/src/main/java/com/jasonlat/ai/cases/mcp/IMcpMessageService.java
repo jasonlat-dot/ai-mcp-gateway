@@ -12,5 +12,5 @@ public interface IMcpMessageService {
      * @param messageCommandEntity 消息命令实体
      * @return 处理结果
      */
-    ResponseEntity<Void> handleMessage(HandleMessageCommandEntity messageCommandEntity) throws Exception;
+    ResponseEntity<Object> handleMessage(HandleMessageCommandEntity messageCommandEntity) throws Exception;
 }

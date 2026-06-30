@@ -22,4 +22,9 @@ public class RateLimitCommandEntity {
      */
     private String apiKey;
 
+    /**
+     * 方法
+     */
+    private String method;
+
 }

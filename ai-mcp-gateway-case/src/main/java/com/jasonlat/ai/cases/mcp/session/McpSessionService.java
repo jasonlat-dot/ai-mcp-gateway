@@ -20,14 +20,13 @@ public class McpSessionService implements IMcpSessionService {
     @Resource
     private DefaultMcpSessionFactory defaultMcpSessionFactory;
 
-    /**
-     * 创建SSE会话连接
-     *
-     * @param gatewayId 网关ID
-     */
     @Override
-    public Flux<ServerSentEvent<String>> establishSseConnection(String gatewayId) throws Exception {
+    public Flux<ServerSentEvent<String>> establishSseConnection(String gatewayId, String apiKey) throws Exception {
         StrategyHandler<String, DefaultMcpSessionFactory.DynamicContext, Flux<ServerSentEvent<String>>> strategyHandler = defaultMcpSessionFactory.strategyHandler();
-        return strategyHandler.apply(gatewayId, new DefaultMcpSessionFactory.DynamicContext());
+
+        DefaultMcpSessionFactory.DynamicContext dynamicContext = new DefaultMcpSessionFactory.DynamicContext();
+        dynamicContext.setValue("apiKey", apiKey);
+
+        return strategyHandler.apply(gatewayId, dynamicContext);
     }
 }

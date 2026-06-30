@@ -22,6 +22,11 @@ public class HandleMessageCommandEntity {
     private String gatewayId;
 
     /**
+     * apiKey
+     */
+    private String apiKey;
+
+    /**
      * 会话ID
      */
     private String sessionId;
@@ -33,6 +38,14 @@ public class HandleMessageCommandEntity {
 
     public  HandleMessageCommandEntity(String gatewayId, String sessionId, String messageBody) throws IOException {
         this.gatewayId = gatewayId;
+        this.sessionId = sessionId;
+        this.jsonRpcMessage = McpSchemaVO.deserializeJsonRpcMessage(messageBody);
+    }
+
+
+    public  HandleMessageCommandEntity(String gatewayId,String apiKey, String sessionId, String messageBody) throws IOException {
+        this.gatewayId = gatewayId;
+        this.apiKey = apiKey;
         this.sessionId = sessionId;
         this.jsonRpcMessage = McpSchemaVO.deserializeJsonRpcMessage(messageBody);
     }

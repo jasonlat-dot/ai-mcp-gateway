@@ -13,7 +13,7 @@ public interface ISessionManagementService {
      * @param gatewayId 网关ID
      * @return  会话配置
      */
-    SessionConfigVO createSession(String gatewayId);
+    SessionConfigVO createSession(String gatewayId, String apiKey);
 
     /**
      * 移除会话

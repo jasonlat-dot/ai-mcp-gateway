@@ -27,8 +27,8 @@ public class McpMessageService implements IMcpMessageService {
      * @return 处理结果
      */
     @Override
-    public ResponseEntity<Void> handleMessage(HandleMessageCommandEntity messageCommandEntity) throws Exception {
-        StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Void>> strategyHandler
+    public ResponseEntity<Object> handleMessage(HandleMessageCommandEntity messageCommandEntity) throws Exception {
+        StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Object>> strategyHandler
                 = defaultMcpMessageFactory.strategyHandler();
         // 调用策略处理逻辑
         return strategyHandler.apply(messageCommandEntity, new DefaultMcpMessageFactory.DynamicContext());

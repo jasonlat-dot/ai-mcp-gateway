@@ -10,8 +10,10 @@ public interface IMcpGatewayService {
     /**
      * 建立SSE连接
      * @param gatewayId 网关ID
+     * @param apiKey apiKey
+     *
      */
-    Flux<ServerSentEvent<String>> establishSseConnection(String gatewayId);
+    Flux<ServerSentEvent<String>> establishSseConnection(String gatewayId, String apiKey) throws Exception;
 
-    Mono<ResponseEntity<Void>> handleMessage(String gatewayId, String sessionId, String messageBody);
+    Mono<ResponseEntity<Object>> handleMessage(String gatewayId, String apiKey, String sessionId, String messageBody) throws Exception;
 }

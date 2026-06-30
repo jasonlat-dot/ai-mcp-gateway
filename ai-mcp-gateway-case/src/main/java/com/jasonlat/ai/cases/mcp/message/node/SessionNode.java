@@ -23,7 +23,7 @@ public class SessionNode extends AbstractMcpMessageSupport {
     private MessageHandleNode messageHandleNode;
 
     @Override
-    protected ResponseEntity<Void> doApply(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
+    protected ResponseEntity<Object> doApply(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
         log.info("SessionNode handle mcp message: {}", requestParameter.toString());
         SessionConfigVO sessionConfigVO = sessionManagementService.getSession(requestParameter.getSessionId());
         if (sessionConfigVO == null) {
@@ -37,7 +37,7 @@ public class SessionNode extends AbstractMcpMessageSupport {
     }
 
     @Override
-    public StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Void>> get(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
+    public StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Object>> get(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
         return messageHandleNode;
     }
 }

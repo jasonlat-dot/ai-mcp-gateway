@@ -54,12 +54,13 @@ public class AuthRateLimitService implements IAuthRateLimitService {
     public boolean rateLimit(RateLimitCommandEntity commandEntity) {
         String gatewayId = commandEntity.getGatewayId();
         String apiKey = commandEntity.getApiKey();
+        String method = commandEntity.getMethod();
         // 参数校验
         if (StringUtils.isAnyBlank(gatewayId, apiKey)) {
             log.info("网关Id: {} apiKey: {} 参数错误", gatewayId, apiKey);
             return false;
         }
-        String key = gatewayId + "_" + apiKey;
+        String key = gatewayId + "_" + apiKey + "_" + method;
         try {
             TokenBucketRateLimiter rateLimiter = rateLimiterCache.get(key, () -> {
                 McpGatewayAuthVO gatewayAuthVO = repository.queryEffectiveGatewayAuthInfo(new LicenseCommandEntity(gatewayId, apiKey));
