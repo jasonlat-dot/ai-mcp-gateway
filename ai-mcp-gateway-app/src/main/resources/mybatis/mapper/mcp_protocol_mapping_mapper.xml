@@ -25,8 +25,7 @@
     <insert id="insert" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO mcp_protocol_mapping
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            gateway_id,
-            tool_id,
+            protocol_id,
             mapping_type,
             <if test="parentPath != null and parentPath.trim().length() > 0">parent_path,</if>
             field_name,
@@ -34,16 +33,13 @@
             mcp_type,
             <if test="mcpDesc != null and mcpDesc.trim().length() > 0">mcp_desc,</if>
             <if test="isRequired != null">is_required,</if>
-            <if test="httpPath != null and httpPath.trim().length() > 0">http_path,</if>
-            <if test="httpLocation != null and httpLocation.trim().length() > 0">http_location,</if>
             <if test="sortOrder != null">sort_order,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
         </trim>
         VALUES
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            #{gatewayId},
-            #{toolId},
+            #{protocolId},
             #{mappingType},
             <if test="parentPath != null and parentPath.trim().length() > 0">#{parentPath},</if>
             #{fieldName},
@@ -51,8 +47,6 @@
             #{mcpType},
             <if test="mcpDesc != null and mcpDesc.trim().length() > 0">#{mcpDesc},</if>
             <if test="isRequired != null">#{isRequired},</if>
-            <if test="httpPath != null and httpPath.trim().length() > 0">#{httpPath},</if>
-            <if test="httpLocation != null and httpLocation.trim().length() > 0">#{httpLocation},</if>
             <if test="sortOrder != null">#{sortOrder},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
@@ -74,8 +68,7 @@
     <update id="updateById" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO">
         UPDATE mcp_protocol_mapping
         <set>
-            <if test="gatewayId != null and gatewayId.trim().length() > 0">gateway_id = #{gatewayId},</if>
-            <if test="toolId != null">tool_id = #{toolId},</if>
+            <if test="protocolId != null">protocol_id = #{protocolId},</if>
             <if test="mappingType != null and mappingType.trim().length() > 0">mapping_type = #{mappingType},</if>
             <if test="parentPath != null and parentPath.trim().length() > 0">parent_path = #{parentPath},</if>
             <if test="fieldName != null and fieldName.trim().length() > 0">field_name = #{fieldName},</if>
@@ -83,32 +76,21 @@
             <if test="mcpType != null and mcpType.trim().length() > 0">mcp_type = #{mcpType},</if>
             <if test="mcpDesc != null and mcpDesc.trim().length() > 0">mcp_desc = #{mcpDesc},</if>
             <if test="isRequired != null">is_required = #{isRequired},</if>
-            <if test="httpPath != null and httpPath.trim().length() > 0">http_path = #{httpPath},</if>
-            <if test="httpLocation != null and httpLocation.trim().length() > 0">http_location = #{httpLocation},</if>
             <if test="sortOrder != null">sort_order = #{sortOrder},</if>
             update_time = CURRENT_TIMESTAMP
         </set>
         <where>
-            <choose>
-                <when test="id != null">
-                    id = #{id}
-                </when>
-                <otherwise>
-                    1 = 0
-                </otherwise>
-            </choose>
-            <if test="(gatewayId == null or gatewayId.trim().length() == 0)
-                      and toolId == null
-                      and (mappingType == null or mappingType.trim().length() == 0)
-                      and (parentPath == null or parentPath.trim().length() == 0)
-                      and (fieldName == null or fieldName.trim().length() == 0)
-                      and (mcpPath == null or mcpPath.trim().length() == 0)
-                      and (mcpType == null or mcpType.trim().length() == 0)
-                      and (mcpDesc == null or mcpDesc.trim().length() == 0)
-                      and isRequired == null
-                      and (httpPath == null or httpPath.trim().length() == 0)
-                      and (httpLocation == null or httpLocation.trim().length() == 0)
-                      and sortOrder == null">
+            id = #{id}
+            <!-- 所有待更新字段都为空，则不执行更新，避免空update -->
+            <if test="protocolId == null
+                and (mappingType == null or mappingType.trim().length() == 0)
+                and (parentPath == null or parentPath.trim().length() == 0)
+                and (fieldName == null or fieldName.trim().length() == 0)
+                and (mcpPath == null or mcpPath.trim().length() == 0)
+                and (mcpType == null or mcpType.trim().length() == 0)
+                and (mcpDesc == null or mcpDesc.trim().length() == 0)
+                and isRequired == null
+                and sortOrder == null">
                 AND 1 = 0
             </if>
         </where>
@@ -142,5 +124,34 @@
         WHERE protocol_id = #{protocolId}
         ORDER BY sort_order DESC
     </select>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false">
+        INSERT INTO mcp_protocol_mapping (
+        protocol_id,
+        mapping_type,
+        parent_path,
+        field_name,
+        mcp_path,
+        mcp_type,
+        mcp_desc,
+        is_required,
+        sort_order
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.protocolId},
+            #{item.mappingType},
+            #{item.parentPath},
+            #{item.fieldName},
+            #{item.mcpPath},
+            #{item.mcpType},
+            #{item.mcpDesc},
+            #{item.isRequired},
+            #{item.sortOrder}
+            )
+        </foreach>
+    </insert>
 
 </mapper>

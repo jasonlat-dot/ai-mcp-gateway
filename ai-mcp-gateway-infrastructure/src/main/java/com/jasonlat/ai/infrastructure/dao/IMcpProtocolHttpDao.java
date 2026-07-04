@@ -2,6 +2,7 @@ package com.jasonlat.ai.infrastructure.dao;
 
 import com.jasonlat.ai.infrastructure.dao.po.McpProtocolHttpPO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -20,5 +21,11 @@ public interface IMcpProtocolHttpDao {
 
     McpProtocolHttpPO queryMcpProtocolHttpByProtocolId(Long protocolId);
 
+    /**
+     * 批量插入
+     * @param list 数据列表
+     * @return 受影响行数
+     */
+    int batchInsert(@Param("list") List<McpProtocolHttpPO> list);
 }
 

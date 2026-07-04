@@ -126,5 +126,30 @@
         </choose>
     </select>
 
+    <!-- 批量插入 -->
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false">
+        INSERT INTO mcp_protocol_http (
+        protocol_id,
+        http_url,
+        http_method,
+        http_headers,
+        timeout,
+        retry_times,
+        status
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.protocolId},
+            #{item.httpUrl},
+            #{item.httpMethod},
+            #{item.httpHeaders},
+            #{item.timeout},
+            #{item.retryTimes},
+            #{item.status}
+            )
+        </foreach>
+    </insert>
+
 </mapper>
 

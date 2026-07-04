@@ -21,5 +21,12 @@ public interface IMcpProtocolMappingDao extends BaseMapper<McpProtocolMappingPO>
     List<McpProtocolMappingPO> queryAll();
 
     List<McpProtocolMappingPO> queryMcpGatewayToolConfigListByProtocolId(@Param("protocolId") Long protocolId);
+
+    /**
+     * 批量插入协议映射数据
+     * @param list 实体集合
+     * @return 影响数据库行数
+     */
+    int batchInsert(@Param("list") List<McpProtocolMappingPO> list);
 }
 
