@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public enum ResponseCode {
 
+    DB_UPDATE_FAIL("0005", "数据库更新失败"),
     // GATEWAY-apikey非法
     GATEWAY_APIKEY_ILLEGAL("ERROR_GATEWAY_APIKEY_ILLEGAL", "网关apikey非法"),
     // 限流值不正确

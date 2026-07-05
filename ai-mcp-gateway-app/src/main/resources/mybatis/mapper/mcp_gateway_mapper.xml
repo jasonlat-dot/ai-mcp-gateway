@@ -84,6 +84,21 @@
         </where>
     </update>
 
+    <update id="updateAuthStatusByGatewayId">
+        UPDATE mcp_gateway
+        <set>
+            <if test="mcpGatewayPO.auth != null">
+                auth = #{mcpGatewayPO.auth},
+            </if>
+            <if test="newVersion != null">
+                version = #{newVersion},
+            </if>
+            update_time = #{mcpGatewayPO.updateTime}
+        </set>
+        WHERE gateway_id = #{mcpGatewayPO.gatewayId}
+        <if test="mcpGatewayPO.version != null">AND version = #{mcpGatewayPO.version}</if>
+    </update>
+
     <select id="queryById" parameterType="java.lang.Long" resultMap="McpGatewayMap">
         SELECT
         <include refid="Base_Column_List"/>

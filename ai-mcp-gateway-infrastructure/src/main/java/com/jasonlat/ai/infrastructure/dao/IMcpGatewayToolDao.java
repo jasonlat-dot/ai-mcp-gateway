@@ -12,4 +12,7 @@ public interface IMcpGatewayToolDao {
 
     Long queryToolProtocolIdByToolName(McpGatewayToolPO mcpGatewayToolPOReq);
 
+    void insert(McpGatewayToolPO mcpGatewayToolPO);
+
+    int updateProtocolByGatewayId(McpGatewayToolPO mcpGatewayToolPO);
 }

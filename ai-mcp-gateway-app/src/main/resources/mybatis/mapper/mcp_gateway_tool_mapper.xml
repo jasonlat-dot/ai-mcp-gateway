@@ -96,6 +96,22 @@
         </where>
     </update>
 
+    <update id="updateProtocolByGatewayId">
+        UPDATE mcp_gateway_tool
+        <set>
+            <!-- 仅当参数非空、非空串才更新，避免覆盖原有数据 -->
+            <if test="protocolId != null">
+                protocol_id = #{protocolId},
+            </if>
+            <if test="protocolType != null and protocolType.trim() != ''">
+                protocol_type = #{protocolType},
+            </if>
+            <!-- PG标准时间函数，兼容MySQL/PostgreSQL，统一由数据库生成更新时间 -->
+            update_time = CURRENT_TIMESTAMP
+        </set>
+        WHERE gateway_id = #{gatewayId}
+    </update>
+
     <select id="queryById" parameterType="java.lang.Long" resultMap="McpGatewayToolMap">
         SELECT
         <include refid="Base_Column_List"/>
