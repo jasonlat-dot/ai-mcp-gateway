@@ -8,6 +8,7 @@ import com.jasonlat.ai.infrastructure.dao.IMcpProtocolHttpDao;
 import com.jasonlat.ai.infrastructure.dao.IMcpProtocolMappingDao;
 import com.jasonlat.ai.infrastructure.dao.po.McpProtocolHttpPO;
 import com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO;
+import com.jasonlat.ai.types.snow.SnowflakeIdGenerator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -28,6 +29,9 @@ public class ProtocolRepository implements IProtocolRepository {
     private IMcpProtocolHttpDao protocolHttpDao;
 
     @Resource
+    private SnowflakeIdGenerator snowflakeIdGenerator;
+
+    @Resource
     private IMcpProtocolMappingDao protocolMappingDao;
 
     @Override
@@ -41,8 +45,8 @@ public class ProtocolRepository implements IProtocolRepository {
         List<McpProtocolHttpPO> mcpProtocolHttpPOs = new ArrayList<>(httpProtocolVOS.size());
         for (HTTPProtocolVO httpProtocolVO : httpProtocolVOS) {
 
-            // 0. 生成协议ID，12位数字的。
-            long protocolId = Long.parseLong(RandomStringUtils.randomNumeric(12));
+            // 0. 生成协议ID
+            long protocolId = snowflakeIdGenerator.nextId();
 
             // 1. 保存 HTTP 协议配置
             McpProtocolHttpPO mcpProtocolHttpPO = McpProtocolHttpPO.builder()

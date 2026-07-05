@@ -18,13 +18,12 @@ public class GatewayConfigCommandEntity {
 
     private GatewayConfigVO gatewayConfigVO;
 
-    public static GatewayConfigCommandEntity buildUpdateGatewayAuthStatusVO(String gatewayId, GatewayEnum.GatewayAuthStatusEnum auth, String newVersion, String  version) {
+    public static GatewayConfigCommandEntity buildUpdateGatewayAuthStatusVO(String gatewayId, GatewayEnum.GatewayAuthStatusEnum auth, String  version) {
         return GatewayConfigCommandEntity.builder()
                 .gatewayConfigVO(GatewayConfigVO.builder()
                         .gatewayId(gatewayId)
                         .auth(auth)
-                        .version( version)
-                        .newVersion(newVersion)
+                        .version(version)
                         .build())
                 .build();
     }

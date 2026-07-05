@@ -21,6 +21,6 @@ public interface IMcpGatewayDao extends BaseMapper<McpGatewayPO> {
 
     McpGatewayPO queryMcpGatewayByGatewayId(@Param("gatewayId")String gatewayId);
 
-    int updateAuthStatusByGatewayId(McpGatewayPO mcpGatewayPO, @Param("newVersion")String newVersion);
+    int updateAuthStatusByGatewayId(McpGatewayPO mcpGatewayPO);
 }
 

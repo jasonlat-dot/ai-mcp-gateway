@@ -58,8 +58,8 @@ public class GatewayRepository implements IGatewayRepository {
         mcpGatewayPO.setGatewayId(gatewayConfigVO.getGatewayId());
         mcpGatewayPO.setAuth(null != gatewayConfigVO.getAuth() ? gatewayConfigVO.getAuth().getCode() : null);
         mcpGatewayPO.setUpdateTime(new Date());
-        mcpGatewayPO.setVersion(gatewayConfigVO.getVersion());
-        int count = mcpGatewayDao.updateAuthStatusByGatewayId(mcpGatewayPO,gatewayConfigVO.getNewVersion());
+        mcpGatewayPO.setVersion(gatewayConfigVO.getNewVersion());
+        int count = mcpGatewayDao.updateAuthStatusByGatewayId(mcpGatewayPO);
         if (1 != count) {
             throw new AppException(DB_UPDATE_FAIL.getCode(), DB_UPDATE_FAIL.getInfo());
         }

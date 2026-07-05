@@ -42,7 +42,7 @@ public class GatewayConfigServiceTest {
     @Test
     public void test_updateGatewayAuthStatus() {
         GatewayConfigCommandEntity commandEntity = GatewayConfigCommandEntity.buildUpdateGatewayAuthStatusVO("gateway_003",
-                GatewayEnum.GatewayAuthStatusEnum.NOT_VERIFIED, "1.0.1", "1.0.0");
+                GatewayEnum.GatewayAuthStatusEnum.NOT_VERIFIED, "1.0.1");
         gatewayConfigService.updateGatewayAuthStatus(commandEntity);
         log.info("更新网关鉴权状态成功 gatewayId: {}", commandEntity.getGatewayConfigVO().getGatewayId());
     }

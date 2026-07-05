@@ -84,19 +84,18 @@
         </where>
     </update>
 
-    <update id="updateAuthStatusByGatewayId">
+    <update id="updateAuthStatusByGatewayId" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO">
         UPDATE mcp_gateway
         <set>
-            <if test="mcpGatewayPO.auth != null">
-                auth = #{mcpGatewayPO.auth},
+            <if test="auth != null">
+                auth = #{auth},
             </if>
-            <if test="newVersion != null">
-                version = #{newVersion},
+            <if test="version != null and version.trim().length() != 0">
+                version = #{version},
             </if>
-            update_time = #{mcpGatewayPO.updateTime}
+            update_time = #{updateTime}
         </set>
-        WHERE gateway_id = #{mcpGatewayPO.gatewayId}
-        <if test="mcpGatewayPO.version != null">AND version = #{mcpGatewayPO.version}</if>
+        WHERE gateway_id = #{gatewayId}
     </update>
 
     <select id="queryById" parameterType="java.lang.Long" resultMap="McpGatewayMap">
