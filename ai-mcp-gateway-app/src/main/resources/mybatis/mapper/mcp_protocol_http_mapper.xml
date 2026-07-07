@@ -151,5 +151,84 @@
         </foreach>
     </insert>
 
+    <delete id="deleteByProtocolId" parameterType="java.lang.Long">
+        DELETE FROM mcp_protocol_http
+        <where>
+            <choose>
+                <when test="protocolId != null">
+                    protocol_id = #{protocolId}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+        </where>
+    </delete>
+
+
+    <update id="updateByProtocolId" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolHttpPO">
+        UPDATE mcp_protocol_http
+        <set>
+            <if test="httpUrl != null and httpUrl.trim().length() != 0">http_url = #{httpUrl},</if>
+            <if test="httpMethod != null and httpMethod.trim().length() != 0">http_method = #{httpMethod},</if>
+            <if test="httpHeaders != null and httpHeaders.trim().length() != 0">http_headers = #{httpHeaders},</if>
+            <if test="timeout != null">timeout = #{timeout},</if>
+            <if test="retryTimes != null">retry_times = #{retryTimes},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        <where>
+            <choose>
+                <when test="protocolId != null">
+                    protocol_id = #{protocolId}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+        </where>
+    </update>
+
+    <select id="queryListByProtocolIds" resultMap="McpProtocolRegistryMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM mcp_protocol_http
+        WHERE protocol_id IN
+        <foreach collection="list" item="protocolId" open="(" separator="," close=")">
+            #{protocolId}
+        </foreach>
+    </select>
+
+    <select id="queryProtocolList" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolHttpPO" resultMap="McpProtocolRegistryMap">
+        SELECT id, protocol_id, http_url, http_method, http_headers, timeout,
+        create_time, update_time
+        FROM mcp_protocol_http
+        <where>
+            <if test="protocolId != null">
+                AND protocol_id = #{protocolId}
+            </if>
+            <if test="httpUrl != null and httpUrl.trim().length() != 0">
+                AND http_url like concat('%', #{httpUrl}, '%')
+            </if>
+        </where>
+        ORDER BY update_time DESC
+        <if test="limitStart != null and limitCount != null">
+            LIMIT #{limitCount} OFFSET #{limitStart}
+        </if>
+    </select>
+
+    <select id="queryProtocolListCount" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolHttpPO" resultType="java.lang.Long">
+        SELECT count(id)
+        FROM mcp_protocol_http
+        <where>
+            <if test="protocolId != null">
+                AND protocol_id = #{protocolId}
+            </if>
+            <if test="httpUrl != null and httpUrl.trim().length() != 0">
+                AND http_url like concat('%', #{httpUrl}, '%')
+            </if>
+        </where>
+    </select>
+
 </mapper>
 

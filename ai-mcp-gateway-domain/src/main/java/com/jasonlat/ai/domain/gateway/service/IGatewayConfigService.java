@@ -10,6 +10,8 @@ public interface IGatewayConfigService {
 
     void saveGatewayConfig(GatewayConfigCommandEntity commandEntity);
 
+    void updateGatewayConfig(GatewayConfigCommandEntity commandEntity);
+
     void updateGatewayAuthStatus(GatewayConfigCommandEntity commandEntity);
 
 }

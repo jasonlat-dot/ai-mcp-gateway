@@ -41,3 +41,4 @@ build/
 /.idea/
 /xfg-ai-mcp-gateway/
 /ai-mcp-gateway-app/data/
+/ai-mcp-gateway-front/node_modules/

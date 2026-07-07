@@ -1,0 +1,6 @@
+/* ============================================================
+ * Global styles entry — order matters.
+ *  theme tokens → reset → element overrides
+ * ============================================================ */
+@import './theme.css';
+@import './global.css';

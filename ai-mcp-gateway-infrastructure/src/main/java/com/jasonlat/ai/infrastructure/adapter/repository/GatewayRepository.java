@@ -12,9 +12,11 @@ import com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO;
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayToolPO;
 import com.jasonlat.ai.types.enums.GatewayEnum;
 import com.jasonlat.ai.types.exception.AppException;
+import com.jasonlat.ai.types.snow.SnowflakeIdGenerator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -33,6 +35,9 @@ public class GatewayRepository implements IGatewayRepository {
     @Resource
     private IMcpGatewayToolDao mcpGatewayToolDao;
 
+    @Resource
+    private SnowflakeIdGenerator snowflakeIdGenerator;
+
     @Override
     public void saveGatewayConfig(GatewayConfigCommandEntity commandEntity) {
         GatewayConfigVO gatewayConfigVO = commandEntity.getGatewayConfigVO();
@@ -45,6 +50,25 @@ public class GatewayRepository implements IGatewayRepository {
         mcpGatewayPO.setAuth(null != gatewayConfigVO.getAuth() ? gatewayConfigVO.getAuth().getCode() : GatewayEnum.GatewayAuthStatusEnum.NOT_VERIFIED.getCode());
         mcpGatewayPO.setStatus(null != gatewayConfigVO.getStatus() ? gatewayConfigVO.getStatus().getCode() : GatewayEnum.GatewayStatus.ENABLE.getCode());
         mcpGatewayDao.insert(mcpGatewayPO);
+    }
+
+    @Override
+    public void updateGatewayConfig(GatewayConfigCommandEntity commandEntity) {
+        GatewayConfigVO gatewayConfigVO = commandEntity.getGatewayConfigVO();
+
+        McpGatewayPO mcpGatewayPO = new McpGatewayPO();
+        mcpGatewayPO.setGatewayId(gatewayConfigVO.getGatewayId());
+        mcpGatewayPO.setGatewayName(gatewayConfigVO.getGatewayName());
+        mcpGatewayPO.setGatewayDesc(gatewayConfigVO.getGatewayDesc());
+        mcpGatewayPO.setVersion(gatewayConfigVO.getVersion());
+        mcpGatewayPO.setAuth(null != gatewayConfigVO.getAuth() ? gatewayConfigVO.getAuth().getCode() : null);
+        mcpGatewayPO.setStatus(null != gatewayConfigVO.getStatus() ? gatewayConfigVO.getStatus().getCode() : null);
+        mcpGatewayPO.setUpdateTime(new Date());
+
+        int count = mcpGatewayDao.updateByGatewayId(mcpGatewayPO);
+        if (1 != count) {
+            throw new AppException(DB_UPDATE_FAIL.getCode(), DB_UPDATE_FAIL.getInfo());
+        }
     }
 
     @Override
@@ -70,6 +94,23 @@ public class GatewayRepository implements IGatewayRepository {
         GatewayToolConfigVO gatewayToolConfigVO = commandEntity.getGatewayToolConfigVO();
 
         McpGatewayToolPO mcpGatewayToolPO = new McpGatewayToolPO();
+        mcpGatewayToolPO.setId(snowflakeIdGenerator.nextId());
+        mcpGatewayToolPO.setGatewayId(gatewayToolConfigVO.getGatewayId());
+        mcpGatewayToolPO.setToolId(snowflakeIdGenerator.nextId());
+        mcpGatewayToolPO.setToolName(gatewayToolConfigVO.getToolName());
+        mcpGatewayToolPO.setToolType(gatewayToolConfigVO.getToolType());
+        mcpGatewayToolPO.setToolDescription(gatewayToolConfigVO.getToolDescription());
+        mcpGatewayToolPO.setToolVersion(gatewayToolConfigVO.getToolVersion());
+        mcpGatewayToolPO.setProtocolId(gatewayToolConfigVO.getProtocolId());
+        mcpGatewayToolPO.setProtocolType(gatewayToolConfigVO.getProtocolType());
+        mcpGatewayToolDao.insert(mcpGatewayToolPO);
+    }
+
+    @Override
+    public void updateGatewayToolConfig(GatewayToolConfigCommandEntity commandEntity) {
+        GatewayToolConfigVO gatewayToolConfigVO = commandEntity.getGatewayToolConfigVO();
+
+        McpGatewayToolPO mcpGatewayToolPO = new McpGatewayToolPO();
         mcpGatewayToolPO.setGatewayId(gatewayToolConfigVO.getGatewayId());
         mcpGatewayToolPO.setToolId(gatewayToolConfigVO.getToolId());
         mcpGatewayToolPO.setToolName(gatewayToolConfigVO.getToolName());
@@ -78,7 +119,12 @@ public class GatewayRepository implements IGatewayRepository {
         mcpGatewayToolPO.setToolVersion(gatewayToolConfigVO.getToolVersion());
         mcpGatewayToolPO.setProtocolId(gatewayToolConfigVO.getProtocolId());
         mcpGatewayToolPO.setProtocolType(gatewayToolConfigVO.getProtocolType());
-        mcpGatewayToolDao.insert(mcpGatewayToolPO);
+        mcpGatewayToolPO.setUpdateTime(new Date());
+
+        int count = mcpGatewayToolDao.updateToolConfigByToolId(mcpGatewayToolPO);
+        if (1 != count) {
+            throw new AppException(DB_UPDATE_FAIL.getCode(), DB_UPDATE_FAIL.getInfo());
+        }
     }
 
     @Override
@@ -94,6 +140,11 @@ public class GatewayRepository implements IGatewayRepository {
         if (1 != count) {
             throw new AppException(DB_UPDATE_FAIL.getCode(), DB_UPDATE_FAIL.getInfo());
         }
+    }
+
+    @Override
+    public void deleteGatewayToolConfig(Long toolId) {
+        mcpGatewayToolDao.deleteByToolId(toolId);
     }
 
 }

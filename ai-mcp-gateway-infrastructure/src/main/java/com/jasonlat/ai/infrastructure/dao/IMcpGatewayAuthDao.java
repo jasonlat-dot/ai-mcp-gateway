@@ -19,5 +19,15 @@ public interface IMcpGatewayAuthDao extends BaseMapper<McpGatewayAuthPO> {
     List<McpGatewayAuthPO> queryAll();
 
     McpGatewayAuthPO queryMcpGatewayAuthPO(McpGatewayAuthPO poReq);
+
+    int deleteByGatewayId(String gatewayId);
+
+    int updateByGatewayId(McpGatewayAuthPO po);
+
+    List<McpGatewayAuthPO> queryAuthList(McpGatewayAuthPO query);
+
+    Long queryAuthListCount(McpGatewayAuthPO query);
+
+    int queryEffectiveGatewayAuthCount(String gatewayId);
 }
 

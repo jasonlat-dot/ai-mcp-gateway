@@ -5,9 +5,12 @@ import com.jasonlat.ai.domain.auth.model.entity.RegisterCommandEntity;
 import com.jasonlat.ai.domain.auth.model.valobj.McpGatewayAuthVO;
 import com.jasonlat.ai.domain.auth.model.valobj.enums.AuthStatusEnum;
 import com.jasonlat.ai.domain.auth.service.IAuthRegisterService;
+import com.jasonlat.ai.types.enums.ResponseCode;
+import com.jasonlat.ai.types.exception.AppException;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -47,5 +50,24 @@ public class AuthRegisterService implements IAuthRegisterService {
 
         // 4. 返回结果
         return apiKey;
+    }
+
+    @Override
+    public boolean updateGatewayAuth(RegisterCommandEntity commandEntity) {
+        if (StringUtils.isBlank(commandEntity.getGatewayId())) {
+            log.error("更新网关认证配置失败: gatewayId为空");
+            throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+        }
+        McpGatewayAuthVO mcpGatewayAuthVO = McpGatewayAuthVO.builder()
+                .gatewayId(commandEntity.getGatewayId())
+                .rateLimit(commandEntity.getRateLimit())
+                .expireTime(commandEntity.getExpireTime())
+                .build();
+        return repository.updateGatewayAuth(mcpGatewayAuthVO);
+    }
+
+    @Override
+    public void deleteGatewayAuth(String gatewayId) {
+        repository.deleteGatewayAuth(gatewayId);
     }
 }

@@ -26,10 +26,19 @@ public class GatewayConfigRequestDTO {
         private String gatewayDesc;
         /** 协议版本 */
         private String version;
-        /** 校验状态：0-不校验，1-强校验 */
+        /** 校验状态：0-禁用，1-启用 */
         private Integer auth;
-        /** 网关状态： 0-禁用，1-启用 */
+        /** 网关状态：0-不校验，1-强校验 */
         private Integer status;
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class GatewayProtocolImport {
+        private String openApiJson;
+        private List<String> endpoints;
     }
 
     @Data

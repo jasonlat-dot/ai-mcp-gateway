@@ -25,4 +25,13 @@ public interface IAuthRepository {
      * @param mcpGatewayAuthVO 网关授权信息
      */
     void insertOne(McpGatewayAuthVO mcpGatewayAuthVO);
+
+    /**
+     * 根据网关ID更新网关授权信息
+     * @param mcpGatewayAuthVO 网关授权信息（gatewayId必填）
+     * @return 是否更新成功
+     */
+    boolean updateGatewayAuth(McpGatewayAuthVO mcpGatewayAuthVO);
+
+    void deleteGatewayAuth(String gatewayId);
 }

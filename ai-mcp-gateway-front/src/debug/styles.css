@@ -1,0 +1,197 @@
+/* ============================================================
+ * 状态页调试 —— 浮动面板 / 总开关 / 小齿轮 相关样式
+ *
+ * 全部以 .debug- 前缀命名,避免与业务组件冲突。
+ * 仅当 debug 模块启用时挂载,不进入生产构建时可整文件删除。
+ * ============================================================ */
+
+/* 状态页预览容器 —— 占满视口 */
+.status-debug-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: var(--bg-base);
+}
+
+/* 浮动调试面板 —— 浅色玻璃风格(天空蓝主调) */
+.debug-floating {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9999;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  border: 1px solid rgba(186, 230, 253, 0.55);
+  border-radius: 14px;
+  box-shadow:
+    0 18px 40px rgba(56, 189, 248, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  color: #1e293b;
+  font-size: 13px;
+  overflow: hidden;
+  user-select: none;
+}
+
+.debug-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: linear-gradient(120deg, rgba(186, 230, 253, 0.5), rgba(254, 215, 170, 0.5));
+  border-bottom: 1px solid rgba(186, 230, 253, 0.4);
+}
+.debug-title { font-weight: 600; letter-spacing: 1px; color: #0c4a6e; }
+.debug-header-actions { display: flex; gap: 6px; }
+
+.debug-mini {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(186, 230, 253, 0.55);
+  border-radius: 6px;
+  color: #1e293b;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.debug-mini:hover { background: rgba(255, 255, 255, 0.95); }
+
+.debug-body { padding: 12px 14px 14px; }
+.debug-hint {
+  font-size: 12px;
+  color: rgba(30, 41, 59, 0.65);
+  margin-bottom: 10px;
+}
+.debug-hint code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #0284c7;
+  background: rgba(186, 230, 253, 0.28);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(186, 230, 253, 0.5);
+}
+
+.debug-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.debug-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(186, 230, 253, 0.5);
+  border-radius: 10px;
+  color: #1e293b;
+  cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.debug-chip:hover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(125, 211, 252, 0.85);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(56, 189, 248, 0.22);
+}
+.debug-chip.active {
+  background: linear-gradient(120deg, rgba(186, 230, 253, 0.7), rgba(254, 215, 170, 0.65));
+  border-color: rgba(14, 165, 233, 0.65);
+  color: #0c4a6e;
+  box-shadow: 0 6px 14px rgba(56, 189, 248, 0.32);
+}
+.chip-icon { font-size: 16px; }
+.chip-label { white-space: nowrap; }
+
+.debug-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+.debug-link {
+  background: none;
+  border: none;
+  color: #0ea5e9;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.debug-link:hover { color: #0284c7; text-decoration: underline; }
+
+.debug-tips {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(186, 230, 253, 0.55);
+  font-size: 12px;
+  color: rgba(30, 41, 59, 0.62);
+}
+.debug-tips summary {
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+.debug-tips ul { margin: 6px 0 0; padding-left: 18px; }
+.debug-tips li { margin: 2px 0; }
+.debug-tips code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #0284c7;
+  background: rgba(186, 230, 253, 0.28);
+  padding: 0 4px;
+  border-radius: 3px;
+}
+
+/* 关闭后的小齿轮 */
+.debug-reopen {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9999;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(186, 230, 253, 0.55);
+  background: rgba(255, 255, 255, 0.88);
+  color: #1e293b;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+  transition: transform 0.2s;
+}
+.debug-reopen:hover { transform: scale(1.08); }
+
+/* 角落总开关 */
+.debug-corner {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 9999;
+}
+.debug-toggle {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(186, 230, 253, 0.55);
+  border-radius: 8px;
+  color: #1e293b;
+  font-size: 12px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.2s;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.22);
+}
+.debug-toggle:hover { background: rgba(255, 255, 255, 0.98); }
+
+/* 浮动面板进出动画 */
+.debug-fade-enter-active,
+.debug-fade-leave-active {
+  transition: opacity 0.2s, transform 0.2s;
+}
+.debug-fade-enter-from,
+.debug-fade-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}

@@ -12,4 +12,7 @@ public interface IProtocolRepository {
 
     List<Long> saveHttpProtocolAndMapping(List<HTTPProtocolVO> httpProtocolVOS);
 
+    boolean updateHttpProtocolAndMapping(HTTPProtocolVO httpProtocolVO);
+
+    void deleteGatewayProtocol(Long protocolId);
 }

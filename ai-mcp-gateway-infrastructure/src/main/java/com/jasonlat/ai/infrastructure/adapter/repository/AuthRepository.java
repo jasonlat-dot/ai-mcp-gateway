@@ -77,4 +77,21 @@ public class AuthRepository implements IAuthRepository {
                 .build();
         mcpGatewayAuthDao.insert(mcpGatewayAuthPO);
     }
+
+    @Override
+    public boolean updateGatewayAuth(McpGatewayAuthVO mcpGatewayAuthVO) {
+        McpGatewayAuthPO mcpGatewayAuthPO = McpGatewayAuthPO.builder()
+                .gatewayId(mcpGatewayAuthVO.getGatewayId())
+                .rateLimit(mcpGatewayAuthVO.getRateLimit())
+                .expireTime(mcpGatewayAuthVO.getExpireTime())
+                .build();
+        int count = mcpGatewayAuthDao.updateByGatewayId(mcpGatewayAuthPO);
+        return 1 == count;
+    }
+
+    @Override
+    public void deleteGatewayAuth(String gatewayId) {
+        mcpGatewayAuthDao.deleteByGatewayId(gatewayId);
+    }
+
 }

@@ -64,6 +64,20 @@
             </otherwise>
         </choose>
     </delete>
+    <delete id="deleteByProtocolId">
+        DELETE FROM mcp_protocol_mapping
+        <where>
+            <choose>
+                <when test="protocolId != null">
+                    protocol_id = #{protocolId}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+        </where>
+    </delete>
+
 
     <update id="updateById" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO">
         UPDATE mcp_protocol_mapping
@@ -153,5 +167,15 @@
             )
         </foreach>
     </insert>
+
+    <select id="queryListByProtocolIds" resultMap="McpProtocolMappingMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM mcp_protocol_mapping
+        WHERE protocol_id IN
+        <foreach collection="list" item="protocolId" open="(" separator="," close=")">
+            #{protocolId}
+        </foreach>
+    </select>
 
 </mapper>

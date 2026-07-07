@@ -11,4 +11,8 @@ public interface IAuthRegisterService {
      * @return 注册结果 apiKey
      */
     String register(RegisterCommandEntity command);
+
+    boolean updateGatewayAuth(RegisterCommandEntity command);
+
+    void deleteGatewayAuth(String gatewayId);
 }

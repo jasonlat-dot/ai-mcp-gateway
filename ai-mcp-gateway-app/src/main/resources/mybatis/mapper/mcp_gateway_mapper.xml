@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.jasonlat.ai.infrastructure.dao.IMcpGatewayDao">
 
@@ -98,6 +98,28 @@
         WHERE gateway_id = #{gatewayId}
     </update>
 
+    <update id="updateByGatewayId" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO">
+        UPDATE mcp_gateway
+        <set>
+            <if test="gatewayName != null and gatewayName.trim().length() != 0">gateway_name = #{gatewayName},</if>
+            <if test="gatewayDesc != null and gatewayDesc.trim().length() != 0">gateway_desc = #{gatewayDesc},</if>
+            <if test="version != null and version.trim().length() != 0">version = #{version},</if>
+            <if test="auth != null">auth = #{auth},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = #{updateTime}
+        </set>
+        <where>
+            <choose>
+                <when test="gatewayId != null and gatewayId.trim().length() != 0">
+                    gateway_id = #{gatewayId}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+        </where>
+    </update>
+
     <select id="queryById" parameterType="java.lang.Long" resultMap="McpGatewayMap">
         SELECT
         <include refid="Base_Column_List"/>
@@ -131,6 +153,36 @@
                 WHERE 1 = 0
             </otherwise>
         </choose>
+    </select>
+
+    <select id="queryGatewayList" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO" resultMap="McpGatewayMap">
+        SELECT id, gateway_id, gateway_name, gateway_desc, version, auth, status, create_time, update_time
+        FROM mcp_gateway
+        <where>
+            <if test="gatewayId != null and gatewayId != ''">
+                AND gateway_id like concat('%', #{gatewayId}, '%')
+            </if>
+            <if test="gatewayName != null and gatewayName != ''">
+                AND gateway_name like concat('%', #{gatewayName}, '%')
+            </if>
+        </where>
+        ORDER BY update_time DESC
+        <if test="limitStart != null and limitCount != null">
+            LIMIT  #{limitCount} OFFSET #{limitStart}
+        </if>
+    </select>
+
+    <select id="queryGatewayListCount" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO" resultType="java.lang.Long">
+        SELECT count(id)
+        FROM mcp_gateway
+        <where>
+            <if test="gatewayId != null and gatewayId != ''">
+                AND gateway_id like concat('%', #{gatewayId}, '%')
+            </if>
+            <if test="gatewayName != null and gatewayName != ''">
+                AND gateway_name like concat('%', #{gatewayName}, '%')
+            </if>
+        </where>
     </select>
 
 </mapper>

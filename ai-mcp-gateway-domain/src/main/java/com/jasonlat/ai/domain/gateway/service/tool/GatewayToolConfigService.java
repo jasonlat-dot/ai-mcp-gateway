@@ -23,7 +23,25 @@ public class GatewayToolConfigService implements IGatewayToolConfigService {
 
     @Override
     public void saveGatewayToolConfig(GatewayToolConfigCommandEntity commandEntity) {
+        GatewayToolConfigVO gatewayToolConfigVO = commandEntity.getGatewayToolConfigVO();
+        if (StringUtils.isAnyBlank(gatewayToolConfigVO.getGatewayId(), gatewayToolConfigVO.getToolName(),
+                gatewayToolConfigVO.getToolType(), gatewayToolConfigVO.getToolVersion(),
+                gatewayToolConfigVO.getProtocolType(), gatewayToolConfigVO.getToolDescription())
+                || gatewayToolConfigVO.getProtocolId() == null || gatewayToolConfigVO.getGatewayId() == null) {
+            log.error("保存工具配置失败: gatewayId或toolName或toolType或toolVersion为空");
+            throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+        }
         repository.saveGatewayToolConfig(commandEntity);
+    }
+
+    @Override
+    public void updateGatewayToolConfig(GatewayToolConfigCommandEntity commandEntity) {
+        GatewayToolConfigVO gatewayToolConfigVO = commandEntity.getGatewayToolConfigVO();
+        if (gatewayToolConfigVO.getToolId() == null) {
+            log.error("更新工具配置失败: gatewayId为空");
+            throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+        }
+        repository.updateGatewayToolConfig(commandEntity);
     }
 
     @Override
@@ -34,5 +52,10 @@ public class GatewayToolConfigService implements IGatewayToolConfigService {
             throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
         }
         repository.updateGatewayToolProtocol(commandEntity);
+    }
+
+    @Override
+    public void deleteGatewayToolConfig(Long toolId) {
+        repository.deleteGatewayToolConfig(toolId);
     }
 }

@@ -1,0 +1,112 @@
+/* ============================================================
+ * Glacis · Cold-Light Design Tokens
+ *
+ * 冷色调浅色系统 — 从 Vanguard 的深色玻璃风格切换过来:
+ *  - 背景走「冰川白」:几乎纯白的基底 + 极淡的冷蓝灰做层次
+ *  - 唯一的强彩色就是 1 个冷蓝(--accent),所有彩色都去饱和
+ *  - 不再用 background gradient / radial aurora / noise — 全部移除
+ *  - 边框走 hairline 的 1px,阴影走非常轻的 tinted shadow
+ *  - 字号和呼吸感是核心:section padding 22-28px,卡片间距 18-22px
+ *  - 所有过渡曲线统一为 cubic-bezier(0.4, 0, 0.2, 1) — 干净利落
+ * ============================================================ */
+
+:root {
+  /* ========== Surface (冰川白基底) ========== */
+  --bg-base:        #f6f8fb;                /* 主背景:微冷的纸白 */
+  --bg-elevated:    #ffffff;                /* 卡片抬升 */
+  --bg-deep:        #eef2f7;                /* 二级抬升 / hover */
+  --bg-sunken:      #f1f4f9;                /* 输入框 / 代码区 */
+
+  /* ========== Text ========== */
+  --text-strong:    #0f172a;                /* slate-900,标题主文本 */
+  --text-default:   #1f2a3d;                /* 正文 */
+  --text-muted:     #5a6678;                /* slate-500~600 */
+  --text-subtle:    #8693a8;                /* slate-400~500 */
+  --text-faint:     #b0b9c8;                /* 极弱信息 */
+  --text-onaccent:  #ffffff;                /* 在彩色背景上的文字 */
+
+  /* ========== Accent — 单一冷蓝 ========== */
+  --accent:         #2563eb;                /* blue-600:权威感 */
+  --accent-hover:   #1d4ed8;                /* blue-700 */
+  --accent-press:   #1e40af;                /* blue-800 */
+  --accent-soft:    rgba(37, 99, 235, 0.08);
+  --accent-line:    rgba(37, 99, 235, 0.18);
+
+  /* 冷色辅助(全部去饱和) */
+  --teal:           #0d9488;                /* teal-600 */
+  --teal-soft:      rgba(13, 148, 136, 0.10);
+  --violet:         #6d55e0;                /* violet-600(冷紫) */
+  --violet-soft:    rgba(109, 85, 224, 0.10);
+  --amber:          #b45309;                /* amber-700(沉稳琥珀) */
+  --amber-soft:     rgba(180, 83, 9, 0.10);
+  --rose:           #be185d;                /* rose-700 */
+  --rose-soft:      rgba(190, 24, 93, 0.10);
+
+  --gradient-brand: linear-gradient(135deg, #2563eb 0%, #0d9488 100%);
+
+  /* ========== Status ========== */
+  --ok-color:       #0d9488;
+  --warn-color:     #b45309;
+  --err-color:      #be185d;
+  --info-color:     #2563eb;
+
+  /* ========== Borders / hairlines ========== */
+  --hairline:       rgba(15, 23, 42, 0.08);
+  --hairline-strong:rgba(15, 23, 42, 0.14);
+  --hairline-soft:  rgba(15, 23, 42, 0.04);
+  --ring-focus:     0 0 0 3px rgba(37, 99, 235, 0.18);
+
+  /* ========== Shadow — 极淡的 tinted ========== */
+  --shadow-xs:      0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm:      0 2px 6px -2px rgba(15, 23, 42, 0.06),
+                    0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md:      0 8px 24px -10px rgba(15, 23, 42, 0.10),
+                    0 2px 6px rgba(15, 23, 42, 0.04);
+  --shadow-lg:      0 24px 48px -16px rgba(15, 23, 42, 0.14),
+                    0 4px 12px rgba(15, 23, 42, 0.04);
+
+  /* ========== Controls ========== */
+  --input-bg:       #ffffff;
+  --input-bg-hover: #ffffff;
+  --input-border:   rgba(15, 23, 42, 0.10);
+  --input-border-hover: rgba(15, 23, 42, 0.18);
+  --input-border-focus: #2563eb;
+  --input-text:     var(--text-strong);
+  --input-placeholder: #98a2b3;
+
+  /* ========== Layout ========== */
+  --radius-sm:      6px;
+  --radius-md:      10px;
+  --radius-lg:      14px;
+  --radius-xl:      20px;
+  --radius-pill:    999px;
+
+  --sidebar-w:            240px;
+  --sidebar-w-collapsed:  68px;
+  --topbar-h:             60px;
+
+  /* ========== Motion — 统一克制 ========== */
+  --ease-glacis:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast:       140ms;
+  --dur-base:       200ms;
+  --dur-slow:       320ms;
+
+  /* ========== Scrollbar ========== */
+  --scroll-thumb:    rgba(15, 23, 42, 0.12);
+  --scroll-thumb-hover: rgba(15, 23, 42, 0.22);
+}
+
+/* ============================================================
+ * Reduced motion
+ * ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

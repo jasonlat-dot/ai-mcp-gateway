@@ -25,6 +25,7 @@ import java.util.List;
 @Repository
 public class ProtocolRepository implements IProtocolRepository {
 
+
     @Resource
     private IMcpProtocolHttpDao protocolHttpDao;
 
@@ -87,6 +88,55 @@ public class ProtocolRepository implements IProtocolRepository {
         // 批量保存
         protocolHttpDao.batchInsert(mcpProtocolHttpPOs);
         return protocolIdList;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean updateHttpProtocolAndMapping(HTTPProtocolVO httpProtocolVO) {
+        if (null == httpProtocolVO || httpProtocolVO.getProtocolId() == null) return false;
+
+        // 1. 更新 HTTP 协议配置
+        McpProtocolHttpPO mcpProtocolHttpPO = McpProtocolHttpPO.builder()
+                .protocolId(httpProtocolVO.getProtocolId())
+                .httpUrl(httpProtocolVO.getHttpUrl())
+                .httpMethod(httpProtocolVO.getHttpMethod())
+                .httpHeaders(httpProtocolVO.getHttpHeaders())
+                .timeout(httpProtocolVO.getTimeout())
+                .build();
+        int httpCount = protocolHttpDao.updateByProtocolId(mcpProtocolHttpPO);
+        if (1 != httpCount) {
+            return false;
+        }
+
+        // 2. 先删除该协议原有映射再批量插入新映射
+        protocolMappingDao.deleteByProtocolId(httpProtocolVO.getProtocolId());
+        List<HTTPProtocolVO.ProtocolMapping> mappings = httpProtocolVO.getMappings();
+        if (null != mappings && !mappings.isEmpty()) {
+            List<McpProtocolMappingPO> mcpProtocolMappingPOs = new ArrayList<>(mappings.size());
+            for (HTTPProtocolVO.ProtocolMapping mapping : mappings) {
+                McpProtocolMappingPO mcpProtocolMappingPO = McpProtocolMappingPO.builder()
+                        .protocolId(httpProtocolVO.getProtocolId())
+                        .mappingType(mapping.getMappingType())
+                        .parentPath(mapping.getParentPath())
+                        .fieldName(mapping.getFieldName())
+                        .mcpPath(mapping.getMcpPath())
+                        .mcpType(mapping.getMcpType())
+                        .mcpDesc(mapping.getMcpDesc())
+                        .isRequired(mapping.getIsRequired())
+                        .sortOrder(mapping.getSortOrder())
+                        .build();
+                mcpProtocolMappingPOs.add(mcpProtocolMappingPO);
+            }
+            protocolMappingDao.batchInsert(mcpProtocolMappingPOs);
+        }
+        return true;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void deleteGatewayProtocol(Long protocolId) {
+        protocolHttpDao.deleteByProtocolId(protocolId);
+        protocolMappingDao.deleteByProtocolId(protocolId);
     }
 
 }

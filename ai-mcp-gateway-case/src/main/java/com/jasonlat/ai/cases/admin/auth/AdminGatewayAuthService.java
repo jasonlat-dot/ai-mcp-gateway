@@ -22,4 +22,15 @@ public class AdminGatewayAuthService implements IAdminGatewayAuthService {
         authRegisterService.register(commandEntity);
     }
 
+    @Override
+    public void updateGatewayAuth(RegisterCommandEntity commandEntity) {
+        authRegisterService.updateGatewayAuth(commandEntity);
+    }
+
+    @Override
+    public void deleteGatewayAuth(String gatewayId) {
+        authRegisterService.deleteGatewayAuth(gatewayId);
+    }
+
+
 }

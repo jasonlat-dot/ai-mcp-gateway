@@ -101,11 +101,78 @@
         FROM mcp_gateway_auth
         ORDER BY id DESC
     </select>
+
     <select id="queryMcpGatewayAuthPO" resultType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayAuthPO">
         SELECT
         <include refid="Base_Column_List"/>
         FROM mcp_gateway_auth
         WHERE gateway_id = #{gatewayId} and api_key = #{apiKey}
     </select>
+
+    <select id="queryAuthList" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayAuthPO" resultMap="McpGatewayAuthMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM mcp_gateway_auth
+        <where>
+            <if test="gatewayId != null and gatewayId != ''">
+                AND gateway_id like concat('%', #{gatewayId}, '%')
+            </if>
+        </where>
+        ORDER BY update_time DESC
+        <if test="limitStart != null and limitCount != null">
+            LIMIT #{limitCount} OFFSET #{limitStart}
+        </if>
+    </select>
+
+    <select id="queryAuthListCount" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayAuthPO" resultType="java.lang.Long">
+        SELECT count(id)
+        FROM mcp_gateway_auth
+        <where>
+            <if test="gatewayId != null and gatewayId != ''">
+                AND gateway_id like concat('%', #{gatewayId}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="queryEffectiveGatewayAuthCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM mcp_gateway_auth
+        WHERE gateway_id = #{gatewayId} and status = 1
+    </select>
+
+    <update id="updateByGatewayId" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayAuthPO">
+        UPDATE mcp_gateway_auth
+        <set>
+            <if test="rateLimit != null">rate_limit = #{rateLimit},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = CURRENT_TIMESTAMP
+        </set>
+        <where>
+            <choose>
+                <when test="gatewayId != null and gatewayId.trim().length() != 0">
+                    gateway_id = #{gatewayId}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+        </where>
+    </update>
+
+    <delete id="deleteByGatewayId" parameterType="java.lang.String">
+        DELETE FROM mcp_gateway_auth
+        <where>
+            <choose>
+                <when test="gatewayId != null and gatewayId.trim().length() != 0">
+                    gateway_id = #{gatewayId}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+        </where>
+    </delete>
+
 
 </mapper>

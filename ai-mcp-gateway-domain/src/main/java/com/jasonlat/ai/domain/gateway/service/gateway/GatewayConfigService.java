@@ -27,6 +27,16 @@ public class GatewayConfigService implements IGatewayConfigService {
     }
 
     @Override
+    public void updateGatewayConfig(GatewayConfigCommandEntity commandEntity) {
+        GatewayConfigVO gatewayConfigVO = commandEntity.getGatewayConfigVO();
+        if (StringUtils.isBlank(gatewayConfigVO.getGatewayId())) {
+            log.error("更新网关配置失败: gatewayId为空");
+            throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+        }
+        repository.updateGatewayConfig(commandEntity);
+    }
+
+    @Override
     public void updateGatewayAuthStatus(GatewayConfigCommandEntity commandEntity) {
         GatewayConfigVO gatewayConfigVO = commandEntity.getGatewayConfigVO();
         if (gatewayConfigVO.getAuth() == null) {

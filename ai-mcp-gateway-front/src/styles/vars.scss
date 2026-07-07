@@ -1,0 +1,58 @@
+/* ============================================================
+ * SCSS shared variables — mirror theme.css for *.vue <style lang="scss">
+ * ============================================================ */
+
+// ----- surface -----
+$bg-base:        #f6f8fb;
+$bg-elevated:    #ffffff;
+$bg-deep:        #eef2f7;
+$bg-sunken:      #f1f4f9;
+
+// ----- hairline -----
+$hairline:        rgba(15, 23, 42, 0.08);
+$hairline-strong: rgba(15, 23, 42, 0.14);
+$hairline-soft:   rgba(15, 23, 42, 0.04);
+
+// ----- text -----
+$text-strong:    #0f172a;
+$text-default:   #1f2a3d;
+$text-muted:     #5a6678;
+$text-subtle:    #8693a8;
+$text-faint:     #b0b9c8;
+
+// ----- accent -----
+$accent:         #2563eb;
+$accent-hover:   #1d4ed8;
+$teal:           #0d9488;
+$violet:         #6d55e0;
+$amber:          #b45309;
+$rose:           #be185d;
+
+// ----- radius -----
+$r-sm:  6px;
+$r-md:  10px;
+$r-lg:  14px;
+$r-xl:  20px;
+
+// ----- motion -----
+$ease:     cubic-bezier(0.4, 0, 0.2, 1);
+$ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+// ----- helpers -----
+@mixin glass {
+  background: #ffffff;
+  border: 1px solid $hairline;
+  box-shadow: var(--shadow-sm);
+}
+
+@mixin focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+@mixin scrollbar {
+  &::-webkit-scrollbar { width: 8px; height: 8px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.10); border-radius: 4px; }
+  &::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.20); }
+}

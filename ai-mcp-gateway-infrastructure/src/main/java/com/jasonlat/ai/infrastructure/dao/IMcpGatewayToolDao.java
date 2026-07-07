@@ -15,4 +15,18 @@ public interface IMcpGatewayToolDao {
     void insert(McpGatewayToolPO mcpGatewayToolPO);
 
     int updateProtocolByGatewayId(McpGatewayToolPO mcpGatewayToolPO);
+
+    int updateToolConfigByToolId(McpGatewayToolPO mcpGatewayToolPO);
+
+
+    List<McpGatewayToolPO> queryListByGatewayId(String gatewayId);
+
+
+    List<McpGatewayToolPO> queryToolList(McpGatewayToolPO query);
+
+    Long queryToolListCount(McpGatewayToolPO query);
+
+    List<McpGatewayToolPO> queryAll();
+
+    int deleteByToolId(Long toolId);
 }

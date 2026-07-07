@@ -28,5 +28,10 @@ public interface IMcpProtocolMappingDao extends BaseMapper<McpProtocolMappingPO>
      * @return 影响数据库行数
      */
     int batchInsert(@Param("list") List<McpProtocolMappingPO> list);
+
+
+    List<McpProtocolMappingPO> queryListByProtocolIds(List<Long> protocolIds);
+
+    void deleteByProtocolId(@Param("protocolId") Long protocolId);
 }
 

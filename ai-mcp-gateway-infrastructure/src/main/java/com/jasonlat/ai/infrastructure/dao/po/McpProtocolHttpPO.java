@@ -1,5 +1,6 @@
 package com.jasonlat.ai.infrastructure.dao.po;
 
+import com.jasonlat.ai.infrastructure.dao.po.base.BasePagePO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class McpProtocolHttpPO {
+public class McpProtocolHttpPO extends BasePagePO {
 
     /**
      * 主键ID

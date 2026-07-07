@@ -1,0 +1,491 @@
+/* ============================================================
+ * Global reset + base typography — Glacis 冷色调版本
+ * ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family:
+    'Plus Jakarta Sans', 'Geist', 'Inter', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-default);
+  line-height: 1.6;
+  font-size: 14px;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+#app {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+button {
+  font-family: inherit;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-glacis);
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+code, pre {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', Consolas, monospace;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}
+
+/* ============================================================
+ * Glacis utility classes — 简洁大气
+ * ============================================================ */
+
+/* 卡片外壳:1px hairline + 极淡 shadow */
+.shell {
+  background: #ffffff;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.shell-inner {
+  border-radius: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+/* eyebrow:小号细体英文标识 — 不再用 uppercase tracking,改成更克制的 11px medium */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  background: var(--bg-deep);
+  border: 1px solid var(--hairline);
+  color: var(--text-muted);
+}
+
+/* text utilities */
+.text-strong { color: var(--text-strong); }
+.text-muted  { color: var(--text-muted); }
+.text-subtle { color: var(--text-subtle); }
+.text-faint  { color: var(--text-faint); }
+.text-accent { color: var(--accent); }
+
+/* ============================================================
+ * Element Plus · 冷色调浅色系统重写
+ * ============================================================ */
+
+:root {
+  --el-color-primary: #2563eb;
+  --el-color-primary-light-3: #4f8bff;
+  --el-color-primary-light-5: #80adff;
+  --el-color-primary-light-7: #b3cdff;
+  --el-color-primary-light-9: rgba(37, 99, 235, 0.08);
+  --el-color-primary-dark-2: #1d4ed8;
+  --el-color-success: #0d9488;
+  --el-color-warning: #b45309;
+  --el-color-danger:  #be185d;
+  --el-color-info:    #5a6678;
+  --el-border-radius-base: 8px;
+  --el-border-color: rgba(15, 23, 42, 0.10);
+  --el-border-color-light: rgba(15, 23, 42, 0.06);
+  --el-border-color-lighter: rgba(15, 23, 42, 0.04);
+  --el-bg-color: #ffffff;
+  --el-bg-color-page: var(--bg-base);
+  --el-bg-color-overlay: #ffffff;
+  --el-text-color-primary: var(--text-strong);
+  --el-text-color-regular: var(--text-default);
+  --el-text-color-secondary: var(--text-muted);
+  --el-text-color-placeholder: var(--input-placeholder);
+  --el-fill-color-blank: #ffffff;
+  --el-fill-color-light: #f1f4f9;
+  --el-fill-color-lighter: #f6f8fb;
+  --el-fill-color-extra-light: #fafbfd;
+  --el-mask-color: rgba(15, 23, 42, 0.32);
+}
+
+/* ===== Button ===== */
+.el-button {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: all var(--dur-base) var(--ease-glacis);
+  border-color: var(--hairline-strong) !important;
+  background: #ffffff !important;
+  color: var(--text-default) !important;
+}
+
+.el-button:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-xs);
+}
+
+.el-button--primary {
+  --el-button-bg-color: #2563eb;
+  --el-button-border-color: #2563eb;
+  --el-button-text-color: #ffffff;
+  --el-button-hover-bg-color: #1d4ed8;
+  --el-button-hover-border-color: #1d4ed8;
+  --el-button-hover-text-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+.el-button--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* ===== Input / Select / Textarea ===== */
+.el-input__wrapper,
+.el-textarea__wrapper,
+.el-select__wrapper {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 1px var(--input-border) inset !important;
+  border-radius: 8px !important;
+  transition: all var(--dur-base) var(--ease-glacis);
+}
+
+.el-input__wrapper:hover,
+.el-textarea__wrapper:hover,
+.el-select__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--input-border-hover) inset !important;
+}
+
+.el-input__wrapper.is-focus,
+.el-textarea__wrapper.is-focus,
+.el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px var(--input-border-focus) inset, var(--ring-focus) !important;
+}
+
+.el-input__inner {
+  color: var(--text-strong) !important;
+}
+
+.el-input__inner::placeholder {
+  color: var(--input-placeholder) !important;
+}
+
+/* ===== Dialog ===== */
+.el-dialog {
+  background: #ffffff !important;
+  border: 1px solid var(--hairline-strong) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+  overflow: hidden;
+}
+
+.el-dialog__header {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid var(--hairline);
+  margin: 0 !important;
+}
+
+.el-dialog__title {
+  color: var(--text-strong) !important;
+  font-weight: 600 !important;
+}
+
+.el-dialog__body {
+  padding: 22px 24px !important;
+  color: var(--text-default);
+}
+
+.el-dialog__footer {
+  padding: 14px 24px 20px !important;
+  border-top: 1px solid var(--hairline);
+}
+
+.el-overlay {
+  background-color: rgba(15, 23, 42, 0.32) !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+/* ===== Tag / Pill ===== */
+.el-tag {
+  background: var(--bg-deep) !important;
+  border: 1px solid var(--hairline) !important;
+  color: var(--text-default) !important;
+  border-radius: 999px !important;
+  font-weight: 500 !important;
+}
+
+.el-tag--success { color: var(--teal) !important;    background: var(--teal-soft)    !important; border-color: rgba(13, 148, 136, 0.28) !important; }
+.el-tag--warning { color: var(--amber) !important;   background: var(--amber-soft)   !important; border-color: rgba(180, 83, 9, 0.28)   !important; }
+.el-tag--danger  { color: var(--rose) !important;    background: var(--rose-soft)    !important; border-color: rgba(190, 24, 93, 0.28)  !important; }
+.el-tag--info    { color: var(--accent) !important;  background: var(--accent-soft)  !important; border-color: var(--accent-line)       !important; }
+
+/* ===== Pagination ===== */
+.el-pagination {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-button-bg-color: #ffffff;
+  --el-pagination-hover-color: var(--accent);
+  --el-pagination-text-color: var(--text-muted);
+  --el-pagination-button-color: var(--text-default);
+  --el-pagination-button-disabled-bg-color: transparent;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.el-pagination .btn-prev,
+.el-pagination .btn-next,
+.el-pagination .el-pager li {
+  background: #ffffff !important;
+  border: 1px solid var(--hairline) !important;
+  border-radius: 8px !important;
+  color: var(--text-default) !important;
+  transition: all var(--dur-base) var(--ease-glacis);
+}
+
+.el-pagination .el-pager li.is-active {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border-color: var(--accent) !important;
+}
+
+.el-pagination .btn-prev:hover,
+.el-pagination .btn-next:hover,
+.el-pagination .el-pager li:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+.el-pagination .el-pager li.is-active:hover {
+  color: #ffffff !important;
+}
+
+/* ===== Form / Checkbox / Radio ===== */
+.el-form-item__label {
+  color: var(--text-default) !important;
+  font-weight: 500 !important;
+  font-size: 12.5px !important;
+}
+
+.el-checkbox__label,
+.el-radio__label {
+  color: var(--text-default) !important;
+}
+
+.el-checkbox__inner,
+.el-radio__inner {
+  background: #ffffff !important;
+  border-color: var(--input-border-hover) !important;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner,
+.el-radio__input.is-checked .el-radio__inner {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+/* ===== Empty ===== */
+.el-empty {
+  --el-empty-text-color: var(--text-subtle);
+}
+
+.el-empty__description p { color: var(--text-subtle); }
+
+/* ===== Loading ===== */
+.el-loading-mask {
+  background-color: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(2px);
+}
+
+.el-loading-spinner .circular {
+  stroke: var(--accent) !important;
+}
+
+/* ===== Tooltip ===== */
+.el-tooltip__popper {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px !important;
+}
+
+.el-tooltip__popper .el-popper__arrow::before {
+  background: #0f172a !important;
+  border-color: #0f172a !important;
+}
+
+/* ===== Message ===== */
+.el-message {
+  background: #ffffff !important;
+  border: 1px solid var(--hairline-strong) !important;
+  border-radius: 10px !important;
+  color: var(--text-strong) !important;
+  box-shadow: var(--shadow-md) !important;
+  font-weight: 500;
+}
+
+.el-message .el-message__content { color: var(--text-strong) !important; }
+
+/* ============================================================
+ * Glacis primitives — 共享按钮样式(.btn, .btn-ghost 等)
+ * 列表与表单里大量复用,统一在一个文件里维护
+ * ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--hairline-strong);
+  background: #ffffff;
+  color: var(--text-default);
+  transition: all var(--dur-base) var(--ease-glacis);
+  white-space: nowrap;
+  user-select: none;
+}
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-xs);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+.btn--primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-muted);
+}
+.btn--ghost:hover {
+  background: var(--bg-deep);
+  color: var(--text-strong);
+  border-color: transparent;
+}
+
+.btn--danger {
+  color: var(--err-color);
+  border-color: rgba(190, 24, 93, 0.20);
+  background: #ffffff;
+}
+.btn--danger:hover {
+  background: var(--rose-soft);
+  border-color: var(--err-color);
+  color: var(--err-color);
+}
+
+.btn--sm { height: 30px; padding: 0 10px; font-size: 12.5px; border-radius: 6px; }
+.btn--lg { height: 42px; padding: 0 18px; font-size: 14px; }
+
+/* ============================================================
+ * Form input (项目自用原生 input/select/textarea)
+ * ============================================================ */
+.inp {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border);
+  background: #ffffff;
+  color: var(--text-strong);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: all var(--dur-base) var(--ease-glacis);
+}
+.inp:hover {
+  border-color: var(--input-border-hover);
+}
+.inp:focus {
+  border-color: var(--input-border-focus);
+  box-shadow: var(--ring-focus);
+}
+.inp::placeholder { color: var(--input-placeholder); }
+.inp[readonly] { background: var(--bg-sunken); cursor: not-allowed; }
+.inp.ta {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.5;
+  min-height: 80px;
+}
+
+select.inp {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%235a6678' d='M6 9L1 4h10z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}

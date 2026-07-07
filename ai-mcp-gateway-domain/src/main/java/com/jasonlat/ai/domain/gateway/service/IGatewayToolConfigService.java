@@ -10,6 +10,10 @@ public interface IGatewayToolConfigService {
 
     void saveGatewayToolConfig(GatewayToolConfigCommandEntity commandEntity);
 
+    void updateGatewayToolConfig(GatewayToolConfigCommandEntity commandEntity);
+
     void updateGatewayToolProtocol(GatewayToolConfigCommandEntity commandEntity);
+
+    void deleteGatewayToolConfig(Long toolId);
 
 }

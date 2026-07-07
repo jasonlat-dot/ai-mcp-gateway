@@ -8,6 +8,11 @@ import com.jasonlat.ai.domain.auth.model.entity.RegisterCommandEntity;
  */
 public interface IAdminGatewayAuthService {
 
+
     void saveGatewayAuth(RegisterCommandEntity commandEntity);
+
+    void updateGatewayAuth(RegisterCommandEntity commandEntity);
+
+    void deleteGatewayAuth(String gatewayId);
 
 }

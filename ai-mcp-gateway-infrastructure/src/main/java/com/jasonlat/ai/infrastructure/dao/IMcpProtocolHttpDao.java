@@ -27,5 +27,16 @@ public interface IMcpProtocolHttpDao {
      * @return 受影响行数
      */
     int batchInsert(@Param("list") List<McpProtocolHttpPO> list);
+
+
+    int deleteByProtocolId(Long protocolId);
+
+    int updateByProtocolId(McpProtocolHttpPO po);
+
+    List<McpProtocolHttpPO> queryListByProtocolIds(List<Long> protocolIds);
+
+    List<McpProtocolHttpPO> queryProtocolList(McpProtocolHttpPO query);
+
+    Long queryProtocolListCount(McpProtocolHttpPO query);
 }
 

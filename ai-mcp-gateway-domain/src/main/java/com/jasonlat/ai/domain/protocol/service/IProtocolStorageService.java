@@ -8,4 +8,7 @@ public interface IProtocolStorageService {
 
     List<Long> storage(StorageCommandEntity commandEntity);
 
+    boolean updateGatewayProtocol(StorageCommandEntity commandEntity);
+
+    void deleteGatewayProtocol(Long protocolId);
 }
