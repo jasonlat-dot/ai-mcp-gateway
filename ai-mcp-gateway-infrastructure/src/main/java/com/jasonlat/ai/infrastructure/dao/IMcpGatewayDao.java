@@ -25,6 +25,11 @@ public interface IMcpGatewayDao extends BaseMapper<McpGatewayPO> {
 
     int updateByGatewayId(McpGatewayPO mcpGatewayPO);
 
+    /**
+     * 按 gatewayId 删除网关基础配置
+     */
+    int deleteByGatewayId(@Param("gatewayId") String gatewayId);
+
     List<McpGatewayPO> queryGatewayList(McpGatewayPO query);
 
     Long queryGatewayListCount(McpGatewayPO query);

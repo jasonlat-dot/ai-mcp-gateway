@@ -174,5 +174,12 @@
         </where>
     </delete>
 
+    <!-- 删除网关前引用校验专用:精确等值统计某网关下的全部 API Key 数量(包含所有 status) -->
+    <select id="countByGatewayId" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT count(id)
+        FROM mcp_gateway_auth
+        WHERE gateway_id = #{gatewayId}
+    </select>
+
 
 </mapper>

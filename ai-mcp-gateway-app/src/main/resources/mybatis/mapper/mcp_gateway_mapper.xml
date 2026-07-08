@@ -55,6 +55,18 @@
         </choose>
     </delete>
 
+    <delete id="deleteByGatewayId" parameterType="java.lang.String">
+        DELETE FROM mcp_gateway
+        <choose>
+            <when test="gatewayId != null and gatewayId.trim().length() > 0">
+                WHERE gateway_id = #{gatewayId}
+            </when>
+            <otherwise>
+                WHERE 1 = 0
+            </otherwise>
+        </choose>
+    </delete>
+
     <update id="updateById" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO">
         UPDATE mcp_gateway
         <set>

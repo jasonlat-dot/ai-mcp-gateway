@@ -2,6 +2,7 @@ package com.jasonlat.ai.infrastructure.dao;
 
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayToolPO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -29,4 +30,10 @@ public interface IMcpGatewayToolDao {
     List<McpGatewayToolPO> queryAll();
 
     int deleteByToolId(Long toolId);
+
+    /**
+     * 精确等值统计某网关下的工具数量
+     * <p>用于删除网关前的引用校验</p>
+     */
+    long countByGatewayId(@Param("gatewayId") String gatewayId);
 }

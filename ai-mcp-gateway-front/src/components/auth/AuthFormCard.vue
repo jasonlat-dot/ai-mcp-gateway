@@ -185,13 +185,14 @@ function triggerLoginError() {
 
 .card-head h2 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 600;
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-tight);
 }
 .card-head p {
   margin: 6px 0 22px;
   color: rgba(30, 41, 59, 0.6);
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 /* Tab */
@@ -226,12 +227,13 @@ function triggerLoginError() {
   background: transparent;
   border: none;
   color: rgba(30, 41, 59, 0.65);
-  font-size: 14px;
-  letter-spacing: 4px;
+  font-size: var(--fs-base);
+  letter-spacing: 0.18em;
+  font-weight: var(--fw-medium);
   cursor: pointer;
   transition: color 0.3s;
 }
-.tab-switch .tab-btn.active { color: #134e4a; font-weight: 600; }
+.tab-switch .tab-btn.active { color: #134e4a; font-weight: var(--fw-semibold); }
 
 /* 表单舞台 */
 .form-stage { min-height: 360px; }
@@ -273,8 +275,8 @@ function triggerLoginError() {
   0%   { transform: scale(0.4); opacity: 0; }
   100% { transform: scale(1);   opacity: 1; }
 }
-.success-box h3 { margin: 0 0 6px; font-size: 18px; }
-.success-box p  { margin: 0 0 22px; color: #666; font-size: 13px; }
+.success-box h3 { margin: 0 0 6px; font-size: var(--fs-2xl); font-weight: var(--fw-semibold); }
+.success-box p  { margin: 0 0 22px; color: #666; font-size: var(--fs-sm); }
 .ok-btn {
   position: relative;
   width: 100%;

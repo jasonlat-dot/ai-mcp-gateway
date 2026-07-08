@@ -234,5 +234,12 @@
         DELETE FROM mcp_gateway_tool WHERE tool_id = #{toolId}
     </delete>
 
+    <!-- 删除网关前引用校验专用:精确等值统计某网关下的工具数量 -->
+    <select id="countByGatewayId" parameterType="java.lang.String" resultType="java.lang.Long">
+        SELECT count(id)
+        FROM mcp_gateway_tool
+        WHERE gateway_id = #{gatewayId}
+    </select>
+
 </mapper>
 

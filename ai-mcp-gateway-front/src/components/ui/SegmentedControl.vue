@@ -1,6 +1,6 @@
 <script setup>
 /**
- * SegmentedControl — 冷色调版本
+ * SegmentedControl — Sub2API-inspired
  */
 import { computed } from 'vue'
 
@@ -23,12 +23,12 @@ function pick(v) {
 </script>
 
 <template>
-  <div class="segmented">
+  <div class="tabs segmented">
     <button
       v-for="opt in options"
       :key="opt.value"
-      class="seg-item"
-      :class="{ active: bound === opt.value }"
+      class="tab"
+      :class="{ 'tab-active': bound === opt.value }"
       @click="pick(opt.value)"
     >
       <span class="seg-label">{{ opt.label }}</span>
@@ -37,61 +37,33 @@ function pick(v) {
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .segmented {
   display: inline-flex;
   align-items: center;
   gap: 2px;
   padding: 3px;
-  border-radius: 9px;
+  border-radius: var(--radius-lg);
   background: var(--bg-sunken);
   border: 1px solid var(--hairline);
 }
 
-.seg-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 7px;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-muted);
-  font-size: 12.5px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--dur-base) var(--ease-glacis);
-  white-space: nowrap;
-}
-
-.seg-item:hover {
-  color: var(--text-strong);
-  background: #ffffff;
-}
-
-.seg-item.active {
-  color: var(--text-strong);
-  background: #ffffff;
-  border-color: var(--hairline);
-  box-shadow: var(--shadow-xs);
-}
-
 .seg-count {
   min-width: 20px;
-  height: 16px;
-  line-height: 16px;
+  height: 18px;
+  line-height: 18px;
   padding: 0 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--bg-deep);
-  font-size: 10.5px;
-  font-weight: 700;
+  font-size: var(--fs-3xs);
+  font-weight: var(--fw-bold);
   text-align: center;
   color: var(--text-muted);
   font-feature-settings: 'tnum';
 }
-
-.seg-item.active .seg-count {
-  background: var(--accent-soft);
-  color: var(--accent);
+.tab-active .seg-count {
+  background: var(--info-soft);
+  color: var(--primary-600);
 }
+:root.dark .tab-active .seg-count { color: var(--primary-300); }
 </style>

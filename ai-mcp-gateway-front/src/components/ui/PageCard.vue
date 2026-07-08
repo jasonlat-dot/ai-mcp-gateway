@@ -1,21 +1,22 @@
 <script setup>
 /**
- * PageCard — 卡片容器(冷色调版)
- *  - 白底 + 1px hairline + 极淡 shadow
- *  - 标题:粗体 16-17px,左对齐
- *  - 头部有底部 1px 分隔线,标题区与内容区清晰分层
+ * PageCard — 卡片容器
+ *  - 抬升面 + 1px hairline + 极轻 shadow
+ *  - 标题:粗体 17px,左对齐
+ *  - 头部底部 1px 分隔线
  */
 defineProps({
   title:    { type: String, default: '' },
   desc:     { type: String, default: '' },
   eyebrow:  { type: String, default: '' },
   padding:  { type: String, default: '22px' },
+  hover:    { type: Boolean, default: false },
 })
 </script>
 
 <template>
-  <section class="page-card">
-    <header v-if="title || $slots.actions" class="card-head" :style="{ padding: `20px ${padding} 18px` }">
+  <section class="page-card card" :class="{ 'card-hover': hover }">
+    <header v-if="title || $slots.actions" class="card-header" :style="{ padding: `18px ${padding} 16px` }">
       <div class="head-left">
         <span v-if="eyebrow" class="eyebrow">{{ eyebrow }}</span>
         <h2 v-if="title" class="head-title">{{ title }}</h2>
@@ -31,39 +32,25 @@ defineProps({
   </section>
 </template>
 
-<style scoped lang="scss">
-.page-card {
-  width: 100%;
-  background: #ffffff;
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
-  overflow: hidden;
-}
-
-.card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  border-bottom: 1px solid var(--hairline-soft);
-}
+<style scoped>
+.page-card { width: 100%; }
 
 .head-left { min-width: 0; }
 
 .head-title {
-  font-size: 16.5px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-tight);
   color: var(--text-strong);
   margin-top: 10px;
+  line-height: var(--lh-snug);
 }
 
 .head-desc {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
   margin-top: 4px;
-  line-height: 1.55;
+  line-height: var(--lh-base);
 }
 
 .head-actions {

@@ -16,6 +16,9 @@ public enum ResponseCode {
     LIMIT_VALUE_ERROR("ERROR_LIMIT_VALUE_ERROR", "限流值不正确"),
     // "未配置限流"
     LIMIT_NOT_CONFIG("ERROR_LIMIT_NOT_CONFIG", "未配置限流"),
+    // 网关存在被引用的子资源(工具/API Key),不允许删除
+    // info 会附带具体数量(在 GatewayConfigService.deleteGatewayConfig 中动态拼装)
+    GATEWAY_IN_USE("ERROR_GATEWAY_IN_USE", "网关存在被引用的子资源"),
     ENUM_NOT_FOUND("ERROR_ENUM_NOT_FOUND", "枚举未找到"),
     METHOD_HANDLER_SERVICE_NOT_FOUND("ERROR_METHOD_HANDLER_SERVICE_NOT_FOUND", "方法处理服务未找到"),
     METHOD_NOT_FOUND("ERROR_METHOD_NOT_FOUND", "方法不存在"),

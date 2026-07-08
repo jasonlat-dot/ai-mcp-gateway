@@ -171,12 +171,12 @@ defineExpose({
 .form-row {
   display: flex; align-items: center; justify-content: space-between;
   margin: 4px 0 18px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 .alt-tip {
   text-align: center;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: rgba(30, 41, 59, 0.65);
   margin-top: 8px;
 }
@@ -217,7 +217,7 @@ defineExpose({
 :deep(.el-input__inner) {
   color: #1e293b !important;
   height: 42px;
-  font-size: 14px;
+  font-size: var(--fs-base);
 }
 :deep(.el-input__inner::placeholder) { color: rgba(30, 41, 59, 0.42); }
 :deep(.el-input__prefix .el-icon),
@@ -225,7 +225,7 @@ defineExpose({
 
 :deep(.el-form-item__error) {
   color: #f43f5e !important;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   padding-top: 2px;
 }
 

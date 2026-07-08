@@ -6,6 +6,7 @@ import com.jasonlat.ai.domain.gateway.model.entity.GatewayConfigCommandEntity;
 import com.jasonlat.ai.domain.gateway.model.entity.GatewayToolConfigCommandEntity;
 import com.jasonlat.ai.domain.gateway.model.valobj.GatewayConfigVO;
 import com.jasonlat.ai.domain.gateway.model.valobj.GatewayToolConfigVO;
+import com.jasonlat.ai.infrastructure.dao.IMcpGatewayAuthDao;
 import com.jasonlat.ai.infrastructure.dao.IMcpGatewayDao;
 import com.jasonlat.ai.infrastructure.dao.IMcpGatewayToolDao;
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO;
@@ -34,6 +35,9 @@ public class GatewayRepository implements IGatewayRepository {
 
     @Resource
     private IMcpGatewayToolDao mcpGatewayToolDao;
+
+    @Resource
+    private IMcpGatewayAuthDao mcpGatewayAuthDao;
 
     @Resource
     private SnowflakeIdGenerator snowflakeIdGenerator;
@@ -145,6 +149,37 @@ public class GatewayRepository implements IGatewayRepository {
     @Override
     public void deleteGatewayToolConfig(Long toolId) {
         mcpGatewayToolDao.deleteByToolId(toolId);
+    }
+
+    @Override
+    public int deleteGatewayConfigByGatewayId(String gatewayId) {
+        if (gatewayId == null || gatewayId.trim().isEmpty()) {
+            log.warn("删除网关配置失败: gatewayId 为空");
+            return 0;
+        }
+        int count = mcpGatewayDao.deleteByGatewayId(gatewayId);
+        log.info("按 gatewayId 删除网关配置 gatewayId: {} 影响行数: {}", gatewayId, count);
+        return count;
+    }
+
+    @Override
+    public long countToolsByGatewayId(String gatewayId) {
+        if (gatewayId == null || gatewayId.trim().isEmpty()) {
+            return 0L;
+        }
+        long count = mcpGatewayToolDao.countByGatewayId(gatewayId);
+        log.debug("引用校验 gatewayId: {} toolCount: {}", gatewayId, count);
+        return count;
+    }
+
+    @Override
+    public long countAuthsByGatewayId(String gatewayId) {
+        if (gatewayId == null || gatewayId.trim().isEmpty()) {
+            return 0L;
+        }
+        long count = mcpGatewayAuthDao.countByGatewayId(gatewayId);
+        log.debug("引用校验 gatewayId: {} authCount: {}", gatewayId, count);
+        return count;
     }
 
 }

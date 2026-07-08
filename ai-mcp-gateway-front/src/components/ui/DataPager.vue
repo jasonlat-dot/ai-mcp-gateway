@@ -1,7 +1,7 @@
 <script setup>
 /**
  * DataPager — 简单分页条(供非 VxeGrid 场景使用)
- * 现在 el-pagination 也已被 global.css 重写成冷色调版
+ * el-pagination 已被 global.css 重写为 Teal 主题
  */
 import { computed } from 'vue'
 
@@ -51,7 +51,7 @@ const pageSize = computed({
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .dp {
   display: flex;
   justify-content: flex-end;

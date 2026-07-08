@@ -300,7 +300,7 @@ async function handleSubmit() {
 
 .hint {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1;
   padding-left: 2px;
   transition: color 0.3s;
@@ -311,7 +311,7 @@ async function handleSubmit() {
 
 .alt-tip {
   text-align: center;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: rgba(30, 41, 59, 0.65);
   margin-top: 8px;
 }
@@ -352,7 +352,7 @@ async function handleSubmit() {
 :deep(.el-input__inner) {
   color: #1e293b !important;
   height: 42px;
-  font-size: 14px;
+  font-size: var(--fs-base);
 }
 :deep(.el-input__inner::placeholder) { color: rgba(30, 41, 59, 0.42); }
 :deep(.el-input__prefix .el-icon),
@@ -360,7 +360,7 @@ async function handleSubmit() {
 
 :deep(.el-form-item__error) {
   color: #f43f5e !important;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   padding-top: 2px;
 }
 

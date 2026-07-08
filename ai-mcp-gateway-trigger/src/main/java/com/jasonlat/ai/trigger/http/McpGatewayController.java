@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -44,7 +43,12 @@ public class McpGatewayController implements IMcpGatewayService {
      */
     @Override
     @RequestMapping(value = "{gatewayId}/mcp/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> establishSseConnection(@PathVariable String gatewayId, @RequestParam("api_key") String apiKey) throws Exception {
+    public Flux<ServerSentEvent<String>> establishSseConnection(@PathVariable String gatewayId,
+                                                                @RequestParam(
+                                                                        value = "api_key",
+                                                                        required = false,
+                                                                        defaultValue = ""
+                                                                ) String apiKey) throws Exception {
         try {
             log.info("建立SSE连接 gatewayId:{}", gatewayId);
             if (StringUtils.isBlank(gatewayId)) {
@@ -73,7 +77,7 @@ public class McpGatewayController implements IMcpGatewayService {
     @Override
     @PostMapping(value = "{gatewayId}/mcp/sse", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Object>> handleMessage(@PathVariable String gatewayId,
-                                                    @RequestParam("api_key") String apiKey,
+                                                    @RequestParam(value = "api_key", required = false, defaultValue = "") String apiKey,
                                                     @RequestParam String sessionId,
                                                     @RequestBody String messageBody) throws Exception {
         try {

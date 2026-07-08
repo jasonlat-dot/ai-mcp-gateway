@@ -49,4 +49,33 @@ public class GatewayConfigService implements IGatewayConfigService {
         }
         repository.updateGatewayAuthStatus(commandEntity);
     }
+
+    @Override
+    public boolean deleteGatewayConfig(String gatewayId) {
+        if (StringUtils.isBlank(gatewayId)) {
+            log.error("删除网关配置失败: gatewayId为空");
+            throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+        }
+        // 引用校验: 网关下若还挂有工具 / API Key, 不允许删除
+        long authCount = repository.countAuthsByGatewayId(gatewayId);
+        if (authCount > 0) {
+            String detail = String.format(
+                "网关 [%s] 还被引用:  API Key %d 个;请先到「工具管理」「认证管理」删除或转移以上子资源再删除。",
+                gatewayId, authCount);
+            log.warn("删除网关被拒绝 gatewayId: {}  authCount: {}", gatewayId, authCount);
+            throw new AppException(ResponseCode.GATEWAY_IN_USE.getCode(), detail);
+        }
+        long toolCount = repository.countToolsByGatewayId(gatewayId);
+        if (toolCount > 0) {
+            String detail = String.format(
+                "网关 [%s] 还被引用:  工具 %d 个;请先到「工具管理」删除或转移以上子资源再删除。",
+                gatewayId, toolCount);
+            log.warn("删除网关被拒绝 gatewayId: {}  toolCount: {}", gatewayId, toolCount);
+            throw new AppException(ResponseCode.GATEWAY_IN_USE.getCode(), detail);
+        }
+
+        // 0 行(记录不存在)视为幂等成功,不抛异常
+        int rows = repository.deleteGatewayConfigByGatewayId(gatewayId);
+        return rows >= 0;
+    }
 }

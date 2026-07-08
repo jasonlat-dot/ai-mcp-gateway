@@ -37,9 +37,9 @@ defineEmits(['click'])
 
   background: linear-gradient(120deg, #5eead4 0%, #6ee7b7 45%, #fcd34d 100%);
   color: #ffffff;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 8px;
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.12em;
   font-family: inherit;
   cursor: pointer;
   outline: none;

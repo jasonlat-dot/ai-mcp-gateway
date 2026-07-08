@@ -63,8 +63,9 @@ const year = computed(() => new Date().getFullYear())
   border: 1px solid rgba(186, 230, 253, 0.6);
   backdrop-filter: blur(8px);
   border-radius: 999px;
-  font-size: 12px;
-  letter-spacing: 1px;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.18em;
+  font-weight: var(--fw-medium);
   color: #0369a1;
   box-shadow: 0 4px 12px rgba(56, 189, 248, 0.14);
 }
@@ -75,10 +76,10 @@ const year = computed(() => new Date().getFullYear())
 
 .brand-title {
   margin: 14px 0 10px;
-  font-size: 40px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 1px;
+  font-size: var(--fs-5xl);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-default);
   color: #1e293b;
 }
 .grad-text {
@@ -90,8 +91,8 @@ const year = computed(() => new Date().getFullYear())
 
 .brand-slogan {
   color: rgba(30, 41, 59, 0.7);
-  font-size: 15px;
-  line-height: 1.8;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-relaxed);
 }
 
 .brand-divider {
@@ -112,9 +113,9 @@ const year = computed(() => new Date().getFullYear())
 
 .brand-footer {
   margin-top: 14px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: rgba(30, 41, 59, 0.45);
-  letter-spacing: 1px;
+  letter-spacing: var(--ls-wide);
 }
 
 .anim-up {

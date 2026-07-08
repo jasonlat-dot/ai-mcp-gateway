@@ -23,8 +23,27 @@ app.use(router)
 app.use(ElementPlus)
 
 // vxe 必须先 use VxeUI 再 use VxeTable,且挂载在 element-plus 之后
-app.use(VxeUI)
-app.use(VxeTable)
+// 包到 try/catch:如果某个版本对当前 Vue 不兼容,只让 vxe 表格降级,
+// 不要让整个 app 因为一次性插件报错而白屏。
+try {
+  app.use(VxeUI)
+} catch (err) {
+  // eslint-disable-next-line no-console
+  console.warn('[VxeUI] plugin not loaded:', err)
+}
+try {
+  app.use(VxeTable)
+} catch (err) {
+  // eslint-disable-next-line no-console
+  console.warn('[VxeTable] plugin not loaded:', err)
+}
+
+// Global error handler — 把页面级未捕获异常打到 console,
+// 不再让一个组件 error 把整个 root unmount 掉导致白屏。
+app.config.errorHandler = (err, instance, info) => {
+  // eslint-disable-next-line no-console
+  console.error('[Vue error]', info, err)
+}
 
 // Register all icons globally as <component :is="iconName" />
 for (const [name, component] of Object.entries(ElementPlusIcons)) {

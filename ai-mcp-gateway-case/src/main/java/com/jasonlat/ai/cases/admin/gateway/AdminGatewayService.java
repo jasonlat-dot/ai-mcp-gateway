@@ -47,4 +47,9 @@ public class AdminGatewayService implements IAdminGatewayService {
         gatewayToolConfigService.deleteGatewayToolConfig(toolId);
     }
 
+    @Override
+    public boolean deleteGatewayConfig(String gatewayId) {
+        return gatewayConfigService.deleteGatewayConfig(gatewayId);
+    }
+
 }

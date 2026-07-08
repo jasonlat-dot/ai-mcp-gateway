@@ -1,58 +1,108 @@
 /* ============================================================
  * SCSS shared variables — mirror theme.css for *.vue <style lang="scss">
+ * Sub2API-inspired Teal system
  * ============================================================ */
 
-// ----- surface -----
-$bg-base:        #f6f8fb;
-$bg-elevated:    #ffffff;
-$bg-deep:        #eef2f7;
-$bg-sunken:      #f1f4f9;
+// ----- surface (light defaults — CSS vars will override in dark) -----
+$bg-base:        var(--bg-base);
+$bg-elevated:    var(--bg-elevated);
+$bg-deep:        var(--bg-deep);
+$bg-sunken:      var(--bg-sunken);
+$bg-glass:       var(--bg-glass);
 
 // ----- hairline -----
-$hairline:        rgba(15, 23, 42, 0.08);
-$hairline-strong: rgba(15, 23, 42, 0.14);
-$hairline-soft:   rgba(15, 23, 42, 0.04);
+$hairline:        var(--hairline);
+$hairline-strong: var(--hairline-strong);
+$hairline-soft:   var(--hairline-soft);
 
 // ----- text -----
-$text-strong:    #0f172a;
-$text-default:   #1f2a3d;
-$text-muted:     #5a6678;
-$text-subtle:    #8693a8;
-$text-faint:     #b0b9c8;
+$text-strong:    var(--text-strong);
+$text-default:   var(--text-default);
+$text-muted:     var(--text-muted);
+$text-subtle:    var(--text-subtle);
+$text-faint:     var(--text-faint);
+$text-onaccent:  var(--text-onaccent);
 
-// ----- accent -----
-$accent:         #2563eb;
-$accent-hover:   #1d4ed8;
-$teal:           #0d9488;
-$violet:         #6d55e0;
-$amber:          #b45309;
-$rose:           #be185d;
+// ----- primary (Teal) -----
+$primary-50:  #f0fdfa;
+$primary-100: #ccfbf1;
+$primary-200: #99f6e4;
+$primary-300: #5eead4;
+$primary-400: #2dd4bf;
+$primary-500: #14b8a6;
+$primary-600: #0d9488;
+$primary-700: #0f766e;
+$primary-800: #115e59;
+$primary-900: #134e4a;
+
+// ----- semantic -----
+$ok-color:    #10b981;
+$ok-soft:     rgba(16, 185, 129, 0.10);
+$warn-color:  #f59e0b;
+$warn-soft:   rgba(245, 158, 11, 0.10);
+$err-color:   #ef4444;
+$err-soft:    rgba(239, 68, 68, 0.10);
+$info-color:  #14b8a6;
+$info-soft:   rgba(20, 184, 166, 0.10);
+$violet-color: #8b5cf6;
+$violet-soft:  rgba(139, 92, 246, 0.10);
 
 // ----- radius -----
-$r-sm:  6px;
+$r-xs:  4px;
+$r-sm:  8px;
 $r-md:  10px;
-$r-lg:  14px;
-$r-xl:  20px;
+$r-lg:  12px;
+$r-xl:  16px;
+$r-2xl: 20px;
+$r-pill: 999px;
 
 // ----- motion -----
-$ease:     cubic-bezier(0.4, 0, 0.2, 1);
-$ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+$ease:      cubic-bezier(0.4, 0, 0.2, 1);
+$ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+$ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+$dur-fast:  150ms;
+$dur-base:  200ms;
+$dur-slow:  300ms;
+
+// ----- shadow shortcuts -----
+$shadow-card:        var(--shadow-card);
+$shadow-card-hover:  var(--shadow-card-hover);
+$shadow-glow:        var(--shadow-glow);
 
 // ----- helpers -----
 @mixin glass {
-  background: #ffffff;
+  background: $bg-glass;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid $hairline;
-  box-shadow: var(--shadow-sm);
+  box-shadow: $shadow-card;
 }
 
 @mixin focus-ring {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.20);
 }
 
 @mixin scrollbar {
   &::-webkit-scrollbar { width: 8px; height: 8px; }
   &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.10); border-radius: 4px; }
-  &::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.20); }
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+    transition: background-color 200ms $ease;
+  }
+  &:hover::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.12); }
+  &:hover::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.22); }
+}
+
+@mixin teal-gradient {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+}
+
+@mixin card-surface {
+  background: $bg-elevated;
+  border: 1px solid $hairline;
+  border-radius: $r-xl;
+  box-shadow: $shadow-card;
+  transition: all $dur-base $ease;
 }

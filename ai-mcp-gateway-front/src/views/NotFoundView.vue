@@ -5,24 +5,25 @@ const router = useRouter()
 
 <template>
   <div class="nf">
-    <div class="nf-card">
+    <div class="nf-card card animate-scale-in">
       <span class="eyebrow">404 · Not Found</span>
       <h1>这片空间似乎被搬走了</h1>
       <p>你访问的页面已不存在,或者链接敲错了。回到控制台继续工作吧。</p>
-      <button class="btn btn--primary" @click="router.push('/dashboard')">
+      <button class="btn btn-primary" @click="router.push('/dashboard')">
         <el-icon><Back /></el-icon> 回到控制台
       </button>
     </div>
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .nf {
   position: relative;
   min-height: 100dvh;
   display: grid;
   place-items: center;
   background: var(--bg-base);
+  background-image: var(--bg-mesh);
   overflow: hidden;
   padding: 24px;
 }
@@ -31,22 +32,22 @@ const router = useRouter()
   z-index: 1;
   text-align: center;
   max-width: 460px;
-  padding: 38px 32px;
-  border-radius: var(--radius-xl);
-  background: #ffffff;
-  border: 1px solid var(--hairline-strong);
-  box-shadow: var(--shadow-md);
+  padding: 40px 36px;
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-card);
 }
 h1 {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: var(--fs-4xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-tight);
   margin: 14px 0 10px;
+  color: var(--text-strong);
 }
 p {
   color: var(--text-muted);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
   margin-bottom: 22px;
 }
 </style>

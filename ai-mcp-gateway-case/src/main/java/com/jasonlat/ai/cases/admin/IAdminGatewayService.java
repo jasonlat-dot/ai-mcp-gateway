@@ -19,4 +19,9 @@ public interface IAdminGatewayService {
 
     void deleteGatewayToolConfig(Long toolId);
 
+    /**
+     * 删除网关基础配置;成功返回 true,不存在/已删除返回 false(幂等)
+     */
+    boolean deleteGatewayConfig(String gatewayId);
+
 }

@@ -14,4 +14,10 @@ public interface IGatewayConfigService {
 
     void updateGatewayAuthStatus(GatewayConfigCommandEntity commandEntity);
 
+    /**
+     * 删除网关基础配置
+     * <p>成功返回 true;gatewayId 不存在/已删除时返回 false(视为幂等成功,不抛异常)</p>
+     */
+    boolean deleteGatewayConfig(String gatewayId);
+
 }

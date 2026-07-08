@@ -1,35 +1,34 @@
 <script setup>
 /**
- * StatusPill — Glacis 冷色调版本
- * tone: success | info | warning | danger | violet | default
+ * StatusPill — Sub2API-inspired Teal system
+ * tone: success | info | warning | danger | disabled | violet | default
  */
 defineProps({
   tone: { type: String, default: 'info' },
   label: { type: String, default: '' },
-  dot:   { type: Boolean, default: false },     // 默认不再强制显示 dot,改为可选
+  dot:   { type: Boolean, default: false },
 })
 </script>
 
 <template>
-  <span class="pill" :class="`tone-${tone}`">
+  <span class="badge badge-plain pill" :class="`tone-${tone}`">
     <span v-if="dot" class="pill-dot" />
     <slot>{{ label }}</slot>
   </span>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 2px 10px;
   border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
   white-space: nowrap;
   border: 1px solid transparent;
-  line-height: 1.6;
+  line-height: var(--lh-normal);
 }
 
 .pill-dot {
@@ -37,12 +36,17 @@ defineProps({
   height: 6px;
   border-radius: 50%;
   background: currentColor;
+  flex-shrink: 0;
 }
 
-.pill.tone-success { color: var(--teal);    background: var(--teal-soft);    border-color: rgba(13, 148, 136, 0.22); }
-.pill.tone-info    { color: var(--accent);   background: var(--accent-soft);  border-color: var(--accent-line); }
-.pill.tone-warning { color: var(--amber);    background: var(--amber-soft);   border-color: rgba(180, 83, 9, 0.22); }
-.pill.tone-danger  { color: var(--rose);     background: var(--rose-soft);    border-color: rgba(190, 24, 93, 0.22); }
-.pill.tone-violet  { color: var(--violet);   background: var(--violet-soft);  border-color: rgba(109, 85, 224, 0.22); }
-.pill.tone-default { color: var(--text-muted); background: var(--bg-deep);     border-color: var(--hairline); }
+.pill.tone-success { color: var(--ok-color); background: var(--ok-soft); border-color: var(--ok-line); }
+.pill.tone-info    { color: var(--primary-600); background: var(--info-soft); border-color: var(--info-line); }
+.pill.tone-warning { color: var(--warn-color); background: var(--warn-soft); border-color: var(--warn-line); }
+.pill.tone-danger  { color: var(--err-color); background: var(--err-soft); border-color: var(--err-line); }
+.pill.tone-disabled{ color: #f87171; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.20); }
+.pill.tone-violet  { color: var(--violet-color); background: var(--violet-soft); border-color: rgba(139, 92, 246, 0.28); }
+.pill.tone-default { color: var(--text-muted); background: var(--bg-deep); border-color: var(--hairline); }
+
+:root.dark .pill.tone-info { color: var(--primary-300); }
+:root.dark .pill.tone-violet { color: #a78bfa; }
 </style>

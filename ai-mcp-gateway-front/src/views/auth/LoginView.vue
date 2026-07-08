@@ -1,12 +1,13 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from '@/composables/useToast'
 
 const auth  = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
 const form = reactive({
   username: '',
@@ -33,12 +34,12 @@ async function onSubmit() {
       username: form.username.trim(),
       password: form.password,
     })
-    ElMessage.success('登录成功,正在进入控制台…')
+    toast.success('登录成功,正在进入控制台…', { duration: 1800 })
     const redirect = route.query.redirect || '/dashboard'
     router.push(redirect)
   } catch (e) {
     errors.password = e?.message || '账号或密码不正确'
-    ElMessage.error(e?.message || '登录失败')
+    toast.error(e?.message || '登录失败', { duration: 2200 })
   } finally {
     loading.value = false
   }
@@ -58,10 +59,10 @@ const year = new Date().getFullYear()
       <!-- 左侧品牌叙事 -->
       <section class="brand">
         <div class="brand-mark">
-          <svg viewBox="0 0 28 28" width="20" height="20">
+          <svg viewBox="0 0 28 28" width="20" height="20" aria-hidden="true">
             <defs>
               <linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%"  stop-color="#2563eb"/>
+                <stop offset="0%"  stop-color="#14b8a6"/>
                 <stop offset="100%" stop-color="#0d9488"/>
               </linearGradient>
             </defs>
@@ -69,12 +70,12 @@ const year = new Date().getFullYear()
                   fill="none" stroke="url(#bm)" stroke-width="1.6"/>
             <circle cx="14" cy="14" r="3.4" fill="url(#bm)"/>
           </svg>
-          <span>Glacis</span>
+          <span>Mcp gateway</span>
         </div>
 
         <h1 class="brand-title">
           <span>MCP 网关</span>
-          <span class="text-accent">运营控制台</span>
+          <span class="text-gradient">运营控制台</span>
         </h1>
 
         <p class="brand-desc">
@@ -83,21 +84,21 @@ const year = new Date().getFullYear()
         </p>
 
         <ul class="feature-list">
-          <li>
+          <li class="card animate-slide-up" style="animation-delay: 0ms">
             <span class="feat-icon"><el-icon><Connection /></el-icon></span>
             <div>
               <strong>实时网关拓扑</strong>
               <small>查看每个网关下的工具、协议、认证状态</small>
             </div>
           </li>
-          <li>
+          <li class="card animate-slide-up" style="animation-delay: 80ms">
             <span class="feat-icon feat-icon--violet"><el-icon><Document /></el-icon></span>
             <div>
               <strong>OpenAPI 一键导入</strong>
               <small>解析 → 映射 → 入库,分钟级接入</small>
             </div>
           </li>
-          <li>
+          <li class="card animate-slide-up" style="animation-delay: 160ms">
             <span class="feat-icon feat-icon--teal"><el-icon><Lightning /></el-icon></span>
             <div>
               <strong>限流与 API Key</strong>
@@ -107,14 +108,14 @@ const year = new Date().getFullYear()
         </ul>
 
         <div class="brand-foot">
-          <span class="status-pill"><span class="dot" />所有服务正常</span>
+          <span class="badge badge-success"><span class="dot" />所有服务正常</span>
           <span class="version">v1.0.0 · {{ year }}</span>
         </div>
       </section>
 
       <!-- 右侧登录卡片 -->
       <section class="form-shell">
-        <div class="card-shell">
+        <div class="card-shell card-glass animate-scale-in">
           <div class="card-inner">
             <header class="card-head">
               <span class="eyebrow">Sign in</span>
@@ -162,17 +163,17 @@ const year = new Date().getFullYear()
                   </span>
                   <span>记住我</span>
                 </label>
-                <a class="muted-link" href="javascript:;" @click.prevent="ElMessage.warning('请联系系统管理员')">忘记密码?</a>
+                <a class="muted-link" href="javascript:;" @click.prevent="toast.warning('请联系系统管理员')">忘记密码?</a>
               </div>
 
-              <button class="submit-btn" :disabled="submitDisabled" type="submit">
+              <button class="btn btn-primary btn-lg btn-block submit-btn" :disabled="submitDisabled" type="submit">
                 <span v-if="!loading">进入控制台 <el-icon><ArrowRight /></el-icon></span>
                 <span v-else class="loading">
                   <span class="spinner" />登录中…
                 </span>
               </button>
 
-              <button type="button" class="quick-fill" @click="quickFill">
+              <button type="button" class="btn btn-secondary quick-fill" @click="quickFill">
                 <el-icon><Key /></el-icon>
                 使用测试账号一键填入
                 <span class="muted">( admin / password123 )</span>
@@ -182,27 +183,46 @@ const year = new Date().getFullYear()
         </div>
 
         <p class="copyright">
-          © {{ year }} AI MCP Gateway · 由 Glacis UI 驱动
+          © {{ year }} AI MCP Gateway
         </p>
       </section>
     </div>
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .auth-page {
   position: relative;
   min-height: 100dvh;
   width: 100%;
   display: grid;
   place-items: center;
-  background:
-    radial-gradient(1200px 600px at 0% 0%, rgba(37, 99, 235, 0.06) 0%, transparent 60%),
-    radial-gradient(900px 500px at 100% 100%, rgba(13, 148, 136, 0.05) 0%, transparent 65%),
-    var(--bg-base);
+  background: var(--bg-base);
+  background-image: var(--bg-mesh);
   padding: 32px 16px;
   overflow: hidden;
+  animation: fadeIn 0.4s ease-out;
 }
+.auth-page::before, .auth-page::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+.auth-page::before {
+  width: 480px; height: 480px;
+  top: -100px; left: -100px;
+  background: rgba(20, 184, 166, 0.20);
+}
+.auth-page::after {
+  width: 540px; height: 540px;
+  bottom: -120px; right: -120px;
+  background: rgba(6, 182, 212, 0.18);
+}
+:root.dark .auth-page::before { background: rgba(20, 184, 166, 0.25); }
+:root.dark .auth-page::after  { background: rgba(6, 182, 212, 0.20); }
 
 .auth-grid {
   position: relative;
@@ -214,7 +234,6 @@ const year = new Date().getFullYear()
   width: 100%;
   align-items: center;
 }
-
 @media (max-width: 980px) {
   .auth-grid { grid-template-columns: 1fr; gap: 28px; }
 }
@@ -226,36 +245,37 @@ const year = new Date().getFullYear()
   flex-direction: column;
   gap: 18px;
   max-width: 520px;
+  animation: slideUp 0.4s ease-out;
 }
-
 .brand-mark {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 7px 14px;
-  border-radius: 999px;
-  background: #ffffff;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
   border: 1px solid var(--hairline);
   width: max-content;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--ls-snug);
   color: var(--text-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .brand-title {
   display: flex;
   flex-direction: column;
   font-size: clamp(36px, 5vw, 54px);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   line-height: 1.05;
-  letter-spacing: -0.035em;
+  letter-spacing: var(--ls-tight);
   color: var(--text-strong);
 }
-
 .brand-desc {
-  font-size: 15px;
+  font-size: var(--fs-lg);
   color: var(--text-muted);
-  line-height: 1.65;
+  line-height: var(--lh-relaxed);
   max-width: 480px;
 }
 
@@ -265,87 +285,65 @@ const year = new Date().getFullYear()
   gap: 12px;
   margin-top: 4px;
 }
-
 .feature-list li {
   display: flex;
   gap: 14px;
   padding: 14px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--hairline);
-  background: #ffffff;
+  background: var(--bg-elevated);
   align-items: flex-start;
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-card);
+  transition: all var(--dur-base) var(--ease-glacis);
+}
+.feature-list li:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--info-line);
 }
 
 .feat-icon {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
-  background: var(--accent-soft);
-  border: 1px solid var(--accent-line);
-  color: var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--info-soft);
+  border: 1px solid var(--info-line);
+  color: var(--primary-600);
   display: grid;
   place-items: center;
-  font-size: 18px;
+  font-size: var(--fs-2xl);
   flex-shrink: 0;
 }
-
-.feat-icon--violet {
-  background: var(--violet-soft);
-  border-color: rgba(109, 85, 224, 0.22);
-  color: var(--violet);
-}
-
-.feat-icon--teal {
-  background: var(--teal-soft);
-  border-color: rgba(13, 148, 136, 0.22);
-  color: var(--teal);
-}
+:root.dark .feat-icon { color: var(--primary-300); }
+.feat-icon--violet { background: var(--violet-soft); border-color: rgba(139, 92, 246, 0.28); color: var(--violet-color); }
+.feat-icon--teal   { background: var(--info-soft);   border-color: var(--info-line);          color: var(--primary-600); }
+:root.dark .feat-icon--teal { color: var(--primary-300); }
 
 .feature-list li strong {
   display: block;
   color: var(--text-strong);
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-base);
   margin-bottom: 2px;
 }
-
 .feature-list li small {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 
-.brand-foot {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--teal);
-  background: var(--teal-soft);
-  border-radius: 999px;
-  border: 1px solid rgba(13, 148, 136, 0.22);
-}
-
-.status-pill .dot {
-  width: 6px;
-  height: 6px;
+.brand-foot { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.brand-foot .dot {
+  width: 6px; height: 6px;
   border-radius: 50%;
-  background: var(--teal);
+  background: currentColor;
+  margin-right: 4px;
+  display: inline-block;
+  animation: pulseSoft 2s ease-in-out infinite;
 }
-
 .version {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: var(--fs-2xs);
+  letter-spacing: var(--ls-wide);
   color: var(--text-faint);
 }
 
@@ -359,45 +357,40 @@ const year = new Date().getFullYear()
 }
 
 .card-shell {
-  background: #ffffff;
+  background: var(--bg-elevated);
   border: 1px solid var(--hairline-strong);
-  border-radius: var(--radius-xl);
-  padding: 1px;
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-2xl);
+  padding: 0;
+  box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 460px;
+  overflow: hidden;
 }
 
-.card-inner {
-  background: #ffffff;
-  border-radius: calc(var(--radius-xl) - 1px);
-  padding: 32px 32px 28px;
-}
+.card-inner { padding: 32px 32px 28px; }
 
 .card-head { margin-bottom: 22px; }
 .card-head h2 {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
   margin-top: 8px;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--ls-tight);
   color: var(--text-strong);
 }
 .card-head p {
   margin-top: 6px;
   color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-base);
 }
 
 /* ===== Form ===== */
 .auth-form { display: flex; flex-direction: column; gap: 16px; }
-
 .field { display: flex; flex-direction: column; gap: 8px; }
-
 .field label {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
   color: var(--text-default);
 }
 
@@ -406,44 +399,34 @@ const year = new Date().getFullYear()
   align-items: center;
   gap: 10px;
   padding: 0 14px;
-  height: 46px;
-  border-radius: 10px;
-  background: #ffffff;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: var(--input-bg);
   border: 1px solid var(--input-border);
-  transition: all var(--dur-base) var(--ease);
+  transition: all var(--dur-base) var(--ease-glacis);
 }
-
 .input-wrap:focus-within {
   border-color: var(--input-border-focus);
   box-shadow: var(--ring-focus);
 }
-
-.input-icon { font-size: 16px; color: var(--text-muted); flex-shrink: 0; }
-
+.input-icon { font-size: var(--fs-xl); color: var(--text-muted); flex-shrink: 0; }
 .input-wrap input {
   flex: 1;
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--text-strong);
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--input-text);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  font-family: inherit;
 }
-
-.input-wrap input::placeholder {
-  color: var(--input-placeholder);
-  font-weight: 400;
-}
+.input-wrap input::placeholder { color: var(--input-placeholder); font-weight: var(--fw-regular); }
 
 .field.has-error .input-wrap {
-  border-color: rgba(190, 24, 93, 0.55);
-  box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.12);
+  border-color: var(--err-color);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
-
-.field-tip {
-  font-size: 11.5px;
-  color: var(--err-color);
-}
+.field-tip { font-size: var(--fs-xs); color: var(--err-color); }
 
 .row-between {
   display: flex;
@@ -457,12 +440,10 @@ const year = new Date().getFullYear()
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
 }
-
 .check input { display: none; }
-
 .check-box {
   width: 18px;
   height: 18px;
@@ -470,59 +451,27 @@ const year = new Date().getFullYear()
   border: 1.5px solid var(--hairline-strong);
   display: grid;
   place-items: center;
-  background: #ffffff;
-  transition: all var(--dur-base) var(--ease);
+  background: var(--input-bg);
+  transition: all var(--dur-base) var(--ease-glacis);
   color: #ffffff;
-  font-size: 11px;
+  font-size: var(--fs-2xs);
 }
-
 .check-box.on {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--primary-500);
+  border-color: var(--primary-500);
 }
 
 .muted-link {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
-  transition: color var(--dur-fast) var(--ease);
+  transition: color var(--dur-fast) var(--ease-glacis);
 }
-.muted-link:hover { color: var(--accent); }
+.muted-link:hover { color: var(--primary-600); }
+:root.dark .muted-link:hover { color: var(--primary-300); }
 
-.submit-btn {
-  margin-top: 8px;
-  height: 48px;
-  border: 0;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: #ffffff;
-  background: var(--accent);
-  cursor: pointer;
-  transition: all var(--dur-base) var(--ease);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.10);
-}
-
-.submit-btn:hover:not(:disabled) {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-
-.submit-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.submit-btn .loading {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
+.submit-btn { margin-top: 8px; }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.submit-btn .loading { display: inline-flex; align-items: center; gap: 10px; }
 
 .spinner {
   width: 14px;
@@ -532,39 +481,29 @@ const year = new Date().getFullYear()
   border-radius: 50%;
   animation: spin 720ms linear infinite;
 }
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .quick-fill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  height: auto;
   padding: 10px 14px;
-  border-radius: 9px;
-  background: var(--bg-sunken);
-  border: 1px dashed var(--hairline-strong);
+  border-style: dashed;
   color: var(--text-muted);
-  font-size: 12.5px;
-  cursor: pointer;
-  transition: all var(--dur-base) var(--ease);
+  font-size: var(--fs-sm);
 }
-
 .quick-fill:hover {
-  background: var(--accent-soft);
-  color: var(--accent);
-  border-color: var(--accent-line);
+  color: var(--primary-600);
+  border-color: var(--info-line);
+  background: var(--info-soft);
 }
-
+:root.dark .quick-fill:hover { color: var(--primary-300); }
 .quick-fill .muted {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11.5px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: var(--fs-xs);
   color: var(--text-faint);
 }
 
 .copyright {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--text-faint);
   text-align: center;
   margin-top: 4px;

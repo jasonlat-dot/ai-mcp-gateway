@@ -173,9 +173,9 @@ const glowBg = computed(
   bottom: -2px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: 4px;
+  font-size: var(--fs-4xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.12em;
   background: linear-gradient(120deg, var(--g-from), var(--g-to));
   -webkit-background-clip: text;
   background-clip: text;
@@ -186,22 +186,22 @@ const glowBg = computed(
 /* ===== 文案 ===== */
 .status-title {
   margin: 6px 0 8px;
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-default);
   color: #1e293b;
 }
 .status-desc {
   margin: 0 0 24px;
   color: rgba(30, 41, 59, 0.7);
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: var(--fs-base);
+  line-height: var(--lh-relaxed);
 }
 
 .status-extra {
   margin-bottom: 22px;
   color: rgba(30, 41, 59, 0.75);
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 /* ===== 按钮组 ===== */
@@ -218,8 +218,8 @@ const glowBg = computed(
   height: 44px;
   padding: 0 22px;
   border-radius: 12px;
-  font-size: 14px;
-  letter-spacing: 2px;
+  font-size: var(--fs-base);
+  letter-spacing: 0.06em;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.3s ease, filter 0.3s ease, background 0.3s ease;
   border: 1px solid transparent;
@@ -232,8 +232,8 @@ const glowBg = computed(
   color: #312e81;
   border: 1px solid rgba(99, 102, 241, 0.18);
   box-shadow: 0 4px 14px -4px rgba(99, 102, 241, 0.22);
-  font-weight: 600;
-  letter-spacing: 4px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.18em;
 }
 .btn-primary:hover {
   background: linear-gradient(135deg, #e0e7ff 0%, #f5d0fe 100%);
@@ -249,8 +249,25 @@ const glowBg = computed(
   color: #312e81;
   border: 1px solid rgba(186, 230, 253, 0.55);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
-  font-weight: 600;
-  letter-spacing: 4px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.18em;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #e0e7ff 0%, #f5d0fe 100%);
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.32);
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-ghost {
+  /* 默认静态 ghost: 白底 + 浅紫细边 */
+  background: rgba(255, 255, 255, 0.92);
+  color: #312e81;
+  border: 1px solid rgba(186, 230, 253, 0.55);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.18em;
 }
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 1);
@@ -271,7 +288,7 @@ const glowBg = computed(
 }
 .tip-chip {
   padding: 4px 10px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: rgba(30, 41, 59, 0.7);
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(186, 230, 253, 0.45);
@@ -281,9 +298,9 @@ const glowBg = computed(
 /* ===== 页脚 ===== */
 .status-footer {
   margin-top: 26px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: rgba(30, 41, 59, 0.45);
-  letter-spacing: 1px;
+  letter-spacing: var(--ls-wide);
 }
 
 /* ===== 入场动画 ===== */
