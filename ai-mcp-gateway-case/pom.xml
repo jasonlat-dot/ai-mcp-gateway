@@ -22,6 +22,10 @@
             <groupId>com.jasonlat.ai</groupId>
             <artifactId>ai-mcp-gateway-domain</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.jasonlat.ai</groupId>
+            <artifactId>ai-mcp-gateway-api</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.jasonlat.dot</groupId>

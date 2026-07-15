@@ -1,11 +1,13 @@
 package com.jasonlat.ai.config;
 
 import com.jasonlat.ai.config.properties.OpenAiClientProperties;
+import com.jasonlat.ai.config.properties.ThreadPoolConfigProperties;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -18,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
  * 然后交给 Spring AI 的 OpenAiApi 使用。
  */
 @Configuration
+@EnableConfigurationProperties(OpenAiClientProperties.class)
 public class OpenAiSpringAiConfig {
 
     /**
