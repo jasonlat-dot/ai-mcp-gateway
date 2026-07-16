@@ -9,7 +9,6 @@ import com.jasonlat.ai.trigger.api.dto.GatewayLLMRequestDTO;
 import com.jasonlat.ai.trigger.api.dto.GatewayLLMResponseDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -39,30 +38,19 @@ public class AdminLLMService implements IAdminLLMService {
         String baseUrl = "http://localhost:" + port;
         String sseEndpoint = baseUrlContextPath + "/" + gatewayId + "/mcp/sse";
 
-        // 获取对话模型
-        ChatModel chatModel = llmService.getChatModel(gatewayId);
+        McpConfigVO mcpConfigVO = McpConfigVO.builder()
+                .baseUri(baseUrl)
+                .sseEndpoint(sseEndpoint)
+                .authApiKey(requestDTO.getAuthApiKey())
+                .timeout(requestDTO.getTimeout())
+                .build();
 
-        // 判断是否重新加载 mcp 服务
-        if (requestDTO.isReload() || null == chatModel) {
+        BuildChatModelCommandEntity commandEntity = BuildChatModelCommandEntity.builder()
+                .gatewayId(gatewayId)
+                .mcpConfigVO(mcpConfigVO)
+                .build();
 
-            McpConfigVO mcpConfigVO = McpConfigVO.builder()
-                    .baseUri(baseUrl)
-                    .sseEndpoint(sseEndpoint)
-                    .authApiKey(requestDTO.getAuthApiKey())
-                    .timeout(requestDTO.getTimeout())
-                    .build();
-
-            BuildChatModelCommandEntity commandEntity = BuildChatModelCommandEntity.builder()
-                    .gatewayId(gatewayId)
-                    .mcpConfigVO(mcpConfigVO)
-                    .build();
-
-            llmService.buildChatModel(commandEntity);
-
-            chatModel = llmService.getChatModel(gatewayId);
-        }
-
-        String call = chatModel.call(requestDTO.getMessage());
+        String call = llmService.callGateway(commandEntity, requestDTO.getMessage());
 
         return GatewayLLMResponseDTO.builder().content(call).build();
     }

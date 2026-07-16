@@ -209,7 +209,7 @@ public class GatewayToolController implements IGatewayToolAdminService {
 
     @RequestMapping(value = "query_gateway_tool_list_by_gateway_id", method = RequestMethod.GET)
     @Override
-    public Response<List<GatewayToolConfigDTO>> queryGatewayToolListByGatewayId(@RequestParam String gatewayId) {
+    public Response<List<GatewayToolConfigDTO>> queryGatewayToolListByGatewayId(@RequestParam("gatewayId") String gatewayId) {
         try {
             log.info("根据网关ID查询网关工具列表开始 gatewayId: {}", gatewayId);
             List<GatewayToolConfigEntity> entities = adminManageService.queryGatewayToolListByGatewayId(gatewayId);
@@ -246,7 +246,8 @@ public class GatewayToolController implements IGatewayToolAdminService {
 
     @RequestMapping(value = "delete_gateway_tool_config", method = RequestMethod.POST)
     @Override
-    public Response<GatewayConfigResponseDTO> deleteGatewayToolConfig(@RequestParam String gatewayId, @RequestParam Long toolId) {
+    public Response<GatewayConfigResponseDTO> deleteGatewayToolConfig(@RequestParam("gatewayId") String gatewayId,
+                                                                       @RequestParam("toolId") Long toolId) {
         try {
             log.info("删除网关工具配置开始 gatewayId: {} toolId: {}", gatewayId, toolId);
             adminGatewayService.deleteGatewayToolConfig(toolId);

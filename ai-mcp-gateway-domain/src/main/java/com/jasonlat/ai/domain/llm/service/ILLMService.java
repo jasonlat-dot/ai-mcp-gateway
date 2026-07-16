@@ -1,7 +1,6 @@
 package com.jasonlat.ai.domain.llm.service;
 
 import com.jasonlat.ai.domain.llm.model.entity.BuildChatModelCommandEntity;
-import org.springframework.ai.chat.model.ChatModel;
 
 
 /**
@@ -10,13 +9,8 @@ import org.springframework.ai.chat.model.ChatModel;
 public interface ILLMService {
 
     /**
-     * 构建对话模型
+     * 创建一次性的 MCP 客户端并执行测试调用；方法返回前关闭客户端连接。
      */
-    void buildChatModel(BuildChatModelCommandEntity commandEntity);
-
-    /**
-     * 根据名称获取对话模型
-     */
-    ChatModel getChatModel(String gatewayId);
+    String callGateway(BuildChatModelCommandEntity commandEntity, String message);
 
 }

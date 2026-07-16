@@ -29,28 +29,10 @@ public class RootNode extends AbstractMcpMessageSupport {
     @Resource(name = "mcpMessageSessionNode")
     private SessionNode sessionNode;
 
-    @Resource
-    private IAuthRateLimitService rateLimitService;
 
     @Override
     protected ResponseEntity<Object> doApply(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
-        try {
-            // 判断命中工具调用做限流处理
-            if (requestParameter.getJsonRpcMessage() instanceof McpSchemaVO.JsonRpcRequest request) {
-                String method = request.method();
-                log.info("mcp method: {}", method);
-                // 是（true）否（false）命中限流
-                boolean isHit = rateLimitService.rateLimit(new RateLimitCommandEntity(requestParameter.getGatewayId(), requestParameter.getApiKey(), method));
-                if (isHit) {
-                    log.warn("消息处理 mcp message RootNode - 命中限流{} {}", requestParameter.getGatewayId(), requestParameter.getApiKey());
-                    throw new AppException(McpErrorCodes.INSUFFICIENT_PERMISSIONS, "fail to auth apikey rateLimiter");
-                }
-            }
-            return router(requestParameter, dynamicContext);
-        } catch (Exception e) {
-            log.error("RootNode handle mcp message error: {}", e.getMessage());
-            throw e;
-        }
+        return router(requestParameter, dynamicContext);
     }
 
     @Override

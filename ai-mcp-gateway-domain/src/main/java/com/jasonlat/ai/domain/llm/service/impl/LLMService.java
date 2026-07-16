@@ -1,12 +1,12 @@
 package com.jasonlat.ai.domain.llm.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.jasonlat.ai.domain.llm.model.entity.BuildChatModelCommandEntity;
 import com.jasonlat.ai.domain.llm.model.valobj.McpConfigVO;
 import com.jasonlat.ai.domain.llm.service.ILLMService;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
+import io.modelcontextprotocol.client.transport.WebFluxSseClientTransport;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,19 +18,19 @@ import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 大模型服务
+ * 管理端网关联调使用的大模型服务。
+ * 每次调用创建独立的 MCP 客户端，请求完成后立即关闭，不做任何缓存。
  */
 @Slf4j
 @Service
 public class LLMService implements ILLMService {
-
-    private final Map<String, ChatModel> chatModelMap = new ConcurrentHashMap<>();
 
     @Resource
     private OpenAiApi openAiApi;
@@ -39,49 +39,40 @@ public class LLMService implements ILLMService {
     private String model;
 
     @Override
-    public void buildChatModel(BuildChatModelCommandEntity commandEntity) {
-        log.info("构建对话模型 gatewayId:{} mcp:{}", commandEntity.getGatewayId(), JSON.toJSONString(commandEntity.getMcpConfigVO()));
-
-        // mcp 配置
-        McpConfigVO mcpConfigVO = commandEntity.getMcpConfigVO();
-
-        // model 配置 + mcp 服务
-        ChatModel chatModel = OpenAiChatModel.builder()
-                .openAiApi(openAiApi)
-                .defaultOptions(OpenAiChatOptions.builder()
-                        .model(model)
-                        .toolCallbacks(buildToolCallback(mcpConfigVO))
-                        .build())
-                .build();
-
-        // 写入缓存
-        chatModelMap.put(commandEntity.getGatewayId(), chatModel);
-    }
-
-    public ToolCallback[] buildToolCallback(McpConfigVO mcpConfigVO) {
-        String sseEndPoint = mcpConfigVO.getSseEndpoint();
-        if (StringUtils.isNotBlank(mcpConfigVO.getAuthApiKey())) {
-            sseEndPoint += "?api_key=" + mcpConfigVO.getAuthApiKey();
+    public String callGateway(BuildChatModelCommandEntity commandEntity, String message) {
+        McpConfigVO config = commandEntity.getMcpConfigVO();
+        log.info("创建临时 MCP 对话模型 gatewayId:{} sseEndpoint:{} timeout:{} authConfigured:{}",
+                commandEntity.getGatewayId(), config.getSseEndpoint(), config.getTimeout(),
+                StringUtils.isNotBlank(config.getAuthApiKey()));
+        UriComponentsBuilder sseEndpointBuilder = UriComponentsBuilder.fromPath(config.getSseEndpoint());
+        if (StringUtils.isNotBlank(config.getAuthApiKey())) {
+            sseEndpointBuilder.queryParam("api_key", config.getAuthApiKey());
         }
+        String sseEndpoint = sseEndpointBuilder.build().encode().toUriString();
 
         HttpClientSseClientTransport sseClientTransport = HttpClientSseClientTransport
-                .builder(mcpConfigVO.getBaseUri())
-                .sseEndpoint(sseEndPoint)
+                .builder(config.getBaseUri())
+                .sseEndpoint(sseEndpoint)
                 .build();
 
         McpSyncClient mcpSyncClient = McpClient
                 .sync(sseClientTransport)
-                .requestTimeout(Duration.ofMillis(mcpConfigVO.getTimeout())).build();
-        var initialize = mcpSyncClient.initialize();
+                .requestTimeout(Duration.ofMillis(config.getTimeout())).build();
 
-        log.info("tool sse mcp initialize {}", initialize);
+        var mcpInitializeResult = mcpSyncClient.initialize();
+        log.info("MCP 初始化结果 gatewayId:{}", mcpInitializeResult);
 
-        return new SyncMcpToolCallbackProvider(mcpSyncClient).getToolCallbacks();
-    }
+        ToolCallback[] callbacks = new SyncMcpToolCallbackProvider(mcpSyncClient).getToolCallbacks();
 
-    @Override
-    public ChatModel getChatModel(String gatewayId) {
-        return chatModelMap.get(gatewayId);
+        ChatModel chatModel = OpenAiChatModel.builder()
+                .openAiApi(openAiApi)
+                .defaultOptions(OpenAiChatOptions.builder()
+                        .model(model)
+                        .toolCallbacks(callbacks)
+                        .build())
+                .build();
+
+        return chatModel.call(message);
     }
 
 }

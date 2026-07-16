@@ -19,8 +19,8 @@ import reactor.core.publisher.Mono;
 @Service("mcpMessageSessionNode")
 public class SessionNode extends AbstractMcpMessageSupport {
 
-    @Resource(name = "mcpMessageMessageHandleNode")
-    private MessageHandleNode messageHandleNode;
+    @Resource(name = "rateLimitNode")
+    private RateLimitNode rateLimitNode;
 
     @Override
     protected ResponseEntity<Object> doApply(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
@@ -38,6 +38,6 @@ public class SessionNode extends AbstractMcpMessageSupport {
 
     @Override
     public StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Object>> get(HandleMessageCommandEntity requestParameter, DefaultMcpMessageFactory.DynamicContext dynamicContext) throws Exception {
-        return messageHandleNode;
+        return rateLimitNode;
     }
 }

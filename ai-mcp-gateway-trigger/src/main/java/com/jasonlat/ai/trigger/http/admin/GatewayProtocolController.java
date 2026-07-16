@@ -327,7 +327,7 @@ public class GatewayProtocolController implements IGatewayProtocolAdminService {
 
     @RequestMapping(value = "query_gateway_protocol_list_by_gateway_id", method = RequestMethod.GET)
     @Override
-    public Response<List<GatewayProtocolDTO>> queryGatewayProtocolListByGatewayId(@RequestParam String gatewayId) {
+    public Response<List<GatewayProtocolDTO>> queryGatewayProtocolListByGatewayId(@RequestParam("gatewayId") String gatewayId) {
         try {
             log.info("根据网关ID查询网关协议列表开始 gatewayId: {}", gatewayId);
             List<GatewayProtocolConfigEntity> entities = adminManageService.queryGatewayProtocolListByGatewayId(gatewayId);
@@ -371,7 +371,7 @@ public class GatewayProtocolController implements IGatewayProtocolAdminService {
 
     @RequestMapping(value = "delete_gateway_protocol", method = RequestMethod.POST)
     @Override
-    public Response<GatewayConfigResponseDTO> deleteGatewayProtocol(@RequestParam Long protocolId) {
+    public Response<GatewayConfigResponseDTO> deleteGatewayProtocol(@RequestParam("protocolId") Long protocolId) {
         try {
             log.info("删除网关协议配置开始 protocolId: {}", protocolId);
             adminProtocolService.deleteGatewayProtocol(protocolId);

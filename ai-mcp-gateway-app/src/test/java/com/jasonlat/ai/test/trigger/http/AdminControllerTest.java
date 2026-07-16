@@ -24,7 +24,6 @@ public class AdminControllerTest {
     public void test_testCallGateway() {
         GatewayLLMRequestDTO requestDTO = GatewayLLMRequestDTO.builder()
                 .gatewayId("gateway_001")
-                .reload(true)
                 .authApiKey("gw-8mvSBT1k9ydEKw9ZN0OSLnp3qcSwj2mde8890FGKdrfNwFto")
                 .timeout(3000)
                 .message("""

@@ -34,9 +34,4 @@ public class GatewayLLMRequestDTO {
      */
     private String message;
 
-    /**
-     * 重新加载LLM，当有协议更新时，可以传入入参
-     */
-    private boolean reload = false;
-
 }

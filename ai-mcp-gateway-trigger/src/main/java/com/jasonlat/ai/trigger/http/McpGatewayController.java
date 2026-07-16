@@ -43,7 +43,7 @@ public class McpGatewayController implements IMcpGatewayService {
      */
     @Override
     @RequestMapping(value = "{gatewayId}/mcp/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> establishSseConnection(@PathVariable String gatewayId,
+    public Flux<ServerSentEvent<String>> establishSseConnection(@PathVariable("gatewayId") String gatewayId,
                                                                 @RequestParam(
                                                                         value = "api_key",
                                                                         required = false,
@@ -76,9 +76,9 @@ public class McpGatewayController implements IMcpGatewayService {
 
     @Override
     @PostMapping(value = "{gatewayId}/mcp/sse", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Object>> handleMessage(@PathVariable String gatewayId,
+    public Mono<ResponseEntity<Object>> handleMessage(@PathVariable("gatewayId") String gatewayId,
                                                     @RequestParam(value = "api_key", required = false, defaultValue = "") String apiKey,
-                                                    @RequestParam String sessionId,
+                                                    @RequestParam("sessionId") String sessionId,
                                                     @RequestBody String messageBody) throws Exception {
         try {
             log.info("处理 MCP SSE 消息 gatewayId:{} sessionId:{} messageBody:{}", gatewayId, sessionId, messageBody);

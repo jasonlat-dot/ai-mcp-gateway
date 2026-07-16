@@ -55,6 +55,12 @@ const routes = [
         component: () => import('@/views/gateway/GatewayAuthView.vue'),
         meta: { title: '认证与限流', icon: 'Key' },
       },
+      {
+        path: 'llm-test',
+        name: 'llm-test',
+        component: () => import('@/views/gateway/GatewayLLMTestView.vue'),
+        meta: { title: 'LLM 网关联调', icon: 'ChatDotRound' },
+      },
     ],
   },
   {

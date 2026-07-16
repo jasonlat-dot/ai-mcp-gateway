@@ -30,9 +30,9 @@ public class SessionMessageService implements ISessionMessageService {
     @Override
     public McpSchemaVO.JsonRpcResponse processHandleMessage(String gatewayId, McpSchemaVO.JsonRpcMessage messageRequest) {
 
+        log.info("开始处理 MCP SSE 消息: {}", JSON.toJSONString(messageRequest));
+
         if (messageRequest instanceof McpSchemaVO.JsonRpcResponse response) {
-            // todo
-            log.info("收到 MCP SSE 结果消息: {}", JSON.toJSONString(response));
         }
 
         if (messageRequest instanceof McpSchemaVO.JsonRpcRequest request) {
@@ -55,8 +55,6 @@ public class SessionMessageService implements ISessionMessageService {
         }
 
         if (messageRequest instanceof McpSchemaVO.JsonRpcNotification notification) {
-            // todo
-            log.info("收到 MCP SSE 通知消息: {}", JSON.toJSONString(notification));
         }
 
         return null;

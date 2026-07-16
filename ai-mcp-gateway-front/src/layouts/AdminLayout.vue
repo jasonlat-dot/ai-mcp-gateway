@@ -25,6 +25,7 @@ const navItems = [
   { path: '/tools',      title: '网关工具', icon: 'Tools',        desc: 'Bound Tools' },
   { path: '/protocols',  title: '协议配置', icon: 'Share',        desc: 'HTTP Protocols' },
   { path: '/auth',       title: '认证限流', icon: 'Key',          desc: 'API Key & Rate' },
+  { path: '/llm-test',   title: 'LLM 网关联调', icon: 'ChatDotRound', desc: 'Gateway Playground' },
 ]
 
 const activePath = computed(() => {

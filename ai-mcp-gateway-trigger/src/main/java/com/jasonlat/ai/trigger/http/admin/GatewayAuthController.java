@@ -185,7 +185,7 @@ public class GatewayAuthController implements IGatewayAuthAdminService {
 
     @RequestMapping(value = "delete_gateway_auth", method = RequestMethod.POST)
     @Override
-    public Response<GatewayConfigResponseDTO> deleteGatewayAuth(@RequestParam String gatewayId) {
+    public Response<GatewayConfigResponseDTO> deleteGatewayAuth(@RequestParam("gatewayId") String gatewayId) {
         try {
             log.info("删除网关认证配置开始 gatewayId: {}", gatewayId);
             adminAuthService.deleteGatewayAuth(gatewayId);

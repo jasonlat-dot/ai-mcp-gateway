@@ -39,19 +39,17 @@ public class EndNode extends AbstractMcpSessionSupport {
 
         return sink.asFlux()
                 .mergeWith(
-                        // 60秒发送一次心跳包
-                        Flux.interval(Duration.ofSeconds(60))
+                        Flux.interval(Duration.ofSeconds(10))
                                 .map(i -> ServerSentEvent.<String>builder()
-                                        .data("heartbeat")
-                                        .event("heartbeat")
+                                        .comment("heartbeat")
                                         .build())
                 )
-                // 前端主动断开连接时触发
-                .doOnCancel(() -> {
-                    sessionManagementService.removeSession(sessionId);
-                })
-                // 流正常结束 / 发生异常终止时触发
-                .doOnTerminate(() -> {
+                .doFinally(signalType -> {
+                    log.info(
+                            "MCP SSE 连接结束 sessionId:{} signal:{}",
+                            sessionId,
+                            signalType
+                    );
                     sessionManagementService.removeSession(sessionId);
                 });
     }
