@@ -1,7 +1,8 @@
-package com.jasonlat.ai.cases.mcp.session.node;
+package com.jasonlat.ai.cases.mcp.sse.session.node;
 
-import com.jasonlat.ai.cases.mcp.session.AbstractMcpSessionSupport;
-import com.jasonlat.ai.cases.mcp.session.factory.DefaultMcpSessionFactory;
+import com.jasonlat.ai.cases.mcp.sse.session.AbstractMcpSseSessionSupport;
+import com.jasonlat.ai.cases.mcp.sse.session.factory.DefaultMcpSessionFactory;
+import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
 import com.jasonlat.design.framework.tree.StrategyHandler;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -11,14 +12,14 @@ import reactor.core.publisher.Flux;
 
 /**
  * @author jasonlat
- * 2026-04-22  20:28
+ * 2026-04-22  20:31
  */
 @Slf4j
-@Service("mcpSessionRootNode")
-public class RootNode extends AbstractMcpSessionSupport {
+@Service("mcpSessionSessionNode")
+public class SseSessionNode extends AbstractMcpSseSessionSupport {
 
-    @Resource(name = "mcpSessionVerifyNode")
-    protected VerifyNode verifyNode;
+    @Resource(name = "mcpSessionEndNode")
+    private EndNode endNode;
 
     /**
      * 业务流程处理方法
@@ -34,12 +35,12 @@ public class RootNode extends AbstractMcpSessionSupport {
      */
     @Override
     protected Flux<ServerSentEvent<String>> doApply(String gatewayId, DefaultMcpSessionFactory.DynamicContext dynamicContext) throws Exception {
-        try {
-            return router(gatewayId, dynamicContext);
-        } catch (Exception e) {
-            log.error("创建SSE会话连接 error: {}", e.getMessage(), e);
-            throw e;
-        }
+        String apiKey = dynamicContext.getValue("apiKey");
+
+        SessionConfigVO sessionConfigVO = sessionManagementService.createSession(gatewayId, apiKey);
+        dynamicContext.setSessionConfigVO(sessionConfigVO);
+
+        return router(gatewayId, dynamicContext);
     }
 
     /**
@@ -56,6 +57,6 @@ public class RootNode extends AbstractMcpSessionSupport {
      */
     @Override
     public StrategyHandler<String, DefaultMcpSessionFactory.DynamicContext, Flux<ServerSentEvent<String>>> get(String requestParameter, DefaultMcpSessionFactory.DynamicContext dynamicContext) throws Exception {
-        return verifyNode;
+        return endNode;
     }
 }

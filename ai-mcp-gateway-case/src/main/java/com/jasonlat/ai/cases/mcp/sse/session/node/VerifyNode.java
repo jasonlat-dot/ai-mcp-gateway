@@ -1,7 +1,7 @@
-package com.jasonlat.ai.cases.mcp.session.node;
+package com.jasonlat.ai.cases.mcp.sse.session.node;
 
-import com.jasonlat.ai.cases.mcp.session.AbstractMcpSessionSupport;
-import com.jasonlat.ai.cases.mcp.session.factory.DefaultMcpSessionFactory;
+import com.jasonlat.ai.cases.mcp.sse.session.AbstractMcpSseSessionSupport;
+import com.jasonlat.ai.cases.mcp.sse.session.factory.DefaultMcpSessionFactory;
 import com.jasonlat.ai.domain.auth.model.entity.LicenseCommandEntity;
 import com.jasonlat.ai.domain.auth.service.IAuthLicenseService;
 import com.jasonlat.ai.types.enums.McpErrorCodes;
@@ -19,10 +19,10 @@ import reactor.core.publisher.Flux;
  */
 @Slf4j
 @Service("mcpSessionVerifyNode")
-public class VerifyNode extends AbstractMcpSessionSupport {
+public class VerifyNode extends AbstractMcpSseSessionSupport {
 
     @Resource(name = "mcpSessionSessionNode")
-    private SessionNode sessionNode;
+    private SseSessionNode sessionNode;
     @Resource
     private IAuthLicenseService authLicenseService;
 

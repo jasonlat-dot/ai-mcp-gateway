@@ -1,7 +1,7 @@
-package com.jasonlat.ai.cases.mcp.message.node;
+package com.jasonlat.ai.cases.mcp.sse.message.node;
 
-import com.jasonlat.ai.cases.mcp.message.AbstractMcpMessageSupport;
-import com.jasonlat.ai.cases.mcp.message.facotry.DefaultMcpMessageFactory;
+import com.jasonlat.ai.cases.mcp.sse.message.AbstractMcpSseMessageSupport;
+import com.jasonlat.ai.cases.mcp.sse.message.facotry.DefaultMcpMessageFactory;
 import com.jasonlat.ai.domain.session.model.entity.HandleMessageCommandEntity;
 import com.jasonlat.ai.domain.session.model.valobj.McpSchemaVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
@@ -23,7 +23,7 @@ import java.util.concurrent.locks.LockSupport;
  */
 @Slf4j
 @Service("mcpMessageMessageHandleNode")
-public class MessageHandleNode extends AbstractMcpMessageSupport {
+public class SseMessageHandleNode extends AbstractMcpSseMessageSupport {
 
     private static final long EMIT_RETRY_TIMEOUT_NANOS = Duration.ofMillis(200).toNanos();
     private static final long EMIT_RETRY_PAUSE_NANOS = TimeUnit.MICROSECONDS.toNanos(100);

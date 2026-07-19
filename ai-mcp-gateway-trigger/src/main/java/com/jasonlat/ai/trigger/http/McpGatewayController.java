@@ -55,7 +55,7 @@ public class McpGatewayController implements IMcpGatewayService {
                 log.error("网关ID不能为空 gatewayId:{}", gatewayId);
                 throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
             }
-            Flux<ServerSentEvent<String>> serverSentEventFlux = mcpSessionService.establishSseConnection(gatewayId, apiKey);
+            Flux<ServerSentEvent<String>> serverSentEventFlux = mcpSessionService.createMcpSession(gatewayId, apiKey);
             log.info("建立SSE连接成功 gatewayId:{}", gatewayId);
             return serverSentEventFlux;
         }  catch (AppException e) {

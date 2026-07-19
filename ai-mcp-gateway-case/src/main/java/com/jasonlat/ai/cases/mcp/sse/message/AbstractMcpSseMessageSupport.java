@@ -1,7 +1,7 @@
-package com.jasonlat.ai.cases.mcp.message;
+package com.jasonlat.ai.cases.mcp.sse.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jasonlat.ai.cases.mcp.message.facotry.DefaultMcpMessageFactory;
+import com.jasonlat.ai.cases.mcp.sse.message.facotry.DefaultMcpMessageFactory;
 import com.jasonlat.ai.domain.session.model.entity.HandleMessageCommandEntity;
 import com.jasonlat.ai.domain.session.service.ISessionManagementService;
 import com.jasonlat.ai.domain.session.service.ISessionMessageService;
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeoutException;
  * @author jasonlat
  * 2026-06-26  19:27
  */
-public abstract class AbstractMcpMessageSupport extends AbstractMultiThreadStrategyRouter<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Object>> {
+public abstract class AbstractMcpSseMessageSupport extends AbstractMultiThreadStrategyRouter<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Object>> {
 
     @Resource
     protected ISessionMessageService sessionMessageService;
