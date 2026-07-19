@@ -31,9 +31,10 @@ import java.util.UUID;
 @RequestMapping("/")
 public class McpGatewayController implements IMcpGatewayService {
 
-    @Resource
+    @Resource(name = "mcpSseSessionService")
     private IMcpSessionService mcpSessionService;
-    @Resource
+
+    @Resource(name = "mcpSseMessageService")
     private IMcpMessageService mcpMessageService;
 
     /**
