@@ -1,7 +1,7 @@
-package com.jasonlat.ai.cases.mcp.message;
+package com.jasonlat.ai.cases.mcp.sse.message;
 
 import com.jasonlat.ai.cases.mcp.IMcpMessageService;
-import com.jasonlat.ai.cases.mcp.message.facotry.DefaultMcpMessageFactory;
+import com.jasonlat.ai.cases.mcp.sse.message.facotry.DefaultMcpMessageFactory;
 import com.jasonlat.ai.domain.session.model.entity.HandleMessageCommandEntity;
 import com.jasonlat.design.framework.tree.StrategyHandler;
 import jakarta.annotation.Resource;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class McpMessageService implements IMcpMessageService {
+public class McpSseMessageService implements IMcpMessageService {
 
     @Resource
     private DefaultMcpMessageFactory defaultMcpMessageFactory;

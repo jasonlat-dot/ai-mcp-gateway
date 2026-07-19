@@ -1,8 +1,6 @@
-package com.jasonlat.ai.cases.mcp.message.facotry;
+package com.jasonlat.ai.cases.mcp.sse.session.factory;
 
-import com.jasonlat.ai.cases.mcp.message.node.RootNode;
-import com.jasonlat.ai.cases.mcp.session.factory.DefaultMcpSessionFactory;
-import com.jasonlat.ai.domain.session.model.entity.HandleMessageCommandEntity;
+import com.jasonlat.ai.cases.mcp.sse.session.node.RootNode;
 import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
 import com.jasonlat.design.framework.tree.StrategyHandler;
 import jakarta.annotation.Resource;
@@ -10,25 +8,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author jasonlat
- * 2026-06-26  19:22
+ * 2026-04-22  20:29
  */
-@Service
-public class DefaultMcpMessageFactory {
+@Component
+public class DefaultMcpSessionFactory {
 
-    @Resource(name = "mcpMessageRootNode")
+    @Resource(name = "mcpSessionRootNode")
     private RootNode rootNode;
 
-    public StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Object>> strategyHandler() {
+
+    public StrategyHandler<String, DynamicContext, Flux<ServerSentEvent<String>>> strategyHandler() {
         return rootNode;
     }
+
 
     @Data
     @Builder

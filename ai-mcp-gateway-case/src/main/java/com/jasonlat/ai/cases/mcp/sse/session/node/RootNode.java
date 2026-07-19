@@ -1,24 +1,25 @@
-package com.jasonlat.ai.cases.mcp.session.node;
+package com.jasonlat.ai.cases.mcp.sse.session.node;
 
-import com.jasonlat.ai.cases.mcp.session.AbstractMcpSessionSupport;
-import com.jasonlat.ai.cases.mcp.session.factory.DefaultMcpSessionFactory;
-import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
+import com.jasonlat.ai.cases.mcp.sse.session.AbstractMcpSseSessionSupport;
+import com.jasonlat.ai.cases.mcp.sse.session.factory.DefaultMcpSessionFactory;
 import com.jasonlat.design.framework.tree.StrategyHandler;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
-
-import java.time.Duration;
 
 /**
  * @author jasonlat
  * 2026-04-22  20:28
  */
 @Slf4j
-@Service("mcpSessionEndNode")
-public class EndNode extends AbstractMcpSessionSupport {
+@Service("mcpSessionRootNode")
+public class RootNode extends AbstractMcpSseSessionSupport {
+
+    @Resource(name = "mcpSessionVerifyNode")
+    protected VerifyNode verifyNode;
+
     /**
      * 业务流程处理方法
      * <p>
@@ -33,25 +34,12 @@ public class EndNode extends AbstractMcpSessionSupport {
      */
     @Override
     protected Flux<ServerSentEvent<String>> doApply(String gatewayId, DefaultMcpSessionFactory.DynamicContext dynamicContext) throws Exception {
-        SessionConfigVO sessionConfigVO = dynamicContext.getSessionConfigVO();
-        String sessionId = sessionConfigVO.getSessionId();
-        Sinks.Many<ServerSentEvent<String>> sink = sessionConfigVO.getSink();
-
-        return sink.asFlux()
-                .mergeWith(
-                        Flux.interval(Duration.ofSeconds(10))
-                                .map(i -> ServerSentEvent.<String>builder()
-                                        .comment("heartbeat")
-                                        .build())
-                )
-                .doFinally(signalType -> {
-                    log.info(
-                            "MCP SSE 连接结束 sessionId:{} signal:{}",
-                            sessionId,
-                            signalType
-                    );
-                    sessionManagementService.removeSession(sessionId);
-                });
+        try {
+            return router(gatewayId, dynamicContext);
+        } catch (Exception e) {
+            log.error("创建SSE会话连接 error: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -68,6 +56,6 @@ public class EndNode extends AbstractMcpSessionSupport {
      */
     @Override
     public StrategyHandler<String, DefaultMcpSessionFactory.DynamicContext, Flux<ServerSentEvent<String>>> get(String requestParameter, DefaultMcpSessionFactory.DynamicContext dynamicContext) throws Exception {
-        return super.get(requestParameter, dynamicContext);
+        return verifyNode;
     }
 }

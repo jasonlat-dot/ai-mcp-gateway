@@ -1,7 +1,7 @@
-package com.jasonlat.ai.cases.mcp.message.node;
+package com.jasonlat.ai.cases.mcp.sse.message.node;
 
-import com.jasonlat.ai.cases.mcp.message.AbstractMcpMessageSupport;
-import com.jasonlat.ai.cases.mcp.message.facotry.DefaultMcpMessageFactory;
+import com.jasonlat.ai.cases.mcp.sse.message.AbstractMcpSseMessageSupport;
+import com.jasonlat.ai.cases.mcp.sse.message.facotry.DefaultMcpMessageFactory;
 import com.jasonlat.ai.domain.auth.model.entity.RateLimitCommandEntity;
 import com.jasonlat.ai.domain.auth.service.IAuthRateLimitService;
 import com.jasonlat.ai.domain.session.model.entity.HandleMessageCommandEntity;
@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Sinks;
 
 /**
@@ -25,10 +24,10 @@ import reactor.core.publisher.Sinks;
  */
 @Slf4j
 @Service("rateLimitNode")
-public class RateLimitNode extends AbstractMcpMessageSupport {
+public class RateLimitNode extends AbstractMcpSseMessageSupport {
 
     @Resource(name = "mcpMessageMessageHandleNode")
-    private MessageHandleNode messageHandleNode;
+    private SseMessageHandleNode messageHandleNode;
 
     @Resource
     private IAuthRateLimitService rateLimitService;

@@ -1,7 +1,7 @@
-package com.jasonlat.ai.cases.mcp.message.node;
+package com.jasonlat.ai.cases.mcp.sse.message.node;
 
-import com.jasonlat.ai.cases.mcp.message.AbstractMcpMessageSupport;
-import com.jasonlat.ai.cases.mcp.message.facotry.DefaultMcpMessageFactory;
+import com.jasonlat.ai.cases.mcp.sse.message.AbstractMcpSseMessageSupport;
+import com.jasonlat.ai.cases.mcp.sse.message.facotry.DefaultMcpMessageFactory;
 import com.jasonlat.ai.domain.session.model.entity.HandleMessageCommandEntity;
 import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
 import com.jasonlat.design.framework.tree.StrategyHandler;
@@ -9,7 +9,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 /**
  * @author jasonlat
@@ -17,7 +16,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 @Service("mcpMessageSessionNode")
-public class SessionNode extends AbstractMcpMessageSupport {
+public class SessionNode extends AbstractMcpSseMessageSupport {
 
     @Resource(name = "rateLimitNode")
     private RateLimitNode rateLimitNode;

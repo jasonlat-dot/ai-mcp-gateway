@@ -1,22 +1,13 @@
-package com.jasonlat.ai.cases.mcp.message.node;
+package com.jasonlat.ai.cases.mcp.sse.message.node;
 
-import com.jasonlat.ai.cases.mcp.message.AbstractMcpMessageSupport;
-import com.jasonlat.ai.cases.mcp.message.facotry.DefaultMcpMessageFactory;
-import com.jasonlat.ai.cases.mcp.session.factory.DefaultMcpSessionFactory;
-import com.jasonlat.ai.domain.auth.model.entity.RateLimitCommandEntity;
-import com.jasonlat.ai.domain.auth.service.IAuthRateLimitService;
+import com.jasonlat.ai.cases.mcp.sse.message.AbstractMcpSseMessageSupport;
+import com.jasonlat.ai.cases.mcp.sse.message.facotry.DefaultMcpMessageFactory;
 import com.jasonlat.ai.domain.session.model.entity.HandleMessageCommandEntity;
-import com.jasonlat.ai.domain.session.model.valobj.McpSchemaVO;
-import com.jasonlat.ai.domain.session.model.valobj.enums.SessionMessageHandlerMethodEnum;
-import com.jasonlat.ai.types.enums.McpErrorCodes;
-import com.jasonlat.ai.types.exception.AppException;
 import com.jasonlat.design.framework.tree.StrategyHandler;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 
 /**
  * @author jasonlat
@@ -24,7 +15,7 @@ import reactor.core.publisher.Flux;
  */
 @Slf4j
 @Service("mcpMessageRootNode")
-public class RootNode extends AbstractMcpMessageSupport {
+public class RootNode extends AbstractMcpSseMessageSupport {
 
     @Resource(name = "mcpMessageSessionNode")
     private SessionNode sessionNode;

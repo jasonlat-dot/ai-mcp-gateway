@@ -1,6 +1,6 @@
-package com.jasonlat.ai.cases.mcp.session;
+package com.jasonlat.ai.cases.mcp.sse.session;
 
-import com.jasonlat.ai.cases.mcp.session.factory.DefaultMcpSessionFactory;
+import com.jasonlat.ai.cases.mcp.sse.session.factory.DefaultMcpSessionFactory;
 import com.jasonlat.ai.domain.session.service.ISessionManagementService;
 import com.jasonlat.design.framework.tree.AbstractMultiThreadStrategyRouter;
 import jakarta.annotation.Resource;
@@ -14,7 +14,7 @@ import java.util.concurrent.TimeoutException;
  * @author jasonlat
  * 2026-04-22  20:24
  */
-public abstract class AbstractMcpSessionSupport extends AbstractMultiThreadStrategyRouter<String, DefaultMcpSessionFactory.DynamicContext, Flux<ServerSentEvent<String>>> {
+public abstract class AbstractMcpSseSessionSupport extends AbstractMultiThreadStrategyRouter<String, DefaultMcpSessionFactory.DynamicContext, Flux<ServerSentEvent<String>>> {
 
     @Resource
     protected ISessionManagementService sessionManagementService;
