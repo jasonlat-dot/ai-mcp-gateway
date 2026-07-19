@@ -64,7 +64,6 @@ public class ApiTest {
         ChatResponse response = chatModel.call(prompt);
         System.out.println("测试结果：" + JSON.toJSONString(response));
 
-        Thread.sleep(1000000);
     }
 
     // http://localhost:8888/api-gateway/gateway_001/mcp/sse?api_key=gw-SjnhpA5S6CI5bx9Vxvh8ATyezZzqclNNP2ikf18wSHHJMR1H

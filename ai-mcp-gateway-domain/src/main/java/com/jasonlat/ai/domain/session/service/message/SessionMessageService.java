@@ -33,6 +33,7 @@ public class SessionMessageService implements ISessionMessageService {
         log.info("开始处理 MCP SSE 消息: {}", JSON.toJSONString(messageRequest));
 
         if (messageRequest instanceof McpSchemaVO.JsonRpcResponse response) {
+            log.info("收到结果消息：{}",  response);
         }
 
         if (messageRequest instanceof McpSchemaVO.JsonRpcRequest request) {
@@ -55,6 +56,7 @@ public class SessionMessageService implements ISessionMessageService {
         }
 
         if (messageRequest instanceof McpSchemaVO.JsonRpcNotification notification) {
+            log.info("收到即将处理的通知 {} {}", notification.method(), JSON.toJSONString(notification.params()));
         }
 
         return null;

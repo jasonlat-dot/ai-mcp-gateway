@@ -39,6 +39,8 @@ public class SessionManagementService implements ISessionManagementService {
     private final long sessionTimeoutMinutes;
     private final long cleanupIntervalMillis;
     private final int eventBufferCapacity;
+    // 每次清理无效会话，最多处理 x 个
+    private final int maxCleanupCount;
 
     private final Map<String, SessionConfigVO> activeSessions = new ConcurrentHashMap<>(8);
     private final Object lifecycleMonitor = new Object();
@@ -50,7 +52,8 @@ public class SessionManagementService implements ISessionManagementService {
             @Value("${server.servlet.context-path:/api-gateway}") String messageEndpointPrefix,
             @Value("${mcp.session.idle-timeout-minutes:10}") long sessionTimeoutMinutes,
             @Value("${mcp.session.cleanup-interval-ms:300000}") long cleanupIntervalMillis,
-            @Value("${mcp.session.event-buffer-capacity:256}") int eventBufferCapacity) {
+            @Value("${mcp.session.event-buffer-capacity:256}") int eventBufferCapacity,
+            @Value("${mcp.session.max-cleanup-count:100}") int maxCleanupCount) {
         this.cleanupScheduler = cleanupScheduler;
         this.messageEndpointPrefix = messageEndpointPrefix;
         this.sessionTimeoutMinutes = requirePositive(
@@ -59,6 +62,8 @@ public class SessionManagementService implements ISessionManagementService {
                 cleanupIntervalMillis, "mcp.session.cleanup-interval-ms");
         this.eventBufferCapacity = requirePositive(
                 eventBufferCapacity, "mcp.session.event-buffer-capacity");
+        this.maxCleanupCount = requirePositive(
+                maxCleanupCount, "mcp.session.max-cleanup-count");
     }
 
     @PostConstruct
@@ -167,13 +172,14 @@ public class SessionManagementService implements ISessionManagementService {
     @Override
     public void clearInactiveSessions() {
         int beforeCleanup = activeSessions.size();
-        log.info("开始清理无效会话,当前活跃会话数:{}", beforeCleanup);
+        log.debug("开始清理无效会话,当前活跃会话数:{}", beforeCleanup);
         if (beforeCleanup == 0) return;
         activeSessions.entrySet().stream()
                 .filter(entry -> {
                     SessionConfigVO vo = entry.getValue();
                     return !vo.isActive() || vo.isExpired(sessionTimeoutMinutes);
                 })
+                .limit(maxCleanupCount)
                 .forEach(entry -> removeSession(entry.getKey()));
 
         int afterCleanup = activeSessions.size();
