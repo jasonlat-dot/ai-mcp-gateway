@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class McpSseMessageService implements IMcpMessageService {
+public class McpSseMessageService implements IMcpMessageService<Object> {
 
     @Resource
     private DefaultMcpMessageFactory defaultMcpMessageFactory;

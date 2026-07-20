@@ -64,7 +64,7 @@ public final class McpErrorCodes {
      * 资源未找到
      */
     public static final int RESOURCE_NOT_FOUND = -32005;
-    
+
     /**
      * 权限不足
      */

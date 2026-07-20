@@ -54,13 +54,12 @@ public class AuthRateLimitService implements IAuthRateLimitService {
     public boolean rateLimit(RateLimitCommandEntity commandEntity) {
         String gatewayId = commandEntity.getGatewayId();
         String apiKey = commandEntity.getApiKey();
-        String method = commandEntity.getMethod();
         // 参数校验
         if (StringUtils.isAnyBlank(gatewayId, apiKey)) {
             log.info("网关Id: {} apiKey: {} 参数错误", gatewayId, apiKey);
             return false;
         }
-        String key = gatewayId + "_" + apiKey + "_" + method;
+        String key = "rateLimit_" + gatewayId + "_" + apiKey;
         try {
             TokenBucketRateLimiter rateLimiter = rateLimiterCache.get(key, () -> {
                 McpGatewayAuthVO gatewayAuthVO = repository.queryEffectiveGatewayAuthInfo(new LicenseCommandEntity(gatewayId, apiKey));
@@ -76,7 +75,7 @@ public class AuthRateLimitService implements IAuthRateLimitService {
                 if (permitsPerSecond <= 0) {
                     throw new AppException(ResponseCode.LIMIT_VALUE_ERROR);
                 }
-                log.info("网关Id: {} apiKey: {} 配置限流: {} 次/秒", gatewayId, apiKey, permitsPerSecond);
+                log.debug("网关Id: {} apiKey: {} 配置限流: {} 次/秒", gatewayId, apiKey, permitsPerSecond);
                 return new TokenBucketRateLimiter(permitsPerSecond);
             });
             // 尝试获取令牌 true: 限流; false: 不限流
@@ -86,15 +85,15 @@ public class AuthRateLimitService implements IAuthRateLimitService {
             if (cause instanceof AppException) {
                 if (((AppException) cause).getCode().equals(ResponseCode.GATEWAY_APIKEY_ILLEGAL.getCode())) {
                     // 如果是无效的apikey，返回 true (限流/禁止)
-                    log.info("网关Id: {} apiKey: {} 无效的apikey --> 限流/禁止", gatewayId, apiKey);
+                    log.debug("网关Id: {} apiKey: {} 无效的apikey --> 限流/禁止", gatewayId, apiKey);
                     return true;
                 } else if (((AppException) cause).getCode().equals(ResponseCode.LIMIT_NOT_CONFIG.getCode())) {
                     // 如果是无限流配置，按原逻辑返回 false (不限流)
-                    log.info("网关Id: {} apiKey: {} 无限流配置 --> 不限流", gatewayId, apiKey);
+                    log.debug("网关Id: {} apiKey: {} 无限流配置 --> 不限流", gatewayId, apiKey);
                     return false;
                 } else if (((AppException) cause).getCode().equals(ResponseCode.LIMIT_VALUE_ERROR.getCode())) {
                     // 如果是配置为 0/负数，按原逻辑返回 true (限流/禁止)
-                    log.info("网关Id: {} apiKey: {} 配置限流: 0/负数 --> 限流/禁止", gatewayId, apiKey);
+                    log.debug("网关Id: {} apiKey: {} 配置限流: 0/负数 --> 限流/禁止", gatewayId, apiKey);
                     return true;
                 }
             }

@@ -10,11 +10,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 /**
  * MCP Streamable 会话服务工厂
  */
+@Component
 public class DefaultMcpStreamableSessionFactory {
 
     @Resource(name = "mcpStreamableSessionRootNode")
@@ -29,6 +31,8 @@ public class DefaultMcpStreamableSessionFactory {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class DynamicContext {
+
+        private String gatewayId;
 
         private String apiKey;
 

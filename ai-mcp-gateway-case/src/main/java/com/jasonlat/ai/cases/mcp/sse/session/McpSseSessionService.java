@@ -2,6 +2,7 @@ package com.jasonlat.ai.cases.mcp.sse.session;
 
 import com.jasonlat.ai.cases.mcp.IMcpSessionService;
 import com.jasonlat.ai.cases.mcp.sse.session.factory.DefaultMcpSessionFactory;
+import com.jasonlat.ai.domain.session.service.ISessionManagementService;
 import com.jasonlat.ai.types.exception.AppException;
 import com.jasonlat.design.framework.tree.StrategyHandler;
 import jakarta.annotation.Resource;
@@ -19,6 +20,19 @@ import static com.jasonlat.ai.types.enums.ResponseCode.METHOD_NOT_FOUND;
 @Slf4j
 @Service
 public class McpSseSessionService implements IMcpSessionService {
+
+    @Resource
+    private ISessionManagementService sessionManagementService;
+
+    /**
+     * 删除 MCP 会话服务
+     *
+     * @param sessionId – 会话ID
+     */
+    @Override
+    public void deleteMcpSession(String sessionId) {
+        sessionManagementService.removeSession(sessionId);
+    }
 
     /**
      * 获取 MCP 会话服务

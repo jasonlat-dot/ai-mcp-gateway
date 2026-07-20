@@ -11,7 +11,11 @@ public enum ResponseCode {
 
     DB_UPDATE_FAIL("0005", "数据库更新失败"),
     // GATEWAY-apikey非法
-    GATEWAY_APIKEY_ILLEGAL("ERROR_GATEWAY_APIKEY_ILLEGAL", "网关apikey非法"),
+    GATEWAY_APIKEY_ILLEGAL("ERROR_GATEWAY_APIKEY_ILLEGAL", "apikey非法"),
+    // 网关不存在
+    GATEWAY_NOT_FOUND("ERROR_GATEWAY_NOT_FOUND", "网关不存在"),
+    // 网关已禁用
+    GATEWAY_DISABLED("ERROR_GATEWAY_DISABLED", "网关已禁用"),
     // 限流值不正确
     LIMIT_VALUE_ERROR("ERROR_LIMIT_VALUE_ERROR", "限流值不正确"),
     // "未配置限流"

@@ -21,10 +21,4 @@ public class RateLimitCommandEntity {
      * API密钥
      */
     private String apiKey;
-
-    /**
-     * 方法
-     */
-    private String method;
-
 }

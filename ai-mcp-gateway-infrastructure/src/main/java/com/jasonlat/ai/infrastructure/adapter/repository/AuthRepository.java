@@ -58,6 +58,7 @@ public class AuthRepository implements IAuthRepository {
     @Override
     public AuthStatusEnum.GatewayConfig queryGatewayAuthStatus(String gatewayId) {
         McpGatewayPO mcpGatewayPO = mcpGatewayDao.queryMcpGatewayByGatewayId(gatewayId);
+        if (null == mcpGatewayPO) return AuthStatusEnum.GatewayConfig.UNKNOWN;
         return AuthStatusEnum.GatewayConfig.get(mcpGatewayPO.getAuth());
     }
 

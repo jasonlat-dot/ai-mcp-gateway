@@ -54,7 +54,7 @@ public class RateLimitNode extends AbstractMcpSseMessageSupport {
                 // 是（true）否（false）命中限流
                 SessionMessageHandlerMethodEnum sessionMessageHandlerMethodEnum = SessionMessageHandlerMethodEnum.getByMethod(method);
                 if (SessionMessageHandlerMethodEnum.TOOLS_CALL.equals(sessionMessageHandlerMethodEnum)) {
-                    boolean isHit = rateLimitService.rateLimit(new RateLimitCommandEntity(requestParameter.getGatewayId(), requestParameter.getApiKey(), method));
+                    boolean isHit = rateLimitService.rateLimit(new RateLimitCommandEntity(requestParameter.getGatewayId(), requestParameter.getApiKey()));
                     if (isHit) {
                         log.warn("消息处理 mcp message RootNode - 命中限流{} {}", requestParameter.getGatewayId(), requestParameter.getApiKey());
                         SessionConfigVO sessionConfigVO = dynamicContext.getSessionConfigVO();

@@ -5,9 +5,11 @@ import reactor.core.publisher.Flux;
 
 public interface IMcpSessionService {
     /**
-     * 创建SSE会话连接
+     * 创建 MCP 会话服务
+     *
      * @param gatewayId 网关ID
-     * @param apiKey apiKey
+     * @param apiKey    API Key
+     * @return 流式响应
      */
     Flux<ServerSentEvent<String>> createMcpSession(String gatewayId, String apiKey) throws Exception;
 
@@ -19,4 +21,9 @@ public interface IMcpSessionService {
      */
     Flux<ServerSentEvent<String>> getMcpSession(String gatewayId, String apiKey, String sessionId) throws Exception;
 
+    /**
+     * 删除 MCP 会话服务
+     * @param sessionId – 会话ID
+     */
+    void deleteMcpSession(String sessionId);
 }

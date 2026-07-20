@@ -1,6 +1,7 @@
 package com.jasonlat.ai.domain.session.service;
 
 import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
+import com.jasonlat.ai.domain.session.model.valobj.enums.SessionTransportTypeEnumVO;
 
 /**
  * @author jasonlat
@@ -14,6 +15,12 @@ public interface ISessionManagementService {
      * @return  会话配置
      */
     SessionConfigVO createSession(String gatewayId, String apiKey);
+
+    /**
+     * 创建回话，按传输协议类型做兼容处理
+     * @return 会话配置
+     */
+    SessionConfigVO createSession(String gatewayId, String apiKey, SessionTransportTypeEnumVO transportType);
 
     /**
      * 移除会话

@@ -10,17 +10,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 
 /**
  * MCP会话消息工厂
  */
+@Component
 public class DefaultMcpStreamableMessageFactory {
 
     @Resource(name = "mcpStreamableMessageRootNode")
     private RootNode rootNode;
 
-    public StrategyHandler<HandleMessageCommandEntity, DynamicContext, ResponseEntity<Void>> strategyHandler() {
+    public StrategyHandler<HandleMessageCommandEntity, DynamicContext, ResponseEntity<?>> strategyHandler() {
         return rootNode;
     }
 

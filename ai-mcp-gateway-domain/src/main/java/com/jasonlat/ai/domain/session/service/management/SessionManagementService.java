@@ -1,7 +1,10 @@
 package com.jasonlat.ai.domain.session.service.management;
 
 import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
+import com.jasonlat.ai.domain.session.model.valobj.enums.SessionTransportTypeEnumVO;
 import com.jasonlat.ai.domain.session.service.ISessionManagementService;
+import com.jasonlat.ai.types.enums.McpErrorCodes;
+import com.jasonlat.ai.types.exception.AppException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +34,10 @@ import java.util.concurrent.locks.LockSupport;
 @Service
 public class SessionManagementService implements ISessionManagementService {
 
+    // 循环重试关闭 SSE sink 的操作，最多持续等待 200ms，超时直接放弃，防止线程死循环卡死。
     private static final long EMIT_RETRY_TIMEOUT_NANOS = Duration.ofMillis(200).toNanos();
-    private static final long EMIT_RETRY_PAUSE_NANOS = TimeUnit.MICROSECONDS.toNanos(100);
+    // 循环重试关闭 SSE sink 的操作，每次暂停 1ms
+    private static final long EMIT_RETRY_PAUSE_NANOS = TimeUnit.MICROSECONDS.toNanos(1000);
 
     private final String messageEndpointPrefix;
     private final ScheduledExecutorService cleanupScheduler;
@@ -85,7 +90,15 @@ public class SessionManagementService implements ISessionManagementService {
      */
     @Override
     public SessionConfigVO createSession(String gatewayId, String apiKey) {
-        log.info("创建会话 gatewayId:{}", gatewayId);
+
+        return createSession(gatewayId, apiKey, SessionTransportTypeEnumVO.SSE);
+    }
+
+    @Override
+    public SessionConfigVO createSession(String gatewayId, String apiKey, SessionTransportTypeEnumVO transportType) {
+        SessionTransportTypeEnumVO sessionTransportType = transportType == null ? SessionTransportTypeEnumVO.SSE : transportType;
+        log.info("创建会话 gatewayId:{} transportType:{}", gatewayId, sessionTransportType.getCode());
+
         String sessionId = "s-" + UUID.randomUUID();
 
         // 一个 session 只对应一条 SSE 响应流；有界队列避免慢客户端造成无限内存增长。
@@ -93,34 +106,36 @@ public class SessionManagementService implements ISessionManagementService {
                 .unicast()
                 .onBackpressureBuffer(new ArrayBlockingQueue<>(eventBufferCapacity));
 
-        UriComponentsBuilder endpointBuilder = UriComponentsBuilder
-                .fromPath(messageEndpointPrefix)
-                .pathSegment(gatewayId, "mcp", "sse")
-                .queryParam("sessionId", sessionId);
-        if (StringUtils.isNotBlank(apiKey)) {
-            endpointBuilder.queryParam("api_key", apiKey);
-        }
-        String messageEndpoint = endpointBuilder.build().encode().toUriString();
+        // SSE 协议需要发送 endpoint 事件，Streamable HTTP 协议通过 Mcp-Session-Id 响应头返回会话，不发送 endpoint，避免破坏协议语义。
+        if (sessionTransportType == SessionTransportTypeEnumVO.SSE) {
+            UriComponentsBuilder endpointBuilder = UriComponentsBuilder
+                    .fromPath(messageEndpointPrefix)
+                    .pathSegment(gatewayId, "mcp", "sse")
+                    .queryParam("sessionId", sessionId);
+            if (StringUtils.isNotBlank(apiKey)) {
+                endpointBuilder.queryParam("api_key", apiKey);
+            }
+            String messageEndpoint = endpointBuilder.build().encode().toUriString();
 
-        Sinks.EmitResult emitResult = sink.tryEmitNext(ServerSentEvent.<String>builder()
-                .event("endpoint")
-                .data(messageEndpoint)
-                .build());
-        if (emitResult.isFailure()) {
-            sink.tryEmitComplete();
-            throw new IllegalStateException(
-                    "初始化 MCP SSE 会话失败 sessionId:" + sessionId + " result:" + emitResult);
+            Sinks.EmitResult emitResult = sink.tryEmitNext(ServerSentEvent.<String>builder()
+                    .event("endpoint")
+                    .data(messageEndpoint)
+                    .build());
+            if (emitResult.isFailure()) {
+                sink.tryEmitComplete();
+                throw new AppException(
+                        "初始化 MCP SSE 会话失败 sessionId:" + sessionId + " result:" + emitResult);
+            }
         }
 
         SessionConfigVO sessionConfigVO = new SessionConfigVO(sessionId, sink);
         synchronized (lifecycleMonitor) {
             if (shuttingDown) {
                 sink.tryEmitComplete();
-                throw new IllegalStateException("会话管理服务正在关闭，拒绝创建新会话");
+                throw new AppException(McpErrorCodes.SERVER_SHUTTING_DOWN, "server shutting down.");
             }
             activeSessions.put(sessionId, sessionConfigVO);
         }
-        log.info("创建会话 gatewayId:{} sessionId:{},当前活跃会话数:{}", gatewayId, sessionId, activeSessions.size());
 
         return sessionConfigVO;
     }
@@ -144,7 +159,7 @@ public class SessionManagementService implements ISessionManagementService {
 
         completeSink(sessionId, sessionConfigVO.getSink());
 
-        log.info("移除会话:{},剩余活跃会话数:{}", sessionId, activeSessions.size());
+        log.info("移除session会话,sessionId:{},", sessionId);
     }
 
     /**
@@ -184,8 +199,7 @@ public class SessionManagementService implements ISessionManagementService {
 
         int afterCleanup = activeSessions.size();
         if (afterCleanup < beforeCleanup) {
-            log.info("清理无效会话完成,清理数量:{},当前活跃会话数:{}",
-                    beforeCleanup - afterCleanup, afterCleanup);
+            log.debug("清理无效会话完成,清理数量:{},当前活跃会话数:{}", beforeCleanup - afterCleanup, afterCleanup);
         } else {
             log.debug("无过期会话,当前活跃会话数:{}", afterCleanup);
         }

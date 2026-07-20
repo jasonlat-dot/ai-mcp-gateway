@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public abstract class AbstractMcpStreamableMessageServiceSupport extends AbstractMultiThreadStrategyRouter<HandleMessageCommandEntity, DefaultMcpStreamableMessageFactory.DynamicContext, ResponseEntity<Void>> {
+public abstract class AbstractMcpStreamableMessageServiceSupport extends AbstractMultiThreadStrategyRouter<HandleMessageCommandEntity, DefaultMcpStreamableMessageFactory.DynamicContext, ResponseEntity<?>> {
 
     @Resource
     protected ISessionMessageService serviceMessageService;

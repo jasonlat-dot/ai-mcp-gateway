@@ -14,15 +14,14 @@ public enum AuthStatusEnum {
     public enum GatewayConfig {
 
         NOT_VERIFIED(0, "不校验"),
-
         STRONG_VERIFIED(1, "强校验"),
+        UNKNOWN(-1, "未知"),
         ;
 
         private Integer code;
         private String info;
 
         public static GatewayConfig get(Integer code) {
-            if (code == null) return null;
             for (GatewayConfig val : values()) {
                 if (val.code.equals(code)) {
                     return val;

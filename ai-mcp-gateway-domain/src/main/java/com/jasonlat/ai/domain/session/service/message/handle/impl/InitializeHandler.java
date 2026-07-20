@@ -76,7 +76,7 @@ public class InitializeHandler implements IRequestHandler {
         McpSchemaVO.JsonRpcResponse jsonRpcResponse =
                 new McpSchemaVO.JsonRpcResponse(McpSchemaVO.JSONRPC_VERSION, message.id(), initializeResult, null);
 
-        log.info("模拟处理初始化请求结束: {}", JSON.toJSONString(jsonRpcResponse));
+        log.info("处理初始化请求结束: {}", JSON.toJSONString(jsonRpcResponse));
         return jsonRpcResponse;
     }
 }

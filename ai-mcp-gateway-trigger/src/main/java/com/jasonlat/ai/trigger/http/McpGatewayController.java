@@ -35,7 +35,7 @@ public class McpGatewayController implements IMcpGatewayService {
     private IMcpSessionService mcpSessionService;
 
     @Resource(name = "mcpSseMessageService")
-    private IMcpMessageService mcpMessageService;
+    private IMcpMessageService<?> mcpMessageService;
 
     /**
      * 建立SSE连接
@@ -77,7 +77,7 @@ public class McpGatewayController implements IMcpGatewayService {
 
     @Override
     @PostMapping(value = "{gatewayId}/mcp/sse", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Object>> handleMessage(@PathVariable("gatewayId") String gatewayId,
+    public Mono<ResponseEntity<?>> handleMessage(@PathVariable("gatewayId") String gatewayId,
                                                     @RequestParam(value = "api_key", required = false, defaultValue = "") String apiKey,
                                                     @RequestParam("sessionId") String sessionId,
                                                     @RequestBody String messageBody) throws Exception {
@@ -91,7 +91,7 @@ public class McpGatewayController implements IMcpGatewayService {
             }
 
             HandleMessageCommandEntity handleMessageCommandEntity = new HandleMessageCommandEntity(gatewayId, apiKey, sessionId, messageBody);
-            ResponseEntity<Object> responseEntity = mcpMessageService.handleMessage(handleMessageCommandEntity);
+            ResponseEntity<?> responseEntity = mcpMessageService.handleMessage(handleMessageCommandEntity);
 
             log.info("处理 MCP SSE 消息成功 gatewayId:{} sessionId:{} messageBody:{}", gatewayId, sessionId, messageBody);
             return Mono.just(responseEntity);

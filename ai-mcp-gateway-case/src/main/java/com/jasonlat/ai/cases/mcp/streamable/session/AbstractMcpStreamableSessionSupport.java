@@ -1,7 +1,9 @@
 package com.jasonlat.ai.cases.mcp.streamable.session;
 
 import com.jasonlat.ai.cases.mcp.streamable.session.factory.DefaultMcpStreamableSessionFactory;
+import com.jasonlat.ai.domain.session.service.ISessionManagementService;
 import com.jasonlat.design.framework.tree.AbstractMultiThreadStrategyRouter;
+import jakarta.annotation.Resource;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 
@@ -13,6 +15,10 @@ import java.util.concurrent.TimeoutException;
  * 2026-07-19  15:15
  */
 public abstract class AbstractMcpStreamableSessionSupport extends AbstractMultiThreadStrategyRouter<String, DefaultMcpStreamableSessionFactory.DynamicContext, Flux<ServerSentEvent<String>>> {
+
+    @Resource
+    protected ISessionManagementService sessionManagementService;
+
     /**
      * 多线程异步数据加载方法
      * <p>
