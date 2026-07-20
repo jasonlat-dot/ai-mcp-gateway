@@ -12,6 +12,7 @@ import {
   updateGatewayConfig,
   deleteGatewayConfig,
   buildSseUrl,
+  buildStreamableUrl,
   copyText,
   listGatewayToolByGatewayId,
   listGatewayAuth,
@@ -131,10 +132,18 @@ async function onSubmit() {
   }
 }
 
-async function copySse(row) {
+function endpointUrl(row, transport) {
+  if (transport === 'streamable') {
+    return row.streamableUrl || buildStreamableUrl(row.gatewayId)
+  }
+  return row.sseUrl || buildSseUrl(row.gatewayId)
+}
+
+async function copyEndpoint(row, transport) {
+  const label = transport === 'streamable' ? 'Streamable' : 'SSE'
   try {
-    await copyText(buildSseUrl(row.gatewayId))
-    toast.success('SSE 地址已复制', { duration: 1800 })
+    await copyText(endpointUrl(row, transport))
+    toast.success(`${label} 地址已复制`, { duration: 1800 })
   } catch {
     toast.error('复制失败', { duration: 1800 })
   }
@@ -255,6 +264,7 @@ function onPageChange({ page, rows }) {
       </div>
 
       <ElGrid
+        class="gateway-grid"
         :data="list"
         :loading="loading"
         :total="total"
@@ -265,34 +275,31 @@ function onPageChange({ page, rows }) {
         empty-desc="点击右上角「新增网关」开始接入,或者尝试重置筛选条件"
         @page-change="onPageChange"
       >
-        <el-table-column prop="gatewayName" label="名称" min-width="220">
-          <template #default="{ row }">
-            <div class="gw-cell">
-              <div class="gw-avatar">{{ (row.gatewayName || row.gatewayId || '?').slice(0, 1).toUpperCase() }}</div>
-              <div class="gw-name" :title="row.gatewayName || '—'">{{ row.gatewayName || '—' }}</div>
-            </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="gatewayDesc" label="描述" min-width="200">
-          <template #default="{ row }">
-            <span class="muted-desc" :title="row.gatewayDesc || '— 暂无描述 —'">{{ row.gatewayDesc || '— 暂无描述 —' }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="gatewayId" label="ID" min-width="200">
+        <el-table-column prop="gatewayId" label="网关 ID" width="260">
           <template #default="{ row }">
             <IdCell :value="row.gatewayId" :max="40" />
           </template>
         </el-table-column>
 
-        <el-table-column prop="version" label="版本" width="100" align="center">
+        <el-table-column prop="gatewayName" label="网关名称" width="260">
+          <template #default="{ row }">
+            <span class="gw-name" :title="row.gatewayName || '—'">{{ row.gatewayName || '—' }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="gatewayDesc" label="描述" min-width="260">
+          <template #default="{ row }">
+            <span class="muted-desc" :title="row.gatewayDesc || '— 暂无描述 —'">{{ row.gatewayDesc || '— 暂无描述 —' }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="version" label="版本" width="104" align="center" header-align="center">
           <template #default="{ row }">
             <span class="ver-pill">v{{ row.version || '1.0.0' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="auth" label="认证" width="120">
+        <el-table-column prop="auth" label="认证" width="116" align="center" header-align="center">
           <template #default="{ row }">
             <StatusPill :tone="authBadge(row.auth).tone">
               <el-icon class="dot"><component :is="row.auth === 1 ? 'Lock' : 'Unlock'" /></el-icon>
@@ -301,7 +308,7 @@ function onPageChange({ page, rows }) {
           </template>
         </el-table-column>
 
-        <el-table-column prop="status" label="状态" width="110">
+        <el-table-column prop="status" label="状态" width="104" align="center" header-align="center">
           <template #default="{ row }">
             <StatusPill :tone="statusBadge(row.status).tone" dot>
               {{ statusBadge(row.status).label }}
@@ -309,18 +316,24 @@ function onPageChange({ page, rows }) {
           </template>
         </el-table-column>
 
-        <el-table-column label="SSE" width="120" align="center">
+        <el-table-column label="连接地址" width="220" align="center" header-align="center">
           <template #default="{ row }">
-            <el-tooltip placement="top" :raw-content="true" :show-after="100">
-              <template #content>复制 SSE URL</template>
-              <button class="btn btn-ghost btn-sm sse-btn" @click.stop="copySse(row)">
-                <el-icon><CopyDocument /></el-icon> 复制
-              </button>
-            </el-tooltip>
+            <div class="endpoint-actions">
+              <el-tooltip placement="top" :content="endpointUrl(row, 'sse')" :show-after="180">
+                <button class="endpoint-btn" @click.stop="copyEndpoint(row, 'sse')">
+                  <el-icon><CopyDocument /></el-icon> SSE
+                </button>
+              </el-tooltip>
+              <el-tooltip placement="top" :content="endpointUrl(row, 'streamable')" :show-after="180">
+                <button class="endpoint-btn" @click.stop="copyEndpoint(row, 'streamable')">
+                  <el-icon><CopyDocument /></el-icon> Streamable
+                </button>
+              </el-tooltip>
+            </div>
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="220" fixed="right" align="right">
+        <el-table-column label="操作" width="204" fixed="right" align="center" header-align="center">
           <template #default="{ row }">
             <div class="ops">
               <button class="op-btn" @click="gotoDetail(row)">详情</button>
@@ -447,7 +460,7 @@ function onPageChange({ page, rows }) {
   margin-bottom: 18px;
 }
 
-.field { display: flex; flex-direction: column; gap: 6px; min-width: 200px; max-width: 280px; }
+.field { display: flex; flex: 0 0 248px; flex-direction: column; gap: 6px; min-width: 0; }
 .field label {
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
@@ -488,29 +501,9 @@ function onPageChange({ page, rows }) {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ===== Name cell (avatar + name) ===== */
-:deep(.gw-cell) {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-:deep(.gw-avatar) {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-md);
-  display: grid;
-  place-items: center;
-  background: var(--gradient-primary-soft);
-  border: 1px solid var(--info-line);
-  color: var(--primary-600);
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-sm);
-  flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace;
-}
-:root.dark :deep(.gw-avatar) { color: var(--primary-300); }
+/* ===== Name cell ===== */
 :deep(.gw-name) {
+  display: block;
   font-weight: var(--fw-semibold);
   color: var(--text-strong);
   font-size: var(--fs-base);
@@ -557,13 +550,49 @@ function onPageChange({ page, rows }) {
   margin-right: 2px;
 }
 
-/* ===== SSE button ===== */
-:deep(.sse-btn) {
+/* ===== MCP endpoint copy actions ===== */
+:deep(.endpoint-actions) {
+  display: grid;
+  grid-template-columns: 70px 112px;
+  justify-content: center;
+  gap: 6px;
+}
+:deep(.endpoint-btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   font-size: var(--fs-xs);
-  gap: 4px;
-  height: 28px;
-  padding: 0 10px;
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: color var(--dur-base) var(--ease), border-color var(--dur-base) var(--ease), background var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+}
+:deep(.endpoint-btn:hover) {
+  color: var(--primary-600);
+  border-color: var(--info-line);
+  background: var(--info-soft);
+  transform: translateY(-1px);
+}
+:deep(.endpoint-btn:active) { transform: translateY(0) scale(.98); }
+:deep(.endpoint-btn:focus-visible) { outline: 2px solid var(--primary-400); outline-offset: 2px; }
+:root.dark :deep(.endpoint-btn:hover) { color: var(--primary-300); }
+
+:deep(.gateway-grid .el-table__header-wrapper th .cell),
+:deep(.gateway-grid .el-table__body-wrapper td .cell) {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+:deep(.gateway-grid .el-table__header-wrapper th.is-center .cell),
+:deep(.gateway-grid .el-table__body-wrapper td.is-center .cell) {
+  justify-content: center;
 }
 
 /* ===== icon buttons (操作) ===== */
@@ -585,7 +614,7 @@ function onPageChange({ page, rows }) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  justify-content: flex-end;
+  justify-content: center;
 }
 .op-btn {
   display: inline-flex;
@@ -733,5 +762,10 @@ function onPageChange({ page, rows }) {
   padding: 18px 0 4px;
   color: var(--text-faint);
   font-size: var(--fs-sm);
+}
+
+@media (max-width: 900px) {
+  .field { flex: 1 1 220px; }
+  .toolbar { width: 100%; justify-content: flex-end; }
 }
 </style>

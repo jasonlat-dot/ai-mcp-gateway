@@ -11,7 +11,7 @@ public enum ResponseCode {
 
     DB_UPDATE_FAIL("0005", "数据库更新失败"),
     // GATEWAY-apikey非法
-    GATEWAY_APIKEY_ILLEGAL("ERROR_GATEWAY_APIKEY_ILLEGAL", "apikey非法"),
+    GATEWAY_APIKEY_ILLEGAL("ERROR_GATEWAY_APIKEY_ILLEGAL", "apikey illegal"),
     // 网关不存在
     GATEWAY_NOT_FOUND("ERROR_GATEWAY_NOT_FOUND", "网关不存在"),
     // 网关已禁用

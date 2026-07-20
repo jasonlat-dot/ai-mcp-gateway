@@ -1,14 +1,15 @@
 package com.jasonlat.ai.cases.admin.llm;
 
 import com.jasonlat.ai.cases.admin.IAdminLLMService;
-import com.jasonlat.ai.domain.gateway.service.IGatewayToolConfigService;
 import com.jasonlat.ai.domain.llm.model.entity.BuildChatModelCommandEntity;
 import com.jasonlat.ai.domain.llm.model.valobj.McpConfigVO;
+import com.jasonlat.ai.domain.llm.model.valobj.McpTypeEnumVO;
 import com.jasonlat.ai.domain.llm.service.ILLMService;
 import com.jasonlat.ai.trigger.api.dto.GatewayLLMRequestDTO;
 import com.jasonlat.ai.trigger.api.dto.GatewayLLMResponseDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +24,8 @@ public class AdminLLMService implements IAdminLLMService {
     @Value("${server.servlet.context-path}")
     private String baseUrlContextPath;
 
-    @Value("${server.port}")
-    private Integer port;
+    @Value("${mcp.internal-base-url}")
+    private String mcpInternalBaseUrl;
 
     @Resource
     private ILLMService llmService;
@@ -35,12 +36,28 @@ public class AdminLLMService implements IAdminLLMService {
 
         String gatewayId = requestDTO.getGatewayId();
 
-        String baseUrl = "http://localhost:" + port;
-        String sseEndpoint = baseUrlContextPath + "/" + gatewayId + "/mcp/sse";
+        String baseUrl = StringUtils.removeEnd(mcpInternalBaseUrl, "/");
+
+        // 解析 MCP 连接类型；默认 SSE
+        McpTypeEnumVO mcpType = McpTypeEnumVO.SSE;
+        if (StringUtils.isNotBlank(requestDTO.getMcpType())) {
+            try {
+                mcpType = McpTypeEnumVO.valueOf(requestDTO.getMcpType().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                log.warn("不支持的 mcpType:{}，使用默认 SSE", requestDTO.getMcpType());
+            }
+        }
+
+        // 根据 MCP 类型拼接 endpoint；SSE 带 /sse 后缀，Streamable 不带
+        String endpoint = baseUrlContextPath + "/" + gatewayId + "/mcp";
+        if (McpTypeEnumVO.SSE == mcpType) {
+            endpoint += "/sse";
+        }
+
 
         McpConfigVO mcpConfigVO = McpConfigVO.builder()
                 .baseUri(baseUrl)
-                .sseEndpoint(sseEndpoint)
+                .endpoint(endpoint)
                 .authApiKey(requestDTO.getAuthApiKey())
                 .timeout(requestDTO.getTimeout())
                 .build();
@@ -48,6 +65,7 @@ public class AdminLLMService implements IAdminLLMService {
         BuildChatModelCommandEntity commandEntity = BuildChatModelCommandEntity.builder()
                 .gatewayId(gatewayId)
                 .mcpConfigVO(mcpConfigVO)
+                .mcpType(mcpType)
                 .build();
 
         String call = llmService.callGateway(commandEntity, requestDTO.getMessage());

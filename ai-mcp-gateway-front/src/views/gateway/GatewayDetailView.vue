@@ -14,6 +14,7 @@ import {
   pageGatewayAuth,
   copyText,
   buildSseUrl,
+  buildStreamableUrl,
 } from '@/api/admin'
 import { authBadge, statusBadge, fmtDate, httpMethodBadge } from '@/utils/format'
 import { useToast } from '@/composables/useToast'
@@ -52,10 +53,18 @@ async function loadAll() {
 
 onMounted(loadAll)
 
-async function copySse() {
+function endpointUrl(transport) {
+  if (transport === 'streamable') {
+    return gateway.value?.streamableUrl || buildStreamableUrl(id.value)
+  }
+  return gateway.value?.sseUrl || buildSseUrl(id.value)
+}
+
+async function copyEndpoint(transport) {
+  const label = transport === 'streamable' ? 'Streamable' : 'SSE'
   try {
-    await copyText(buildSseUrl(id.value))
-    toast.success('SSE 地址已复制', { duration: 1800 })
+    await copyText(endpointUrl(transport))
+    toast.success(`${label} 地址已复制`, { duration: 1800 })
   } catch {
     toast.error('复制失败', { duration: 1800 })
   }
@@ -86,8 +95,11 @@ const statusTone = computed(() => statusBadge(gateway.value?.status).tone || 'de
         </div>
       </div>
       <div class="hero-right">
-        <button class="btn btn-secondary" @click="copySse">
+        <button class="btn btn-secondary" @click="copyEndpoint('sse')">
           <el-icon><CopyDocument /></el-icon> 复制 SSE URL
+        </button>
+        <button class="btn btn-secondary" @click="copyEndpoint('streamable')">
+          <el-icon><CopyDocument /></el-icon> 复制 Streamable URL
         </button>
         <button class="btn btn-primary" @click="back">
           <el-icon><Back /></el-icon> 返回列表

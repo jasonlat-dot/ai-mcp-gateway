@@ -2,6 +2,7 @@
  * admin 共享工具方法
  *  - copyText: 剪贴板(浏览器安全上下文 fallback)
  *  - buildSseUrl: SSE 长连接绝对 URL(与 /admin base 无关)
+ *  - buildStreamableUrl: Streamable HTTP 绝对 URL
  * ============================================================ */
 
 export function copyText(text) {
@@ -33,4 +34,9 @@ export function buildSseUrl(gatewayId) {
   // - 生产: Nginx 已经反代过 /api-gateway,这里填空字符串即可
   const base = (import.meta.env.VITE_SSE_BASE || 'http://127.0.0.1:8888').replace(/\/$/, '')
   return `${base}/${gatewayId}/mcp/sse`
+}
+
+export function buildStreamableUrl(gatewayId) {
+  const base = (import.meta.env.VITE_SSE_BASE || 'http://127.0.0.1:8888').replace(/\/$/, '')
+  return `${base}/${gatewayId}/mcp`
 }

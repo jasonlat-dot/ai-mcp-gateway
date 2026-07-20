@@ -20,6 +20,7 @@ import com.jasonlat.ai.types.exception.AppException;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +42,28 @@ public class GatewayController implements IGatewayAdminService {
 
     @Resource
     private IAdminManageService adminManageService;
+
+    /**
+     * 使用当前请求的 scheme、host、port 和 Servlet context-path 生成客户端可直接使用的 MCP 地址。
+     * context-path 因此无需在前端硬编码，修改 application.yml 并重启后会自动生效。
+     */
+    private GatewayConfigDTO toGatewayConfigDTO(GatewayConfigEntity entity) {
+        String streamableUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .pathSegment(entity.getGatewayId(), "mcp")
+                .build()
+                .toUriString();
+
+        return GatewayConfigDTO.builder()
+                .gatewayId(entity.getGatewayId())
+                .gatewayName(entity.getGatewayName())
+                .gatewayDesc(entity.getGatewayDesc())
+                .version(entity.getVersion())
+                .auth(entity.getAuth())
+                .status(entity.getStatus())
+                .sseUrl(streamableUrl + "/sse")
+                .streamableUrl(streamableUrl)
+                .build();
+    }
 
     @RequestMapping(value = "save_gateway_config", method = RequestMethod.POST)
     @Override
@@ -149,14 +172,9 @@ public class GatewayController implements IGatewayAdminService {
         try {
             log.info("查询网关配置列表开始");
             List<GatewayConfigEntity> entities = adminManageService.queryGatewayConfigList();
-            List<GatewayConfigDTO> dtoList = entities.stream().map(e -> GatewayConfigDTO.builder()
-                    .gatewayId(e.getGatewayId())
-                    .gatewayName(e.getGatewayName())
-                    .gatewayDesc(e.getGatewayDesc())
-                    .version(e.getVersion())
-                    .auth(e.getAuth())
-                    .status(e.getStatus())
-                    .build()).collect(Collectors.toList());
+            List<GatewayConfigDTO> dtoList = entities.stream()
+                    .map(this::toGatewayConfigDTO)
+                    .collect(Collectors.toList());
             log.info("查询网关配置列表完成 count: {}", dtoList.size());
             return Response.<List<GatewayConfigDTO>>builder()
                     .code(ResponseCode.SUCCESS.getCode())
@@ -193,14 +211,9 @@ public class GatewayController implements IGatewayAdminService {
                     .build();
 
             GatewayConfigPageEntity pageEntity = adminManageService.queryGatewayConfigPage(queryEntity);
-            List<GatewayConfigDTO> dtoList = pageEntity.getDataList().stream().map(e -> GatewayConfigDTO.builder()
-                    .gatewayId(e.getGatewayId())
-                    .gatewayName(e.getGatewayName())
-                    .gatewayDesc(e.getGatewayDesc())
-                    .version(e.getVersion())
-                    .auth(e.getAuth())
-                    .status(e.getStatus())
-                    .build()).collect(Collectors.toList());
+            List<GatewayConfigDTO> dtoList = pageEntity.getDataList().stream()
+                    .map(this::toGatewayConfigDTO)
+                    .collect(Collectors.toList());
             log.info("查询网关配置分页完成 total: {}", pageEntity.getTotal());
             return ResponsePage.<List<GatewayConfigDTO>>builder()
                     .code(ResponseCode.SUCCESS.getCode())

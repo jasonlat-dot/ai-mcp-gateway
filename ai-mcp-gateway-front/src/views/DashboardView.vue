@@ -12,6 +12,7 @@ import {
   listGatewayProtocol,
   listGatewayAuth,
   buildSseUrl,
+  buildStreamableUrl,
   copyText,
 } from '@/api/admin'
 import { authBadge, statusBadge, parseHeaders } from '@/utils/format'
@@ -142,10 +143,18 @@ const greeting = computed(() => {
   return '晚上好'
 })
 
-async function quickCopySse(gatewayId) {
+function endpointUrl(gateway, transport) {
+  if (transport === 'streamable') {
+    return gateway.streamableUrl || buildStreamableUrl(gateway.gatewayId)
+  }
+  return gateway.sseUrl || buildSseUrl(gateway.gatewayId)
+}
+
+async function quickCopyEndpoint(gateway, transport) {
+  const label = transport === 'streamable' ? 'Streamable' : 'SSE'
   try {
-    await copyText(buildSseUrl(gatewayId))
-    toast.success('SSE 地址已复制', { duration: 1800 })
+    await copyText(endpointUrl(gateway, transport))
+    toast.success(`${label} 地址已复制`, { duration: 1800 })
   } catch {
     toast.error('复制失败', { duration: 1800 })
   }
@@ -221,21 +230,27 @@ async function quickCopyApiKey(apiKey) {
                 <span class="gw-id"><IdCell :value="g.gatewayId" :max="36" /></span>
                 <span class="gw-name" :title="g.gatewayName || g.gatewayId">{{ g.gatewayName || g.gatewayId }}</span>
               </span>
-              <span class="gw-cell gw-cell-actions">
-<el-tooltip placement="top" :raw-content="true" :show-after="100">
-                <template #content>复制 SSE 地址</template>
-                <button class="btn btn-ghost btn-icon btn-sm" @click="quickCopySse(g.gatewayId)">
-                  <el-icon><CopyDocument /></el-icon>
-                </button>
-              </el-tooltip>
-                <button class="btn btn-sm btn-secondary" @click="go(`/gateways/${g.gatewayId}`)">
-                  <el-icon><View /></el-icon> 详情
-                </button>
-              </span>
               <span class="gw-cell gw-cell-tags">
                 <StatusPill :tone="authBadge(g.auth).tone">{{ authBadge(g.auth).label }}</StatusPill>
                 <StatusPill :tone="statusBadge(g.status).tone">{{ statusBadge(g.status).label }}</StatusPill>
                 <StatusPill tone="violet">v{{ g.version || '1.0.0' }}</StatusPill>
+              </span>
+              <span class="gw-cell gw-cell-endpoints">
+                <el-tooltip placement="top" :content="endpointUrl(g, 'sse')" :show-after="180">
+                  <button class="gw-copy-btn" aria-label="复制 SSE 地址" @click="quickCopyEndpoint(g, 'sse')">
+                    <el-icon><CopyDocument /></el-icon> SSE
+                  </button>
+                </el-tooltip>
+                <el-tooltip placement="top" :content="endpointUrl(g, 'streamable')" :show-after="180">
+                  <button class="gw-copy-btn" aria-label="复制 Streamable 地址" @click="quickCopyEndpoint(g, 'streamable')">
+                    <el-icon><CopyDocument /></el-icon> Streamable
+                  </button>
+                </el-tooltip>
+              </span>
+              <span class="gw-cell gw-cell-detail">
+                <button class="btn btn-sm btn-secondary" @click="go(`/gateways/${g.gatewayId}`)">
+                  <el-icon><View /></el-icon> 详情
+                </button>
               </span>
             </li>
           </ul>
@@ -454,7 +469,7 @@ async function quickCopyApiKey(apiKey) {
   .bento-row-top { grid-template-columns: 1fr; }
 }
 
-.recent-list { min-height: 200px; }
+.recent-list { min-height: 200px; container-type: inline-size; }
 .empty-host { padding: 24px 0; }
 
 /* ===== Gateway table (扁平单行,与协议表一致) ===== */
@@ -464,10 +479,11 @@ async function quickCopyApiKey(apiKey) {
   gap: 4px;
 }
 .gw-row {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto auto auto;
+  grid-template-areas: "info tags endpoints detail";
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 8px 10px;
   border-radius: var(--radius-md);
   background: var(--bg-elevated);
@@ -481,20 +497,24 @@ async function quickCopyApiKey(apiKey) {
 }
 .gw-cell { min-width: 0; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
 .gw-cell-info {
-  display: flex;
-  align-items: center;
+  grid-area: info;
   gap: 6px;
   min-width: 0;
-  flex: 0 0 auto;
 }
 .gw-cell-tags {
+  grid-area: tags;
   gap: 6px;
   flex-shrink: 0;
 }
-.gw-cell-actions {
-  margin-left: auto;
+.gw-cell-endpoints {
+  grid-area: endpoints;
+  display: grid;
+  grid-template-columns: 58px 96px;
   gap: 6px;
-  flex-shrink: 0;
+}
+.gw-cell-detail {
+  grid-area: detail;
+  justify-content: flex-end;
 }
 
 .gw-id {
@@ -514,6 +534,55 @@ async function quickCopyApiKey(apiKey) {
   min-width: 0;
   flex: 0 1 auto;
   max-width: 220px;
+}
+
+.gw-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 7px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: color var(--dur-base) var(--ease), border-color var(--dur-base) var(--ease), background var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+}
+.gw-copy-btn:hover {
+  color: var(--primary-600);
+  border-color: var(--info-line);
+  background: var(--info-soft);
+  transform: translateY(-1px);
+}
+.gw-copy-btn:active { transform: translateY(0) scale(.98); }
+.gw-copy-btn:focus-visible { outline: 2px solid var(--primary-400); outline-offset: 2px; }
+:root.dark .gw-copy-btn:hover { color: var(--primary-300); }
+
+@container (max-width: 760px) {
+  .gw-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "info detail"
+      "tags endpoints";
+    row-gap: 8px;
+  }
+  .gw-cell-tags { justify-content: flex-start; }
+  .gw-cell-endpoints { justify-content: flex-end; }
+}
+
+@container (max-width: 520px) {
+  .gw-row {
+    grid-template-areas:
+      "info detail"
+      "tags tags"
+      "endpoints endpoints";
+  }
+  .gw-cell-endpoints { justify-content: flex-start; }
 }
 
 /* 让 PageCard 在顶部对齐时,卡片标题区高度统一,

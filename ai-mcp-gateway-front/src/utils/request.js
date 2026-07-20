@@ -47,6 +47,16 @@ function normalizeError(reason) {
   return new Error('请求失败')
 }
 
+function normalizeHttpErrorPayload(status, data) {
+  const body = data && typeof data === 'object' ? data : { data }
+  return {
+    ...body,
+    code: body.code || String(status),
+    info: body.info || body.message || (typeof data === 'string' && data.trim()) || `请求异常 ${status}`,
+    httpStatus: status,
+  }
+}
+
 const SUCCESS_CODES = new Set(['0000', 'SUCCESS_0000', '200'])
 
 function createService() {
@@ -121,9 +131,12 @@ function createService() {
             window.location.hash = '#/login'
           }
           // 401/403 仍然要主动提示用户,这是不可恢复的业务状态。
-          return Promise.reject(normalizeError({ info: '登录状态已失效,请重新登录', code: String(status) }))
+          return Promise.reject(normalizeError({
+            ...normalizeHttpErrorPayload(status, data),
+            info: '登录状态已失效,请重新登录',
+          }))
         }
-        return Promise.reject(normalizeError({ info: data?.info || `请求异常 ${status}`, code: String(status) }))
+        return Promise.reject(normalizeError(normalizeHttpErrorPayload(status, data)))
       }
       if (error.request) {
         if (IS_DEV) {

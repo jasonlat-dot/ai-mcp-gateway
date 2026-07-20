@@ -23,4 +23,10 @@ public class GatewayConfigDTO implements Serializable {
     private Integer auth;
     private Integer status;
 
+    /** 当前运行环境下的 MCP SSE 完整地址。 */
+    private String sseUrl;
+
+    /** 当前运行环境下的 MCP Streamable HTTP 完整地址。 */
+    private String streamableUrl;
+
 }

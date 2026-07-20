@@ -34,4 +34,8 @@ public class GatewayLLMRequestDTO {
      */
     private String message;
 
+    /**
+     * MCP 连接类型；sse / streamable，默认 sse
+     */
+    private String mcpType = "sse";
 }

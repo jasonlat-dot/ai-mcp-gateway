@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class McpConfigVO {
 
     private String baseUri;
-    private String sseEndpoint;
+    private String endpoint;
     private String authApiKey;
     private Integer timeout;
 
