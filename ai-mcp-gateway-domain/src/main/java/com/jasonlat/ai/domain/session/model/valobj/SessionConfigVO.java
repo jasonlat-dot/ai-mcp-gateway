@@ -7,6 +7,7 @@ import reactor.core.publisher.Sinks;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+
 /**
  * 会话配置
  * @author jasonlat
@@ -23,13 +24,19 @@ public class SessionConfigVO {
     // 响应式对象
     private Sinks.Many<ServerSentEvent<String>> sink;
 
-    // 不可变、线程安全 精确到纳秒的 时间
+    /**
+     * 会话时间
+     */
     private Instant createTime;
 
-    // 最后访问时间
+    /**
+     * 最后访问时间戳，volatile 确保多线程下可见性
+     */
     private volatile Instant lastAccessedTime;
 
-    // 是否活跃
+    /**
+     * 会话活跃状态标识
+     */
     private volatile boolean active;
 
     public SessionConfigVO(String sessionId, Sinks.Many<ServerSentEvent<String>> sink) {
@@ -58,7 +65,6 @@ public class SessionConfigVO {
      * 过期时间判断
      */
     public boolean isExpired(long timeoutMinutes) {
-        // 上次访问时间 早于 当前时间往前推 timeoutMinutes 分钟 → 已过期
         return lastAccessedTime.isBefore(Instant.now().minus(timeoutMinutes, ChronoUnit.MINUTES));
     }
 }

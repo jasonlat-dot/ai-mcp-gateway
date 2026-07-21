@@ -1,6 +1,7 @@
 package com.jasonlat.ai.domain.session.service;
 
 import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
+import com.jasonlat.ai.domain.session.model.valobj.SessionSyncInfoVO;
 import com.jasonlat.ai.domain.session.model.valobj.enums.SessionTransportTypeEnumVO;
 
 /**
@@ -28,6 +29,8 @@ public interface ISessionManagementService {
      */
     void removeSession(String sessionId);
 
+    void removeLocalSession(String sessionId);
+
     /**
      * 获取会话
      * @param sessionId 会话ID
@@ -35,14 +38,10 @@ public interface ISessionManagementService {
      */
     SessionConfigVO getSession(String sessionId);
 
-    /**
-     * 清理无效会话(过期的会话)
-     */
-    void clearInactiveSessions();
 
-    /**
-     * 停止服务
-     */
-    void shutdown();
+    void syncSession(SessionSyncInfoVO sessionSyncInfoVO);
 
+    boolean hasSession(String sessionId);
+
+    void initializeDistributedSessions();
 }

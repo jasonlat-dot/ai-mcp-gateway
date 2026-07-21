@@ -20,17 +20,10 @@ public class McpSseMessageService implements IMcpMessageService<Object> {
     @Resource
     private DefaultMcpMessageFactory defaultMcpMessageFactory;
 
-    /**
-     * 处理MCP消息
-     *
-     * @param messageCommandEntity 消息命令实体
-     * @return 处理结果
-     */
     @Override
-    public ResponseEntity<Object> handleMessage(HandleMessageCommandEntity messageCommandEntity) throws Exception {
+    public ResponseEntity<Object> handleMessage(HandleMessageCommandEntity commandEntity) throws Exception {
         StrategyHandler<HandleMessageCommandEntity, DefaultMcpMessageFactory.DynamicContext, ResponseEntity<Object>> strategyHandler
                 = defaultMcpMessageFactory.strategyHandler();
-        // 调用策略处理逻辑
-        return strategyHandler.apply(messageCommandEntity, new DefaultMcpMessageFactory.DynamicContext());
+        return strategyHandler.apply(commandEntity, new DefaultMcpMessageFactory.DynamicContext());
     }
 }

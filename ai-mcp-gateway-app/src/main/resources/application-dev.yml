@@ -28,17 +28,20 @@ thread:
         block-queue-size: 5000
         policy: CallerRunsPolicy
 
-baidu:
-  api-key: ${BAIDU_API_KEY}
+
+mcp:
+  internal-base-url: ${MCP_INTERNAL_BASE_URL:http://127.0.0.1:${server.port}}
+  session:
+    event-buffer-capacity: ${EVENT_BUFFER_CAPACITY:256}
+    session-timeout-minutes: ${SESSION_TIMEOUT_MINUTES:30}
 
 openai:
   client:
-    base-url: ${OPENAI_API_BASE_URL}
-    api-key: ${OPENAI_API_KEY}
-    model: gpt-5.4
+    base-url: http://127.0.0.1:9999/
+    api-key: sk-tabbit-local
+    model: tabbit/gpt-5.5
     completions-path: v1/chat/completions
     embeddings-path: v1/embeddings
-
     http:
       connect-timeout-ms: 10000
       response-timeout-ms: 120000
@@ -55,14 +58,59 @@ openai:
         username:
         password:
 
+spring:
+  ai:
+    openai:
+      base-url: ${openai.client.base-url}
+      api-key: ${openai.client.api-key}
+      model: ${openai.client.model}
+      completions-path: ${openai.client.completions-path}
+      embeddings-path: ${openai.client.embeddings-path}
+
+  # 数据库配置
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${EDU_DB_URL:jdbc:postgresql://192.168.3.16:15432/ai_mcp_gateway_v2}
+    username: ${EDU_DB_USERNAME:root}
+    password: ${EDU_DB_PASSWORD:123456}
+  rabbitmq:
+    enabled: ${EDU_RESOURCE_RABBITMQ_ENABLED:true}
+    host: ${EDU_RABBITMQ_HOST:192.168.3.16}
+    port: ${EDU_RABBITMQ_PORT:5672}
+    username: ${EDU_RABBITMQ_USERNAME:admin}
+    password: ${EDU_RABBITMQ_PASSWORD:123456}
+    virtual-host: ${EDU_RABBITMQ_VHOST:/}
+
+
+  # Redisson 分布式使用
+redis:
+  sdk:
+    config:
+      host: 192.168.3.16
+      port: 16379
+      password: 123456
+      database: 2
+      pool-size: 10
+      min-idle-size: 5
+      idle-timeout: 30000
+      connect-timeout: 5000
+      retry-attempts: 3
+      retry-interval: 1000
+      ping-interval: 60000
+      keep-alive: true
+
   # mybatis plus 配置
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #设置sql的日志,有了这句才有打印各种sql的日志在控制台
+    #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   mapper-locations: classpath:mybatis/mapper/*.xml
+
 
   # 日志
 logging:
   level:
     root: info
+    com.jasonlat.ai: info
+    com.jasonlat.ai.infrastructure.dao: OFF # OFF: 禁止打印数据库日志, DEBUG：打印 SQL 和参数， TRACE：打印 SQL、参数和结果集

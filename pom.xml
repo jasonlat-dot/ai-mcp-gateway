@@ -212,7 +212,6 @@
                 <scope>import</scope>
             </dependency>
 
-
             <dependency>
                 <groupId>com.jasonlat.dot</groupId>
                 <artifactId>redisson-spring-boot-starter</artifactId>

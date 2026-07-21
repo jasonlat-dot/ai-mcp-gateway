@@ -39,7 +39,7 @@ public class EndNode extends AbstractMcpSseSessionSupport {
 
         return sink.asFlux()
                 .mergeWith(
-                        Flux.interval(Duration.ofSeconds(10))
+                        Flux.interval(Duration.ofSeconds(30))
                                 .map(i -> ServerSentEvent.<String>builder()
                                         .comment("heartbeat")
                                         .build())
