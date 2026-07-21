@@ -40,8 +40,5 @@ public interface ISessionDistributedService {
      */
     List<SessionSyncInfoVO> loadActiveSessions();
 
-    /**
-     * 订阅 Redis Session 同步事件
-     */
-    void subscribeSessionSyncEvent(Consumer<SessionSyncEventVO> consumer);
+    SessionSyncInfoVO getSession(String sessionId);
 }

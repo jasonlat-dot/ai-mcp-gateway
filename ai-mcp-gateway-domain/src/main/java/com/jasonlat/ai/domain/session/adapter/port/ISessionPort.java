@@ -1,5 +1,6 @@
 package com.jasonlat.ai.domain.session.adapter.port;
 
+import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionSyncEventVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionSyncInfoVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
@@ -22,4 +23,6 @@ public interface ISessionPort {
     void publishSessionSyncEvent(SessionSyncEventVO event);
 
     void subscribeSessionSyncEvent(Consumer<SessionSyncEventVO> consumer);
+
+    SessionSyncInfoVO getSession(String sessionId);
 }

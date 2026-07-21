@@ -183,8 +183,10 @@ public class SessionManagementService implements ISessionManagementService {
             sessionConfigVO.updateLastAccessed();
             return sessionConfigVO;
         }
-
-        return null;
+        // 兜底处理 从分布式缓存获取session信息
+        SessionSyncInfoVO sessionSyncInfoVO = sessionDistributedService.getSession(sessionId);
+        if (sessionSyncInfoVO == null) return null;
+        return sessionDistributedService.rebuildLocalSession(sessionSyncInfoVO);
     }
 
     @Override

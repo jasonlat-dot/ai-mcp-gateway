@@ -135,4 +135,9 @@ public class SessionDistributedService implements ISessionDistributedService {
     public void subscribeSessionSyncEvent(Consumer<SessionSyncEventVO> consumer) {
         sessionPort.subscribeSessionSyncEvent(consumer);
     }
+
+    @Override
+    public SessionSyncInfoVO getSession(String sessionId) {
+        return sessionPort.getSession(sessionId);
+    }
 }

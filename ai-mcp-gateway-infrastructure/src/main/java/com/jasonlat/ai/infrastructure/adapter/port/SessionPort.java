@@ -180,4 +180,10 @@ public class SessionPort implements ISessionPort {
         topic.addListener(SessionSyncEventVO.class, (channel, msg) -> consumer.accept(msg));
     }
 
+    @Override
+    public SessionSyncInfoVO getSession(String sessionId) {
+        RMap<String, SessionSyncInfoVO> sessionMap = redissonClient.getMap(SESSION_SYNC_MAP);
+        return sessionMap.get(sessionId);
+    }
+
 }
