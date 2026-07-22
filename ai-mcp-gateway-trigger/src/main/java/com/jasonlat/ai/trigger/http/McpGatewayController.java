@@ -5,6 +5,7 @@ import com.jasonlat.ai.cases.mcp.IMcpMessageService;
 import com.jasonlat.ai.cases.mcp.IMcpSessionService;
 import com.jasonlat.ai.domain.session.model.entity.HandleMessageCommandEntity;
 
+import com.jasonlat.ai.domain.session.model.valobj.SessionConfigVO;
 import com.jasonlat.ai.trigger.api.IMcpGatewayService;
 import com.jasonlat.ai.trigger.api.model.Response;
 import com.jasonlat.ai.types.enums.ResponseCode;
@@ -45,19 +46,15 @@ public class McpGatewayController implements IMcpGatewayService {
     @Override
     @RequestMapping(value = "{gatewayId}/mcp/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> establishSseConnection(@PathVariable("gatewayId") String gatewayId,
-                                                                @RequestParam(
-                                                                        value = "api_key",
-                                                                        required = false,
-                                                                        defaultValue = ""
-                                                                ) String apiKey) throws Exception {
+                                                                @RequestParam(value = "api_key", required = false, defaultValue = "") String apiKey) throws Exception {
         try {
-            log.info("建立SSE连接 gatewayId:{}", gatewayId);
+            log.debug("建立SSE连接 gatewayId:{}", gatewayId);
             if (StringUtils.isBlank(gatewayId)) {
                 log.error("网关ID不能为空 gatewayId:{}", gatewayId);
                 throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
             }
             Flux<ServerSentEvent<String>> serverSentEventFlux = mcpSessionService.createMcpSession(gatewayId, apiKey);
-            log.info("建立SSE连接成功 gatewayId:{}", gatewayId);
+            log.debug("建立SSE连接成功 gatewayId:{}", gatewayId);
             return serverSentEventFlux;
         }  catch (AppException e) {
             log.error("建立 MCP SSE 连接拒绝，gatewayId: {}", gatewayId, e);
@@ -80,24 +77,55 @@ public class McpGatewayController implements IMcpGatewayService {
     public Mono<ResponseEntity<Object>> handleMessage(@PathVariable("gatewayId") String gatewayId,
                                                     @RequestParam(value = "api_key", required = false, defaultValue = "") String apiKey,
                                                     @RequestParam("sessionId") String sessionId,
-                                                    @RequestBody String messageBody) throws Exception {
+                                                    @RequestBody String messageBody) {
         try {
-            log.info("处理 MCP SSE 消息 gatewayId:{} sessionId:{} messageBody:{}", gatewayId, sessionId, messageBody);
+            log.debug("处理 MCP SSE 消息 gatewayId:{} sessionId:{} messageBody:{}", gatewayId, sessionId, messageBody);
 
             // 非法参数校验
-            if (StringUtils.isBlank(gatewayId) || StringUtils.isBlank(sessionId)) {
-                log.error("参数不能为空 gatewayId:{} sessionId:{}", gatewayId, sessionId);
+            if (StringUtils.isBlank(gatewayId) || StringUtils.isBlank(sessionId) || StringUtils.isBlank(messageBody)) {
+                log.error("参数不能为空 gatewayId:{} sessionId:{} messageBody:{}", gatewayId, sessionId, messageBody);
                 throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
             }
 
             HandleMessageCommandEntity handleMessageCommandEntity = new HandleMessageCommandEntity(gatewayId, apiKey, sessionId, messageBody);
             ResponseEntity<Object> responseEntity = mcpMessageService.handleMessage(handleMessageCommandEntity);
 
-            log.info("处理 MCP SSE 消息成功 gatewayId:{} sessionId:{} messageBody:{}", gatewayId, sessionId, messageBody);
+            log.debug("处理 MCP SSE 消息成功 gatewayId:{} sessionId:{} messageBody:{}", gatewayId, sessionId, messageBody);
             return Mono.just(responseEntity);
         } catch (Exception e) {
             log.error("处理 MCP SSE 消息失败，gatewayId: {}", gatewayId, e);
             return Mono.just(ResponseEntity.internalServerError().build());
+        }
+    }
+
+    /**
+     * 内部转发接口：被其他实例调用，用于把 POST 请求转发到本机（真正的 SSE 连接持有者）。
+     * <p>
+     * 本接口只接收本机是 holder 的请求，最终调 mcpMessageService.handleMessage 把响应
+     * 通过本地 Sink 推回给客户端（客户端的 SSE 长连接在本机）。
+     *
+     * @param gatewayId  网关ID
+     * @param sessionId  会话ID
+     * @param messageBody 原始 JSON-RPC 消息体
+     */
+    @PostMapping(value = "{gatewayId}/mcp/internal/forward", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> forwardMessage(@PathVariable("gatewayId") String gatewayId,
+                                                 @RequestParam(value = "api_key", required = false, defaultValue = "") String apiKey,
+                                                 @RequestParam("sessionId") String sessionId,
+                                                 @RequestBody String messageBody) {
+        try {
+
+            log.debug("收到内部转发请求 gatewayId:{} sessionId:{}, messageBody: {}", gatewayId, sessionId, messageBody);
+            // 非法参数校验
+            if (StringUtils.isBlank(gatewayId) || StringUtils.isBlank(sessionId) || StringUtils.isBlank(messageBody)) {
+                log.error("参数【gatewayId、sessionId、messageBody】不能为空 gatewayId:{} sessionId:{} messageBody: {}", gatewayId, sessionId, messageBody);
+                throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+            }
+            HandleMessageCommandEntity entity = new HandleMessageCommandEntity(gatewayId, apiKey, sessionId, messageBody);
+            return mcpMessageService.handleMessage(entity);
+        } catch (Exception e) {
+            log.error("处理内部转发请求失败，gatewayId: {}", gatewayId, e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

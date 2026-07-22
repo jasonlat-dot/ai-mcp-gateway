@@ -45,4 +45,11 @@ public class SessionSyncInfoVO {
      * 会话活跃状态标识
      */
     private volatile boolean active;
+
+    /**
+     * 持有 SSE 长连接的实例ID（IP:Port 或 instanceId）
+     * <p>
+     * 关键字段：用于在多实例部署中，POST 消息能识别"谁是连接持有者"，从而把响应推回给真正的长连接。
+     */
+    private volatile String holderInstanceId;
 }

@@ -3,6 +3,8 @@ package com.jasonlat.ai.infrastructure.adapter.port;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jasonlat.ai.domain.session.adapter.port.ISessionPort;
+import com.jasonlat.ai.domain.session.model.valobj.SessionForwardRequestVO;
+import com.jasonlat.ai.domain.session.model.valobj.SessionForwardResponseVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionSyncEventVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionSyncInfoVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
@@ -14,11 +16,13 @@ import lombok.AllArgsConstructor;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RMap;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 import retrofit2.Call;
+import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -184,6 +188,71 @@ public class SessionPort implements ISessionPort {
     public SessionSyncInfoVO getSession(String sessionId) {
         RMap<String, SessionSyncInfoVO> sessionMap = redissonClient.getMap(SESSION_SYNC_MAP);
         return sessionMap.get(sessionId);
+    }
+
+    @Override
+    public SessionForwardResponseVO forwardToHolder(SessionForwardRequestVO request) {
+        if (request == null) {
+            return SessionForwardResponseVO.fail(400, "转发请求 VO 不能为空");
+        }
+        if (StringUtils.isBlank(request.getHolderInstanceId())) {
+            return SessionForwardResponseVO.fail(400, "holderInstanceId 不能为空");
+        }
+        String url = buildHolderUrl(
+                request.getHolderInstanceId(),
+                request.getContextPath(),
+                request.getGatewayId(),
+                request.getSessionId(),
+                request.getApiKey()
+        );
+        try {
+            Map<String, Object> headers = buildForwardHeaders(request.getFromInstanceId());
+            RequestBody requestBody = RequestBody.create(
+                    MediaType.parse("application/json"),
+                    request.getMessageBody() == null ? "" : request.getMessageBody()
+            );
+            Call<ResponseBody> call = gateway.post(url, headers, requestBody);
+            Response<ResponseBody> response = call.execute();
+            int statusCode = response.code();
+            try (ResponseBody responseBody = response.body()) {
+                if (responseBody == null) return null;
+                if (response.isSuccessful()) {
+                    return SessionForwardResponseVO.ok(statusCode, responseBody.toString());
+                } else {
+                    return SessionForwardResponseVO.fail(statusCode, responseBody.toString());
+                }
+            }
+
+        } catch (IOException e) {
+            return SessionForwardResponseVO.fail(503, "转发 IO 异常: " + e.getMessage());
+        } catch (Exception e) {
+            return SessionForwardResponseVO.fail(500, "转发异常: " + e.getMessage());
+        }
+    }
+    private String buildHolderUrl(String holderInstanceId, String contextPath,
+                                  String gatewayId, String sessionId, String apiKey) {
+        StringBuilder url = new StringBuilder()
+                .append("http://")
+                .append(holderInstanceId)
+                .append(contextPath)
+                .append("/")
+                .append(gatewayId)
+                .append("/mcp/internal/forward")
+                .append("?sessionId=").append(sessionId);
+        if (StringUtils.isNotBlank(apiKey)) {
+            url.append("&api_key=").append(apiKey);
+        }
+        return url.toString();
+    }
+    private Map<String, Object> buildForwardHeaders(String fromInstanceId) {
+        Map<String, Object> headers = new HashMap<>(4);
+        headers.put("Content-Type", "application/json");
+        headers.put("Accept", "application/json");
+        headers.put("X-Internal-Forward", "true");
+        if (StringUtils.isNotBlank(fromInstanceId)) {
+            headers.put("X-Forwarded-Instance", fromInstanceId);
+        }
+        return headers;
     }
 
 }

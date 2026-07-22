@@ -3,6 +3,7 @@ package com.jasonlat.ai.domain.session.model.valobj;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,13 @@ public final class McpSchemaVO {
 
         throw new IllegalArgumentException("Cannot deserialize JsonRpcMessage: " + jsonText);
     }
+
+    public static String serializeJsonRpcMessage(JsonRpcMessage message) throws JsonProcessingException {
+        if (message == null) {
+            return null;
+        }
+        return objectMapper.writeValueAsString(message);
+   }
 
     public static  <T> T unmarshalFrom(Object data, TypeReference<T> typeRef) {
         return objectMapper.convertValue(data, typeRef);

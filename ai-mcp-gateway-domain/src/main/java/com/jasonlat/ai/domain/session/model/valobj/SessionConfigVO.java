@@ -39,12 +39,29 @@ public class SessionConfigVO {
      */
     private volatile boolean active;
 
+    /**
+     * 持有 SSE 长连接的实例 ID（IP:Port 或 instanceId）
+     * <p>
+     * 关键字段：用于判断"本机是否就是连接持有者"。
+     * 若本机不是 holder，POST 消息需要转发到 holder 处理。
+     */
+    private String holderInstanceId;
+
     public SessionConfigVO(String sessionId, Sinks.Many<ServerSentEvent<String>> sink) {
         this.sessionId = sessionId;
         this.sink = sink;
         this.createTime = Instant.now();
         this.lastAccessedTime = Instant.now();
         this.active = true;
+    }
+
+    public SessionConfigVO(String sessionId, Sinks.Many<ServerSentEvent<String>> sink, String holderInstanceId) {
+        this.sessionId = sessionId;
+        this.sink = sink;
+        this.createTime = Instant.now();
+        this.lastAccessedTime = Instant.now();
+        this.active = true;
+        this.holderInstanceId = holderInstanceId;
     }
 
     /**

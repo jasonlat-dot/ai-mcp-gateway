@@ -41,8 +41,8 @@ public class SseMessageHandleNode extends AbstractMcpSseMessageSupport {
                     .event("message")
                     .data(responseJson)
                     .build();
-            log.info("MessageHandleNode emit mcp message, sessionId: {}", sessionConfigVO.getSessionId());
-            Sinks.EmitResult emitResult = sessionConfigVO.getSink().tryEmitNext(responseEvent);
+            log.debug("MessageHandleNode emit mcp message, sessionId: {}", sessionConfigVO.getSessionId());
+            Sinks.EmitResult emitResult = emitWithRetry(sessionConfigVO, responseEvent);
 
             if (emitResult.isFailure()) {
                 log.warn("发送 MCP SSE 响应失败 sessionId:{} result:{}",

@@ -51,15 +51,21 @@ public class SessionManagementService implements ISessionManagementService {
     private final String messageEndpointPrefix;
     private final int eventBufferCapacity;
 
+    private final String instanceId;
 
     public SessionManagementService(
             @Value("${server.servlet.context-path:/api-gateway}") String messageEndpointPrefix,
             @Value("${mcp.session.event-buffer-capacity:256}") int eventBufferCapacity,
-            @Value("${mcp.session.session-timeout-minutes:30}") int sessionTimeoutMinutes
+            @Value("${mcp.session.session-timeout-minutes:30}") int sessionTimeoutMinutes,
+            @Value("${mcp.instance.id}") String instanceId
             ) {
         this.messageEndpointPrefix = messageEndpointPrefix;
         this.eventBufferCapacity = requirePositive(eventBufferCapacity, "mcp.session.event-buffer-capacity");
         this.sessionTimeoutMinutes = requirePositive(sessionTimeoutMinutes, "mcp.session.session-timeout-minutes");
+        /*
+         * 当前实例唯一标识（IP:Port），用于在 holderInstanceId 中记录"我是连接持有者"
+         */
+        this.instanceId = instanceId;
         /*
          * 定时任务调度
          */
@@ -91,9 +97,10 @@ public class SessionManagementService implements ISessionManagementService {
         log.info("创建会话 gatewayId:{} transportType:{}", gatewayId, sessionTransportType.getCode());
 
         String sessionId = "s-" + UUID.randomUUID();
-        SessionConfigVO sessionConfigVO = createLocalSession(sessionId, gatewayId, apiKey, sessionTransportType);
+        SessionConfigVO sessionConfigVO = createLocalSession(sessionId, gatewayId, apiKey, sessionTransportType, instanceId);
 
-        SessionSyncInfoVO sessionSyncInfoVO = sessionDistributedService.buildSessionSyncInfo(sessionId, gatewayId, apiKey, sessionTransportType);
+        SessionSyncInfoVO sessionSyncInfoVO =
+                sessionDistributedService.buildSessionSyncInfo(sessionId, gatewayId, apiKey, sessionTransportType, instanceId);
         sessionDistributedService.saveSession(sessionSyncInfoVO);
 
         log.info("创建会话 gatewayId:{} sessionId:{} transportType:{},当前活跃会话数:{}", gatewayId, sessionId, sessionTransportType.getCode(), activeSessions.size());
@@ -102,6 +109,10 @@ public class SessionManagementService implements ISessionManagementService {
     }
 
     private SessionConfigVO createLocalSession(String sessionId, String gatewayId, String apiKey, SessionTransportTypeEnumVO transportType) {
+        return createLocalSession(sessionId, gatewayId, apiKey, transportType, null);
+    }
+
+    private SessionConfigVO createLocalSession(String sessionId, String gatewayId, String apiKey, SessionTransportTypeEnumVO transportType, String holderInstanceId) {
 
         // 一个 session 只对应一条 SSE 响应流；有界队列避免慢客户端造成无限内存增长。
         Sinks.Many<ServerSentEvent<String>> sink = Sinks.many()
@@ -129,7 +140,7 @@ public class SessionManagementService implements ISessionManagementService {
                         "初始化 MCP SSE 会话失败 sessionId:" + sessionId + " result:" + emitResult);
             }
         }
-        SessionConfigVO sessionConfigVO = new SessionConfigVO(sessionId, sink);
+        SessionConfigVO sessionConfigVO = new SessionConfigVO(sessionId, sink, holderInstanceId);
         activeSessions.put(sessionId, sessionConfigVO);
 
         return sessionConfigVO;

@@ -34,6 +34,7 @@ import java.util.function.Consumer;
 @Service
 public class SessionDistributedService implements ISessionDistributedService {
 
+
     @Resource
     private ISessionPort sessionPort;
 
@@ -50,6 +51,22 @@ public class SessionDistributedService implements ISessionDistributedService {
      * @return 可持久化到 Redis 的会话同步信息
      */
     public SessionSyncInfoVO buildSessionSyncInfo(String sessionId, String gatewayId, String apiKey, SessionTransportTypeEnumVO transportType) {
+        return buildSessionSyncInfo(sessionId, gatewayId, apiKey, transportType,  null);
+    }
+
+    /**
+     * 构建会话同步信息（多实例版，携带 holderInstanceId）
+     * <p>
+     * 用于解决 SSE 长连接跨机器路由问题：记录谁是连接持有者，让 POST 能找到它。
+     *
+     * @param sessionId         会话唯一标识
+     * @param gatewayId         网关ID
+     * @param apiKey            API 密钥
+     * @param transportType     传输协议类型（SSE / Streamable HTTP）
+     * @param holderInstanceId  连接持有者实例ID
+     */
+    @Override
+    public SessionSyncInfoVO buildSessionSyncInfo(String sessionId, String gatewayId, String apiKey, SessionTransportTypeEnumVO transportType, String holderInstanceId) {
         long now = System.currentTimeMillis();
         return SessionSyncInfoVO.builder()
                 .sessionId(sessionId)
@@ -59,6 +76,7 @@ public class SessionDistributedService implements ISessionDistributedService {
                 .createTime(now)
                 .lastAccessedTime(now)
                 .active(true)
+                .holderInstanceId(holderInstanceId)
                 .build();
     }
 
@@ -84,6 +102,7 @@ public class SessionDistributedService implements ISessionDistributedService {
                 .createTime(Instant.ofEpochMilli(sessionSyncInfoVO.getCreateTime()))
                 .lastAccessedTime(Instant.ofEpochMilli(sessionSyncInfoVO.getCreateTime()))
                 .active(sessionSyncInfoVO.isActive())
+                .holderInstanceId(sessionSyncInfoVO.getHolderInstanceId())
                 .build();
     }
 
@@ -123,18 +142,6 @@ public class SessionDistributedService implements ISessionDistributedService {
         return sessionPort.loadActiveSessions();
     }
 
-    /**
-     * 订阅 Redis Session 同步事件
-     * <p>
-     * 应用启动时由 Trigger 层的 SessionRedisListener 触发订阅，
-     * 持续监听 Redis Topic 中的 CREATE / REMOVE 事件，
-     * 实现多实例间的会话增量同步。
-     *
-     * @param consumer 事件消费者，处理 SessionSyncEventVO
-     */
-    public void subscribeSessionSyncEvent(Consumer<SessionSyncEventVO> consumer) {
-        sessionPort.subscribeSessionSyncEvent(consumer);
-    }
 
     @Override
     public SessionSyncInfoVO getSession(String sessionId) {

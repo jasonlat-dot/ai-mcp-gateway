@@ -21,6 +21,14 @@ public interface ISessionDistributedService {
     SessionSyncInfoVO buildSessionSyncInfo(String sessionId, String gatewayId, String apiKey, SessionTransportTypeEnumVO transportType);
 
     /**
+     * 构建会话同步信息（多实例版，携带 holderInstanceId）
+     * <p>
+     * 用于解决 SSE 长连接跨机器路由问题：记录谁是连接持有者，让 POST 能找到它。
+     */
+    SessionSyncInfoVO buildSessionSyncInfo(String sessionId, String gatewayId, String apiKey, SessionTransportTypeEnumVO transportType, String holderInstanceId);
+
+
+    /**
      * 从同步信息重建本地会话
      */
     SessionConfigVO rebuildLocalSession(SessionSyncInfoVO sessionSyncInfoVO);
