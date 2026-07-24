@@ -12,9 +12,19 @@ import java.util.List;
 public class McpToolProtocolConfigVO {
 
     /**
+     * 协议类型:HTTP / DUBBO
+     */
+    private String protocolType;
+
+    /**
      * 请求协议配置
      */
     private HTTPConfig httpConfig;
+
+    /**
+     * Dubbo 工具配置(protocolType=DUBBO 时使用)
+     */
+    private DubboConfig dubboConfig;
 
     /**
      * 请求协议映射
@@ -22,6 +32,9 @@ public class McpToolProtocolConfigVO {
     private List<ProtocolMapping> requestProtocolMappings;
 
     @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class HTTPConfig {
         /**
          * 请求URL
@@ -40,6 +53,46 @@ public class McpToolProtocolConfigVO {
          */
         private Integer timeoutMs;
     }
+
+    // ===================== Dubbo 配置(新增) =====================
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class DubboConfig {
+        /**
+         * Provider 全限定接口名
+         * 例:com.jasonlat.ai.dubbo.api.EmployeeService
+         */
+        private String interfaceName;
+        /**
+         * Dubbo 服务分组(对应 Provider @DubboService(group="..."))
+         */
+        private String group;
+        /**
+         * Dubbo 服务版本(对应 @DubboService(version="..."))
+         */
+        private String version;
+        /**
+         * 要调用的方法名
+         * 例:getCompanyEmployee
+         */
+        private String methodName;
+        /**
+         * 方法参数类型全限定名列表(JSON 顺序与 LLM 参数顺序对齐)
+         * 例:["com.jasonlat.ai.dubbo.api.dto.EmployeeRequest"]
+         */
+        private List<String> parameterTypes;
+        /**
+         * 单次调用超时(毫秒)
+         */
+        private Integer timeoutMs;
+        /**
+         * 失败重试次数(0=不重试)
+         */
+        private Integer retries;
+    }
+
 
     @Getter
     @Builder

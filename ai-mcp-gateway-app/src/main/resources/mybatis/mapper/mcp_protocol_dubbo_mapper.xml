@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jasonlat.ai.infrastructure.dao.IMcpProtocolDubboDao">
+
+    <resultMap id="McpProtocolDubboMap" type="com.jasonlat.ai.infrastructure.dao.po.McpProtocolDubboPO">
+        <id column="id" property="id"/>
+        <result column="protocol_id" property="protocolId"/>
+        <result column="interface_name" property="interfaceName"/>
+        <result column="group_name" property="groupName"/>
+        <result column="version" property="version"/>
+        <result column="method_name" property="methodName"/>
+        <result column="parameter_types" property="parameterTypes"/>
+        <result column="timeout" property="timeout"/>
+        <result column="retry_times" property="retryTimes"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, protocol_id, interface_name, group_name, version, method_name,
+        parameter_types, timeout, retry_times, status, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolDubboPO" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO mcp_protocol_dubbo
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            protocol_id,
+            interface_name,
+            <if test="groupName != null and groupName.trim().length() > 0">group_name,</if>
+            <if test="version != null and version.trim().length() > 0">version,</if>
+            <if test="methodName != null and methodName.trim().length() > 0">method_name,</if>
+            <if test="parameterTypes != null and parameterTypes.trim().length() > 0">parameter_types,</if>
+            <if test="timeout != null">timeout,</if>
+            <if test="retryTimes != null">retry_times,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{protocolId},
+            #{interfaceName},
+            <if test="groupName != null and groupName.trim().length() > 0">#{groupName},</if>
+            <if test="version != null and version.trim().length() > 0">#{version},</if>
+            <if test="methodName != null and methodName.trim().length() > 0">#{methodName},</if>
+            <if test="parameterTypes != null and parameterTypes.trim().length() > 0">#{parameterTypes},</if>
+            <if test="timeout != null">#{timeout},</if>
+            <if test="retryTimes != null">#{retryTimes},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM mcp_protocol_dubbo
+        <choose>
+            <when test="_parameter != null">
+                WHERE id = #{id}
+            </when>
+            <otherwise>
+                WHERE 1 = 0
+            </otherwise>
+        </choose>
+    </delete>
+
+    <update id="updateById" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolDubboPO">
+        UPDATE mcp_protocol_dubbo
+        <set>
+            <if test="protocolId != null">protocol_id = #{protocolId},</if>
+            <if test="interfaceName != null and interfaceName.trim().length() > 0">interface_name = #{interfaceName},</if>
+            <if test="groupName != null and groupName.trim().length() > 0">group_name = #{groupName},</if>
+            <if test="version != null and version.trim().length() > 0">version = #{version},</if>
+            <if test="methodName != null and methodName.trim().length() > 0">method_name = #{methodName},</if>
+            <if test="parameterTypes != null and parameterTypes.trim().length() > 0">parameter_types = #{parameterTypes},</if>
+            <if test="timeout != null">timeout = #{timeout},</if>
+            <if test="retryTimes != null">retry_times = #{retryTimes},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = CURRENT_TIMESTAMP
+        </set>
+        <where>
+            <choose>
+                <when test="id != null">
+                    id = #{id}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+        </where>
+    </update>
+
+    <select id="queryById" parameterType="java.lang.Long" resultMap="McpProtocolDubboMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mcp_protocol_dubbo
+        <choose>
+            <when test="id != null">
+                WHERE id = #{id}
+            </when>
+            <otherwise>
+                WHERE 1 = 0
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="queryAll" resultMap="McpProtocolDubboMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mcp_protocol_dubbo
+        ORDER BY id DESC
+    </select>
+
+    <select id="queryMcpProtocolDubboByProtocolId" parameterType="java.lang.Long" resultMap="McpProtocolDubboMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mcp_protocol_dubbo
+        <choose>
+            <when test="protocolId != null">
+                WHERE protocol_id = #{protocolId}
+            </when>
+            <otherwise>
+                WHERE 1 = 0
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="false">
+        INSERT INTO mcp_protocol_dubbo (
+        protocol_id,
+        interface_name,
+        group_name,
+        version,
+        method_name,
+        parameter_types,
+        timeout,
+        retry_times,
+        status
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.protocolId},
+            #{item.interfaceName},
+            #{item.groupName},
+            #{item.version},
+            #{item.methodName},
+            #{item.parameterTypes},
+            #{item.timeout},
+            #{item.retryTimes},
+            #{item.status}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteByProtocolId" parameterType="java.lang.Long">
+        DELETE FROM mcp_protocol_dubbo
+        <where>
+            <choose>
+                <when test="protocolId != null">
+                    protocol_id = #{protocolId}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+        </where>
+    </delete>
+
+    <update id="updateByProtocolId" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolDubboPO">
+        UPDATE mcp_protocol_dubbo
+        <set>
+            <if test="interfaceName != null and interfaceName.trim().length() != 0">interface_name = #{interfaceName},</if>
+            <if test="groupName != null and groupName.trim().length() != 0">group_name = #{groupName},</if>
+            <if test="version != null and version.trim().length() != 0">version = #{version},</if>
+            <if test="methodName != null and methodName.trim().length() != 0">method_name = #{methodName},</if>
+            <if test="parameterTypes != null and parameterTypes.trim().length() != 0">parameter_types = #{parameterTypes},</if>
+            <if test="timeout != null">timeout = #{timeout},</if>
+            <if test="retryTimes != null">retry_times = #{retryTimes},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        <where>
+            <choose>
+                <when test="protocolId != null">
+                    protocol_id = #{protocolId}
+                </when>
+                <otherwise>
+                    1 = 0
+                </otherwise>
+            </choose>
+        </where>
+    </update>
+
+    <select id="queryListByProtocolIds" resultMap="McpProtocolDubboMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM mcp_protocol_dubbo
+        WHERE protocol_id IN
+        <foreach collection="list" item="protocolId" open="(" separator="," close=")">
+            #{protocolId}
+        </foreach>
+    </select>
+
+    <select id="queryProtocolList" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolDubboPO" resultMap="McpProtocolDubboMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mcp_protocol_dubbo
+        <where>
+            <if test="protocolId != null">
+                AND protocol_id = #{protocolId}
+            </if>
+            <if test="interfaceName != null and interfaceName.trim().length() != 0">
+                AND interface_name like concat('%', #{interfaceName}, '%')
+            </if>
+            <if test="methodName != null and methodName.trim().length() != 0">
+                AND method_name like concat('%', #{methodName}, '%')
+            </if>
+        </where>
+        ORDER BY update_time DESC
+        <if test="limitStart != null and limitCount != null">
+            LIMIT #{limitCount} OFFSET #{limitStart}
+        </if>
+    </select>
+
+    <select id="queryProtocolListCount" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolDubboPO" resultType="java.lang.Long">
+        SELECT count(id)
+        FROM mcp_protocol_dubbo
+        <where>
+            <if test="protocolId != null">
+                AND protocol_id = #{protocolId}
+            </if>
+            <if test="interfaceName != null and interfaceName.trim().length() != 0">
+                AND interface_name like concat('%', #{interfaceName}, '%')
+            </if>
+            <if test="methodName != null and methodName.trim().length() != 0">
+                AND method_name like concat('%', #{methodName}, '%')
+            </if>
+        </where>
+    </select>
+
+</mapper>

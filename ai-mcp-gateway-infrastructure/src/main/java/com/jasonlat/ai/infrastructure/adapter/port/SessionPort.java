@@ -1,13 +1,13 @@
 package com.jasonlat.ai.infrastructure.adapter.port;
 
-import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jasonlat.ai.domain.session.adapter.port.ISessionPort;
 import com.jasonlat.ai.domain.session.model.valobj.SessionForwardRequestVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionForwardResponseVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionSyncEventVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionSyncInfoVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
+import com.jasonlat.ai.infrastructure.adapter.port.tool.DubboInvoker;
+import com.jasonlat.ai.infrastructure.adapter.port.tool.HttpInvoker;
 import com.jasonlat.ai.infrastructure.gateway.GenericHttpGateway;
 import com.jasonlat.ai.types.enums.ResponseCode;
 import com.jasonlat.ai.types.exception.AppException;
@@ -30,8 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 /**
  * @author jasonlat
@@ -43,7 +42,9 @@ public class SessionPort implements ISessionPort {
 
     private final GenericHttpGateway gateway;
 
-    private final ObjectMapper objectMapper;
+    private final HttpInvoker httpInvoker;
+
+    private final DubboInvoker dubboInvoker;
 
     // Redis Topic
     private static final String SESSION_SYNC_TOPIC = "ai:mcp:gateway:session:sync";
@@ -59,57 +60,28 @@ public class SessionPort implements ISessionPort {
     private RedissonClient redissonClient;
 
     @Override
-    public Object toolCall(McpToolProtocolConfigVO.HTTPConfig httpConfig, Object params) throws IOException {
-
-        // params 是map 不是就抛异常  --> {"word":"jsaonlat"}  key-value 形式
-        if (!(params instanceof Map<?,?> arguments)) {
+    public Object toolCall(McpToolProtocolConfigVO protocolConfig, Object params) throws Exception {
+        if (!(params instanceof Map<?, ?>)) {
             throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
         }
 
-        String httpHeadersJson = httpConfig.getHeaders();
-        Map<String, Object> headers = objectMapper.readValue(httpHeadersJson, Map.class);
-
-        String httpMethod = httpConfig.getMethod().toLowerCase();
-
-        switch (httpMethod) {
-            case "post": {
-                RequestBody requestBody = RequestBody.create(
-                        MediaType.parse("application/json"),
-                        JSON.toJSONString(arguments.values().toArray()[0])
-                );
-                Call<ResponseBody> call = gateway.post(httpConfig.getUrl(), headers, requestBody);
-                try (ResponseBody responseBody = call.execute().body()) {
-                    if (responseBody == null) {
-                        return null;
-                    }
-                    return responseBody.string();
-                }
-            }
-            case "get": {
-                HashMap<String, Object> objMapRequest = new HashMap<>((Map<String, Object>) arguments.values().toArray()[0]);
-
-                String url = httpConfig.getUrl();
-                // 替换路径参数
-                // 匹配字符串里形如 {xxx} 的占位符，并且把 xxx 提取到分组 1  http://api/{userId}/info/{orderNo} 匹配到两处：{userId}、{orderNo}
-                Matcher matcher = Pattern.compile("\\{([^}]+)}").matcher(url);
-                while (matcher.find()) {
-                    String name = matcher.group(1);
-                    if (objMapRequest.containsKey(name)) {
-                        url = url.replace("{" + name + "}", String.valueOf(objMapRequest.get(name)));
-                        objMapRequest.remove(name);
-                    }
-                }
-
-                Call<ResponseBody> call = gateway.get(url, headers, objMapRequest);
-                try (ResponseBody responseBody = call.execute().body()) {
-                    if (responseBody == null) {
-                        return null;
-                    }
-                    return responseBody.string();
-                }
-            }
+        String protocolType = protocolConfig.getProtocolType();
+        if (protocolType == null) {
+            // 兼容老数据:没填就当 HTTP
+            protocolType = "HTTP";
         }
-        throw new AppException(ResponseCode.METHOD_NOT_FOUND);
+
+        // =========================================================================
+        // 注:HTTP 调用的具体实现已委托给 HttpInvoker,Dubbo 委托给 DubboInvoker(后续)。
+        // 这里 SessionPort 只做"按 protocolType 分发"的工厂职责,
+        // 不再持有 HTTP/Dubbo 的调用细节,避免一处逻辑被两套代码各自维护。
+        // =========================================================================
+        return switch (protocolType.toUpperCase()) {
+            case "HTTP"  -> httpInvoker.invoke(protocolConfig.getHttpConfig(), params);
+            case "DUBBO" -> dubboInvoker.invoke(protocolConfig, params);
+            default -> throw new AppException("unknown protocol type: " + protocolType);
+        };
+
     }
 
     /**

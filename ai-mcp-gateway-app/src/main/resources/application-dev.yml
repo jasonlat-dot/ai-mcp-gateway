@@ -99,7 +99,7 @@ redis:
       ping-interval: 60000
       keep-alive: true
 
-  # mybatis plus 配置
+# mybatis plus 配置
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
@@ -108,9 +108,32 @@ mybatis-plus:
   mapper-locations: classpath:mybatis/mapper/*.xml
 
 
-  # 日志
+# Dubbo 消费者配置 - 用于 GenericService 通用调用任意 Dubbo Provider
+# 注意:Dubbo 3.x 的 application-discovery-migration 由 DubboInvoker 内部
+# 通过 System.setProperty 强制为 INTERFACE_FIRST(见 DubboInvoker 静态块)
+dubbo:
+  application:
+    name: ai-mcp-gateway-consumer
+    qos-enable: false
+  registry:
+    address: nacos://192.168.3.16:8848
+#    username: nacos
+#    password: nacos
+  consumer:
+    timeout: 5000
+    retries: 0
+    check: false
+  # Generic 调用必须在协议层明确开启,否则 $invoke 走不通
+  protocol:
+    name: dubbo
+    port: -1  # Consumer 不监听,只是占位
+
+
+# 日志
 logging:
   level:
     root: info
     com.jasonlat.ai: info
     com.jasonlat.ai.infrastructure.dao: OFF # OFF: 禁止打印数据库日志, DEBUG：打印 SQL 和参数， TRACE：打印 SQL、参数和结果集
+    org.apache.dubbo: WARN
+    com.alibaba.nacos: WARN

@@ -9,8 +9,12 @@ import java.util.function.Consumer;
 
 public interface ISessionPort {
 
-
-    Object toolCall(McpToolProtocolConfigVO.HTTPConfig httpConfig, Object params) throws Exception;
+    /**
+     * 统一工具调用入口:按 protocolType 分发 HTTP / DUBBO
+     * @param protocolConfig 完整协议配置(含 protocolType + 对应协议子配置)
+     * @param params         MCP 客户端传入的参数 Map {city:"beijing", ...}
+     */
+    Object toolCall(McpToolProtocolConfigVO protocolConfig, Object params) throws Exception;
 
     void saveSessionSyncInfo(SessionSyncInfoVO sessionSyncInfoVO);
 

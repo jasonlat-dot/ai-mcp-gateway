@@ -7,8 +7,13 @@ import com.jasonlat.ai.domain.session.adapter.repository.ISessionRepository;
 import com.jasonlat.ai.infrastructure.dao.*;
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayPO;
 import com.jasonlat.ai.infrastructure.dao.po.McpGatewayToolPO;
-import com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO;
+import com.jasonlat.ai.infrastructure.dao.po.McpProtocolDubboPO;
 import com.jasonlat.ai.infrastructure.dao.po.McpProtocolHttpPO;
+import com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO;
+import com.jasonlat.ai.types.enums.ResponseCode;
+import com.jasonlat.ai.types.exception.AppException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -36,6 +41,12 @@ public class SessionRepository implements ISessionRepository {
 
     @Resource
     private IMcpProtocolMappingDao mcpProtocolMappingDao;
+
+    @Resource
+    private IMcpProtocolDubboDao mcpProtocolDubboDao;
+
+    @Resource
+    private ObjectMapper objectMapper;
 
     /**
      * 查询网关配置信息
@@ -112,22 +123,85 @@ public class SessionRepository implements ISessionRepository {
 
     @Override
     public McpToolProtocolConfigVO queryMcpGatewayProtocolConfig(String gatewayId, String toolName) {
-        // 获取协议ID - 根据网关ID + 工具名称
-        McpGatewayToolPO mcpGatewayToolPOReq = new McpGatewayToolPO();
-        mcpGatewayToolPOReq.setGatewayId(gatewayId);
-        mcpGatewayToolPOReq.setToolName(toolName);
-        Long protocolId = mcpGatewayToolDao.queryToolProtocolIdByToolName(mcpGatewayToolPOReq);
+        // 1. 一次查询拿到 (protocolId, protocolType) — 旧版只查 protocolId,无法支撑多协议路由
+        McpGatewayToolPO tool = mcpGatewayToolDao.queryByGatewayIdAndToolName(gatewayId, toolName);
+        if (tool == null) {
+            log.warn("工具不存在,gatewayId:{} toolName:{}", gatewayId, toolName);
+            return null;
+        }
+        Long protocolId = tool.getProtocolId();
+        String protocolType = tool.getProtocolType();
+        if (protocolType == null || protocolType.isBlank()) {
+            // 兼容老数据:protocol_type 为空时按 HTTP 处理
+            protocolType = "HTTP";
+        }
 
-        // 查询协议
-        McpProtocolHttpPO mcpProtocolHttpPO = mcpProtocolHttpDao.queryMcpProtocolHttpByProtocolId(protocolId);
-        if (null == mcpProtocolHttpPO) return null;
+        // 2. 按 protocolType 分发加载具体协议配置
+        McpToolProtocolConfigVO.McpToolProtocolConfigVOBuilder builder = McpToolProtocolConfigVO.builder()
+                .protocolType(protocolType);
 
-        McpToolProtocolConfigVO.HTTPConfig httpConfig = new McpToolProtocolConfigVO.HTTPConfig();
-        httpConfig.setUrl(mcpProtocolHttpPO.getHttpUrl());
-        httpConfig.setHeaders(mcpProtocolHttpPO.getHttpHeaders());
-        httpConfig.setMethod(mcpProtocolHttpPO.getHttpMethod());
-        httpConfig.setTimeoutMs(mcpProtocolHttpPO.getTimeout());
+        switch (protocolType.toUpperCase()) {
+            case "HTTP" -> {
+                McpProtocolHttpPO http = mcpProtocolHttpDao.queryMcpProtocolHttpByProtocolId(protocolId);
+                if (http == null) {
+                    log.warn("HTTP 协议配置缺失,protocolId:{}", protocolId);
+                    return null;
+                }
+                builder.httpConfig(McpToolProtocolConfigVO.HTTPConfig.builder()
+                        .url(http.getHttpUrl())
+                        .headers(http.getHttpHeaders())
+                        .method(http.getHttpMethod())
+                        .timeoutMs(http.getTimeout())
+                        .build());
+            }
+            case "DUBBO" -> {
+                McpProtocolDubboPO dubbo = mcpProtocolDubboDao.queryMcpProtocolDubboByProtocolId(protocolId);
+                if (dubbo == null) {
+                    log.warn("DUBBO 协议配置缺失,protocolId:{}", protocolId);
+                    return null;
+                }
+                // parameter_types 是 JSON 字符串,反序列化给业务层用 List<String>
+                List<String> paramTypes;
+                try {
+                    paramTypes = (dubbo.getParameterTypes() == null || dubbo.getParameterTypes().isBlank())
+                            ? Collections.emptyList()
+                            : objectMapper.readValue(dubbo.getParameterTypes(), new TypeReference<List<String>>() {});
+                } catch (Exception e) {
+                    log.error("DUBBO parameter_types JSON 解析失败,protocolId:{} raw:{}",
+                            protocolId, dubbo.getParameterTypes(), e);
+                    throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+                }
+                builder.dubboConfig(McpToolProtocolConfigVO.DubboConfig.builder()
+                        .interfaceName(dubbo.getInterfaceName())
+                        .group(dubbo.getGroupName())
+                        .version(dubbo.getVersion())
+                        .methodName(dubbo.getMethodName())
+                        .parameterTypes(paramTypes)
+                        .timeoutMs(dubbo.getTimeout())
+                        .retries(dubbo.getRetryTimes())
+                        .build());
+            }
+            default -> throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+        }
 
-        return McpToolProtocolConfigVO.builder().httpConfig(httpConfig).build();
+        // 3. 字段映射表共用 — 与具体协议无关,schema 描述的是 MCP 客户端入参/出参
+        List<McpProtocolMappingPO> mappingPOList =
+                mcpProtocolMappingDao.queryMcpGatewayToolConfigListByProtocolId(protocolId);
+        List<McpToolProtocolConfigVO.ProtocolMapping> requestProtocolMappings = new ArrayList<>(mappingPOList.size());
+        for (McpProtocolMappingPO mcpProtocolMappingPO : mappingPOList) {
+            requestProtocolMappings.add(McpToolProtocolConfigVO.ProtocolMapping.builder()
+                    .mappingType(mcpProtocolMappingPO.getMappingType())
+                    .parentPath(mcpProtocolMappingPO.getParentPath())
+                    .fieldName(mcpProtocolMappingPO.getFieldName())
+                    .mcpPath(mcpProtocolMappingPO.getMcpPath())
+                    .mcpType(mcpProtocolMappingPO.getMcpType())
+                    .mcpDesc(mcpProtocolMappingPO.getMcpDesc())
+                    .isRequired(mcpProtocolMappingPO.getIsRequired())
+                    .sortOrder(mcpProtocolMappingPO.getSortOrder())
+                    .build());
+        }
+        builder.requestProtocolMappings(requestProtocolMappings);
+
+        return builder.build();
     }
 }

@@ -43,3 +43,4 @@ build/
 /ai-mcp-gateway-app/data/
 /ai-mcp-gateway-front/node_modules/
 /scripts/
+/ai-mcp-gateway-dubbo-test/

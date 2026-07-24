@@ -13,6 +13,16 @@ public interface IMcpGatewayToolDao {
 
     Long queryToolProtocolIdByToolName(McpGatewayToolPO mcpGatewayToolPOReq);
 
+    /**
+     * 按 (gatewayId, toolName) 取完整工具 PO — 用于 tools/call 路由时
+     * 同时拿到 protocol_id + protocol_type,以决定加载哪种协议配置表。
+     * <p>
+     * 旧方法 {@link #queryToolProtocolIdByToolName} 只返回 protocolId,
+     * 拿不到 protocolType,无法支撑多协议路由,只保留给历史使用方。
+     */
+    McpGatewayToolPO queryByGatewayIdAndToolName(@Param("gatewayId") String gatewayId,
+                                                 @Param("toolName") String toolName);
+
     void insert(McpGatewayToolPO mcpGatewayToolPO);
 
     int updateProtocolByGatewayId(McpGatewayToolPO mcpGatewayToolPO);

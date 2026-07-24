@@ -14,6 +14,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -43,15 +44,15 @@ public class ToolsCallHandler  implements IRequestHandler {
                 log.error("工具调用失败: 工具不存在, gatewayId:{} toolName:{}", gatewayId, toolName);
                 throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
             }
-            Object result = port.toolCall(mcpToolProtocolConfigVO.getHttpConfig(), argumentsMap);
+            Object result = port.toolCall(mcpToolProtocolConfigVO, argumentsMap);
             log.info("工具调用结果 result: {}", result);
             return new McpSchemaVO.JsonRpcResponse(McpSchemaVO.JSONRPC_VERSION, message.id(), Map.of(
-                    "content", new Object[]{
+                    "content", List.of(
                             Map.of(
                                     "type", "text",
                                     "text", result
                             )
-                    },
+                    ),
                     "isError", false
             ), null);
 

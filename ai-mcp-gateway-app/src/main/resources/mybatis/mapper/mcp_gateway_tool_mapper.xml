@@ -186,6 +186,18 @@
         </where>
     </select>
 
+    <!-- 多协议路由用:取完整 tool PO,带 protocol_type -->
+    <select id="queryByGatewayIdAndToolName" resultMap="McpGatewayToolMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mcp_gateway_tool
+        <where>
+            gateway_id = #{gatewayId}
+            AND tool_name = #{toolName}
+        </where>
+        LIMIT 1
+    </select>
+
     <select id="queryListByGatewayId" parameterType="java.lang.String" resultMap="McpGatewayToolMap">
         SELECT
             <include refid="Base_Column_List"/>
