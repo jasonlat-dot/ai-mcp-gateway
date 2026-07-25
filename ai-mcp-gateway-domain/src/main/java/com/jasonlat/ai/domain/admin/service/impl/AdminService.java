@@ -65,6 +65,31 @@ public class AdminService implements IAdminService {
     }
 
     @Override
+    public List<DubboProtocolConfigEntity> queryDubboProtocolList() {
+        return adminRepository.queryDubboProtocolList();
+    }
+
+    @Override
+    public DubboProtocolPageEntity queryDubboProtocolPage(DubboProtocolQueryEntity queryEntity) {
+        return adminRepository.queryDubboProtocolPage(queryEntity);
+    }
+
+    @Override
+    public List<DubboProtocolConfigEntity> queryDubboProtocolListByGatewayId(String gatewayId) {
+        List<GatewayToolConfigEntity> tools = adminRepository.queryGatewayToolListByGatewayId(gatewayId);
+        if (tools == null || tools.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        List<Long> protocolIds = tools.stream()
+                .map(GatewayToolConfigEntity::getProtocolId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+
+        return adminRepository.queryDubboProtocolListByProtocolIds(protocolIds);
+    }
+
+    @Override
     public List<GatewayAuthConfigEntity> queryGatewayAuthList() {
         return adminRepository.queryGatewayAuthList();
     }

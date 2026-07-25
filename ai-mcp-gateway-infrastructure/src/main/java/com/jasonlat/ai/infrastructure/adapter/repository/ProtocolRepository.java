@@ -2,10 +2,13 @@ package com.jasonlat.ai.infrastructure.adapter.repository;
 
 
 import com.jasonlat.ai.domain.protocol.adapter.repository.IProtocolRepository;
+import com.jasonlat.ai.domain.protocol.model.valobj.dubbo.DubboProtocolVO;
 import com.jasonlat.ai.domain.protocol.model.valobj.enums.ProtocolStatusEnum;
 import com.jasonlat.ai.domain.protocol.model.valobj.http.HTTPProtocolVO;
+import com.jasonlat.ai.infrastructure.dao.IMcpProtocolDubboDao;
 import com.jasonlat.ai.infrastructure.dao.IMcpProtocolHttpDao;
 import com.jasonlat.ai.infrastructure.dao.IMcpProtocolMappingDao;
+import com.jasonlat.ai.infrastructure.dao.po.McpProtocolDubboPO;
 import com.jasonlat.ai.infrastructure.dao.po.McpProtocolHttpPO;
 import com.jasonlat.ai.infrastructure.dao.po.McpProtocolMappingPO;
 import com.jasonlat.ai.types.snow.SnowflakeIdGenerator;
@@ -28,6 +31,9 @@ public class ProtocolRepository implements IProtocolRepository {
 
     @Resource
     private IMcpProtocolHttpDao protocolHttpDao;
+
+    @Resource
+    private IMcpProtocolDubboDao protocolDubboDao;
 
     @Resource
     private SnowflakeIdGenerator snowflakeIdGenerator;
@@ -135,8 +141,112 @@ public class ProtocolRepository implements IProtocolRepository {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteGatewayProtocol(Long protocolId) {
+        // 两表都尝试删,protocolId 命中哪个就删哪个 — 单协议不会同时占两行。
         protocolHttpDao.deleteByProtocolId(protocolId);
+        protocolDubboDao.deleteByProtocolId(protocolId);
         protocolMappingDao.deleteByProtocolId(protocolId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<Long> saveDubboProtocolAndMapping(List<DubboProtocolVO> dubboProtocolVOS) {
+        if (null == dubboProtocolVOS || dubboProtocolVOS.isEmpty()) return new ArrayList<>();
+
+        List<Long> protocolIdList = new ArrayList<>(dubboProtocolVOS.size());
+
+        for (DubboProtocolVO vo : dubboProtocolVOS) {
+            // 0. 生成协议ID
+            long protocolId = snowflakeIdGenerator.nextId();
+
+            // 1. 保存 Dubbo 协议配置
+            McpProtocolDubboPO dubboPO = McpProtocolDubboPO.builder()
+                    .protocolId(protocolId)
+                    .interfaceName(vo.getInterfaceName())
+                    .groupName(vo.getGroupName())
+                    .version(vo.getVersion())
+                    .methodName(vo.getMethodName())
+                    .parameterTypes(com.alibaba.fastjson.JSON.toJSONString(vo.getParameterTypes()))
+                    .timeout(vo.getTimeout() == null ? 3000 : vo.getTimeout())
+                    .retryTimes(vo.getRetryTimes() == null ? 0 : vo.getRetryTimes())
+                    .directUrl(vo.getDirectUrl())
+                    .directEnabled(vo.getDirectEnabled())
+                    .status(vo.getStatus() == null
+                            ? ProtocolStatusEnum.ENABLE.getCode()
+                            : vo.getStatus())
+                    .build();
+            protocolDubboDao.insert(dubboPO);
+
+            // 2. 保存协议映射配置
+            List<DubboProtocolVO.ProtocolMapping> mappings = vo.getMappings();
+            if (mappings != null && !mappings.isEmpty()) {
+                List<McpProtocolMappingPO> mappingPOs = new ArrayList<>(mappings.size());
+                for (DubboProtocolVO.ProtocolMapping m : mappings) {
+                    mappingPOs.add(McpProtocolMappingPO.builder()
+                            .protocolId(protocolId)
+                            .mappingType(m.getMappingType())
+                            .parentPath(m.getParentPath())
+                            .fieldName(m.getFieldName())
+                            .mcpPath(m.getMcpPath())
+                            .mcpType(m.getMcpType())
+                            .mcpDesc(m.getMcpDesc())
+                            .isRequired(m.getIsRequired())
+                            .sortOrder(m.getSortOrder())
+                            .build());
+                }
+                protocolMappingDao.batchInsert(mappingPOs);
+            }
+
+            protocolIdList.add(protocolId);
+        }
+
+        log.info("Dubbo 协议保存完成: count={}", protocolIdList.size());
+        return protocolIdList;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public boolean updateDubboProtocolAndMapping(DubboProtocolVO vo) {
+        if (vo == null || vo.getProtocolId() == null) return false;
+
+        // 1. 更新 mcp_protocol_dubbo 行(只更新允许编辑的字段,interfaceName 不让改)
+        McpProtocolDubboPO po = McpProtocolDubboPO.builder()
+                .protocolId(vo.getProtocolId())
+                .groupName(vo.getGroupName())
+                .version(vo.getVersion())
+                .methodName(vo.getMethodName())
+                .parameterTypes(com.alibaba.fastjson.JSON.toJSONString(vo.getParameterTypes()))
+                .timeout(vo.getTimeout() == null ? 3000 : vo.getTimeout())
+                .retryTimes(vo.getRetryTimes() == null ? 0 : vo.getRetryTimes())
+                .directUrl(vo.getDirectUrl())
+                .directEnabled(vo.getDirectEnabled() == null ? 0 : vo.getDirectEnabled())
+                .status(vo.getStatus())
+                .build();
+        int count = protocolDubboDao.updateByProtocolId(po);
+        if (count != 1) {
+            return false;
+        }
+
+        // 2. 重置 mapping 行
+        protocolMappingDao.deleteByProtocolId(vo.getProtocolId());
+        List<DubboProtocolVO.ProtocolMapping> mappings = vo.getMappings();
+        if (mappings != null && !mappings.isEmpty()) {
+            List<McpProtocolMappingPO> mappingPOs = new ArrayList<>(mappings.size());
+            for (DubboProtocolVO.ProtocolMapping m : mappings) {
+                mappingPOs.add(McpProtocolMappingPO.builder()
+                        .protocolId(vo.getProtocolId())
+                        .mappingType(m.getMappingType())
+                        .parentPath(m.getParentPath())
+                        .fieldName(m.getFieldName())
+                        .mcpPath(m.getMcpPath())
+                        .mcpType(m.getMcpType())
+                        .mcpDesc(m.getMcpDesc())
+                        .isRequired(m.getIsRequired())
+                        .sortOrder(m.getSortOrder())
+                        .build());
+            }
+            protocolMappingDao.batchInsert(mappingPOs);
+        }
+        return true;
     }
 
 }

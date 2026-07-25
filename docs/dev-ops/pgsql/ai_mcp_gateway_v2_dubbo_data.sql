@@ -30,13 +30,20 @@ VALUES ('gateway_001', 2, 'JavaSDKMCPClient_getCompanyEmployeeByDubbo', 'functio
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 2) 在 mcp_protocol_dubbo 插入协议配置,protocol_id = 2
+--    direct_url 演示多实例直连:同服务本地起两个 Provider,用逗号分隔。
+--    DubboInvoker 解析后按顺序故障转移(首个失败切下一个)。
+--    实际场景应用真实 IP:PORT,这里用 localhost:20880 / localhost:20881 占位,
+--    调试完了改成 NULL + direct_enabled=0 切回 Nacos。
 INSERT INTO mcp_protocol_dubbo (protocol_id, interface_name, group_name, version, method_name,
-                                parameter_types, timeout, retry_times, status,
-                                create_time, update_time)
+                                parameter_types, timeout, retry_times, direct_url, direct_enabled,
+                                status, create_time, update_time)
 VALUES (2, 'com.jasonlat.ai.dubbo.api.EmployeeService', 'default', '1.0.0',
         'getCompanyEmployee',
         '["com.jasonlat.ai.dubbo.api.dto.EmployeeRequest"]',
-        5000, 0, 1,
+        5000, 0,
+        'dubbo://localhost:20880,dubbo://localhost:20881',
+        1,
+        1,
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 3) 字段映射:request — 描述 LLM 传进来的 schema

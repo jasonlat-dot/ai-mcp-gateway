@@ -69,8 +69,14 @@ public class GatewayConfigRequestDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class GatewayProtocol {
-        /** 协议列表数据 */
+        /** HTTP 协议列表数据 */
         private List<HTTPProtocol> httpProtocols;
+
+        /**
+         * Dubbo 协议列表数据 — 与 httpProtocols 平级,
+         * 一条记录对应 mcp_protocol_dubbo 一行;mappings 复用 HTTP 的 ProtocolMapping 结构。
+         */
+        private List<DubboProtocol> dubboProtocols;
 
         @Data
         @Builder
@@ -82,6 +88,25 @@ public class GatewayConfigRequestDTO {
             private String httpHeaders;
             private String httpMethod;
             private Integer timeout;
+            private List<ProtocolMapping> mappings;
+        }
+
+        @Data
+        @Builder
+        @AllArgsConstructor
+        @NoArgsConstructor
+        public static class DubboProtocol {
+            private Long protocolId;
+            private String interfaceName;
+            private String groupName;
+            private String version;
+            private String methodName;
+            private List<String> parameterTypes;
+            private Integer timeout;
+            private Integer retryTimes;
+            private String directUrl;
+            private Boolean directEnabled;
+            private Integer status;
             private List<ProtocolMapping> mappings;
         }
 

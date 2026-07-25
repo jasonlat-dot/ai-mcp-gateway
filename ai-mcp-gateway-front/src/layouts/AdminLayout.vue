@@ -6,7 +6,7 @@ import ThemeToggle from '@/components/common/ThemeToggle.vue'
 import { useToast } from '@/composables/useToast'
 import {
   DataAnalysis, Connection, Tools, Share, Key, Refresh, SwitchButton,
-  Expand, Fold, Sunny, Moon, Search,
+  Expand, Fold, Sunny, Moon, Search, Location,
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -23,7 +23,8 @@ const navItems = [
   { path: '/dashboard',  title: '控制台',   icon: 'DataAnalysis', desc: 'Gateway Insights' },
   { path: '/gateways',   title: '网关列表', icon: 'Connection',   desc: 'Gateway Inventory' },
   { path: '/tools',      title: '网关工具', icon: 'Tools',        desc: 'Bound Tools' },
-  { path: '/protocols',  title: '协议配置', icon: 'Share',        desc: 'HTTP Protocols' },
+  { path: '/protocols',  title: 'HTTP 协议', icon: 'Share',      desc: 'OpenAPI Protocols' },
+  { path: '/dubbo-protocols', title: 'Dubbo 协议', icon: 'Connection', desc: 'dubbo-api-docs' },
   { path: '/auth',       title: '认证限流', icon: 'Key',          desc: 'API Key & Rate' },
   { path: '/llm-test',   title: 'LLM 网关联调', icon: 'ChatDotRound', desc: 'Gateway Playground' },
 ]

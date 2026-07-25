@@ -1,8 +1,8 @@
-package com.jasonlat.ai.domain.protocol.service.analysis.strategy.impl;
+package com.jasonlat.ai.domain.protocol.service.analysis.http.strategy.impl;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.jasonlat.ai.domain.protocol.model.valobj.http.HTTPProtocolVO;
-import com.jasonlat.ai.domain.protocol.service.analysis.strategy.AbstractAnalysisStrategy;
+import com.jasonlat.ai.domain.protocol.service.analysis.http.strategy.AbstractAnalysisStrategy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

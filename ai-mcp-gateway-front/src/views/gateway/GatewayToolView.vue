@@ -9,6 +9,7 @@ import {
   pageGatewayTool,
   listGatewayConfig,
   listGatewayProtocol,
+  listDubboProtocol,
   saveGatewayTool,
   updateGatewayTool,
   deleteGatewayTool,
@@ -20,7 +21,8 @@ const loading = ref(false)
 const list = ref([])
 const total = ref(0)
 const gateways = ref([])
-const protocols = ref([])
+const httpProtocols = ref([])
+const dubboProtocols = ref([])
 
 const query = reactive({ gatewayId: '', toolId: '', page: 1, rows: 10 })
 const dialog = ref(false)
@@ -58,9 +60,14 @@ async function load() {
 }
 
 async function loadOptions() {
-  const settled = await Promise.allSettled([listGatewayConfig(), listGatewayProtocol()])
-  gateways.value  = settled[0].status === 'fulfilled' ? settled[0].value : []
-  protocols.value = settled[1].status === 'fulfilled' ? settled[1].value : []
+  const settled = await Promise.allSettled([
+    listGatewayConfig(),
+    listGatewayProtocol(),
+    listDubboProtocol(),
+  ])
+  gateways.value       = settled[0].status === 'fulfilled' ? settled[0].value : []
+  httpProtocols.value  = settled[1].status === 'fulfilled' ? settled[1].value : []
+  dubboProtocols.value = settled[2].status === 'fulfilled' ? settled[2].value : []
 }
 
 onMounted(async () => { await load(); await loadOptions() })
@@ -125,7 +132,19 @@ async function doDelete() {
 }
 
 function onPageChange({ page, rows }) { query.page = page; query.rows = rows; load() }
-const selectedProtocol = computed(() => protocols.value.find(p => p.protocolId === form.protocolId))
+
+// 协议类型决定"关联协议"下拉的数据源
+const availableProtocols = computed(() => {
+  return form.protocolType === 'dubbo' ? dubboProtocols.value : httpProtocols.value
+})
+
+// 协议类型切换时清空旧的 protocolId,避免 type/id 不一致
+function onProtocolTypeChange(v) {
+  form.protocolType = v
+  form.protocolId = null
+}
+
+const selectedProtocol = computed(() => availableProtocols.value.find(p => p.protocolId === form.protocolId))
 </script>
 
 <template>
@@ -262,10 +281,9 @@ const selectedProtocol = computed(() => protocols.value.find(p => p.protocolId =
           </div>
           <div class="form-item">
             <label>协议类型</label>
-            <select v-model="form.protocolType" class="inp">
+            <select :value="form.protocolType" class="inp" @change="(e) => onProtocolTypeChange(e.target.value)">
               <option value="http">http</option>
               <option value="dubbo">dubbo</option>
-              <option value="rabbitmq">rabbitmq</option>
             </select>
           </div>
           <div class="form-item">
@@ -278,26 +296,49 @@ const selectedProtocol = computed(() => protocols.value.find(p => p.protocolId =
           <label>关联协议</label>
           <select v-model="form.protocolId" class="inp">
             <option :value="null">不绑定</option>
-            <option v-for="p in protocols" :key="p.protocolId" :value="p.protocolId">
-              {{ p.protocolName || p.httpUrl }} (#{{ p.protocolId }})
-            </option>
+            <option
+              v-for="p in availableProtocols"
+              :key="`${form.protocolType}-${p.protocolId}`"
+              :value="p.protocolId"
+            >{{ form.protocolType === 'dubbo' ? `${p.interfaceName}#${p.methodName} (#${p.protocolId})` : `${p.protocolName || p.httpUrl} (#${p.protocolId})` }}</option>
           </select>
+          <small class="hint">
+            当前数据源: <b>{{ form.protocolType === 'dubbo' ? `Dubbo 协议 (${dubboProtocols.length})` : `HTTP 协议 (${httpProtocols.length})` }}</b>
+            · 切换协议类型会清空当前选择
+          </small>
         </div>
 
         <div v-if="selectedProtocol" class="protocol-preview">
-          <span class="eyebrow">协议预览</span>
+          <span class="eyebrow">协议预览 · {{ form.protocolType === 'dubbo' ? 'Dubbo' : 'HTTP' }}</span>
           <div class="preview-body">
-            <div class="preview-top">
-              <StatusPill :tone="(selectedProtocol.httpMethod||'').toUpperCase()==='GET' ? 'info' : 'success'">
-                {{ selectedProtocol.httpMethod }}
-              </StatusPill>
-              <code class="url">{{ selectedProtocol.httpUrl }}</code>
-            </div>
-            <div class="preview-sub">
-              <span>超时 {{ selectedProtocol.timeout ?? '-' }} ms</span>
-              <span>·</span>
-              <span>映射 {{ selectedProtocol.mappings?.length || 0 }} 项</span>
-            </div>
+            <template v-if="form.protocolType === 'dubbo'">
+              <div class="preview-top">
+                <StatusPill tone="info">{{ selectedProtocol.methodName || '—' }}</StatusPill>
+                <code class="url">{{ selectedProtocol.interfaceName }} · v{{ selectedProtocol.version || '—' }} · {{ selectedProtocol.groupName || '—' }}</code>
+              </div>
+              <div class="preview-sub">
+                <span>超时 {{ selectedProtocol.timeout ?? '-' }} ms</span>
+                <span>·</span>
+                <span>重试 {{ selectedProtocol.retryTimes ?? 0 }} 次</span>
+                <span>·</span>
+                <span>直连 {{ selectedProtocol.directUrl || '—' }}</span>
+                <span>·</span>
+                <span>映射 {{ selectedProtocol.mappings?.length || 0 }} 项</span>
+              </div>
+            </template>
+            <template v-else>
+              <div class="preview-top">
+                <StatusPill :tone="(selectedProtocol.httpMethod||'').toUpperCase()==='GET' ? 'info' : 'success'">
+                  {{ selectedProtocol.httpMethod }}
+                </StatusPill>
+                <code class="url">{{ selectedProtocol.httpUrl }}</code>
+              </div>
+              <div class="preview-sub">
+                <span>超时 {{ selectedProtocol.timeout ?? '-' }} ms</span>
+                <span>·</span>
+                <span>映射 {{ selectedProtocol.mappings?.length || 0 }} 项</span>
+              </div>
+            </template>
           </div>
         </div>
       </div>

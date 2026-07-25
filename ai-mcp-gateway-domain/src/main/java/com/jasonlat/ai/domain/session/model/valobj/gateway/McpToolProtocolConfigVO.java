@@ -1,5 +1,6 @@
 package com.jasonlat.ai.domain.session.model.valobj.gateway;
 
+import com.jasonlat.ai.domain.session.model.valobj.enums.ProtocolType;
 import lombok.*;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class McpToolProtocolConfigVO {
     /**
      * 协议类型:HTTP / DUBBO
      */
-    private String protocolType;
+    private ProtocolType protocolType;
 
     /**
      * 请求协议配置
@@ -91,6 +92,27 @@ public class McpToolProtocolConfigVO {
          * 失败重试次数(0=不重试)
          */
         private Integer retries;
+
+        /**
+         * 直连 URL 列表,优先级最高。
+         * 元素格式:dubbo://host:port 或 tri://host:port
+         * 设置后绕过 Nacos 服务发现,按列表顺序故障转移(首个失败切下一个)。
+         * 主要用于本地调试、Provider 未注册到 Nacos、灰度指定实例等场景。
+         * <p>
+         * 留空 / 列表为空:走 Nacos 默认发现。
+         * 单实例:List 长度 1,等价于旧版单 URL 行为。
+         * 多实例:List 长度 N,DubboInvoker 按顺序尝试,首个可用为止。
+         */
+        private List<String> directUrls;
+
+        /**
+         * 是否启用直连:true=按 directUrls 顺序故障转移调用,false=走 Nacos 默认发现。
+         * 留这个开关的目的是:Nacos 配置可以保留,只在调试时切换;
+         * 不留开关的话,留空就是关闭,但运维/调试时容易忘记清空导致误连。
+         * <p>
+         * 即便 directEnabled=true,directUrls 为空时也应安全回退到 Nacos(由 Invoker 层判断)。
+         */
+        private Integer directEnabled;
     }
 
 

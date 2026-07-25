@@ -31,6 +31,9 @@ public class AdminRepository implements IAdminRepository {
     @Resource
     private IMcpProtocolMappingDao protocolMappingDao;
 
+    @Resource
+    private IMcpProtocolDubboDao protocolDubboDao;
+
     @Override
     public List<GatewayConfigEntity> queryGatewayConfigList() {
         List<McpGatewayPO> mcpGatewayPOS = mcpGatewayDao.queryAll();
@@ -290,6 +293,92 @@ public class AdminRepository implements IAdminRepository {
                             .build()).collect(Collectors.toList()))
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DubboProtocolConfigEntity> queryDubboProtocolList() {
+        List<McpProtocolDubboPO> pos = protocolDubboDao.queryAll();
+        return pos.stream().map(po -> {
+            List<McpProtocolMappingPO> mappings = protocolMappingDao.queryMcpGatewayToolConfigListByProtocolId(po.getProtocolId());
+            return toDubboEntity(po, mappings);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public DubboProtocolPageEntity queryDubboProtocolPage(DubboProtocolQueryEntity queryEntity) {
+        McpProtocolDubboPO query = new McpProtocolDubboPO();
+        query.setProtocolId(queryEntity.getProtocolId());
+        query.setInterfaceName(queryEntity.getInterfaceName());
+        query.setMethodName(queryEntity.getMethodName());
+        query.setPage(queryEntity.getPage());
+        query.setRows(queryEntity.getRows());
+
+        Long count = protocolDubboDao.queryProtocolListCount(query);
+        if (count == null || count == 0) {
+            return DubboProtocolPageEntity.builder()
+                    .dataList(new java.util.ArrayList<>())
+                    .total(0L)
+                    .build();
+        }
+
+        List<McpProtocolDubboPO> pos = protocolDubboDao.queryProtocolList(query);
+        List<Long> protocolIds = pos.stream().map(McpProtocolDubboPO::getProtocolId).collect(Collectors.toList());
+        List<McpProtocolMappingPO> mappings = protocolMappingDao.queryListByProtocolIds(protocolIds);
+
+        List<DubboProtocolConfigEntity> dataList = pos.stream().map(po -> {
+            List<McpProtocolMappingPO> ownMappings = mappings.stream()
+                    .filter(m -> m.getProtocolId().equals(po.getProtocolId()))
+                    .toList();
+            return toDubboEntity(po, ownMappings);
+        }).collect(Collectors.toList());
+
+        return DubboProtocolPageEntity.builder()
+                .dataList(dataList)
+                .total(count)
+                .build();
+    }
+
+    @Override
+    public List<DubboProtocolConfigEntity> queryDubboProtocolListByProtocolIds(List<Long> protocolIds) {
+        if (protocolIds == null || protocolIds.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        List<McpProtocolDubboPO> pos = protocolDubboDao.queryListByProtocolIds(protocolIds);
+        List<McpProtocolMappingPO> mappings = protocolMappingDao.queryListByProtocolIds(protocolIds);
+
+        return pos.stream().map(po -> {
+            List<McpProtocolMappingPO> ownMappings = mappings.stream()
+                    .filter(m -> m.getProtocolId().equals(po.getProtocolId()))
+                    .toList();
+            return toDubboEntity(po, ownMappings);
+        }).collect(Collectors.toList());
+    }
+
+    private DubboProtocolConfigEntity toDubboEntity(McpProtocolDubboPO po, List<McpProtocolMappingPO> mappings) {
+        return DubboProtocolConfigEntity.builder()
+                .protocolId(po.getProtocolId())
+                .interfaceName(po.getInterfaceName())
+                .groupName(po.getGroupName())
+                .version(po.getVersion())
+                .methodName(po.getMethodName())
+                .parameterTypes(po.getParameterTypes())
+                .timeout(po.getTimeout())
+                .retryTimes(po.getRetryTimes())
+                .directUrl(po.getDirectUrl())
+                .directEnabled(po.getDirectEnabled())
+                .status(po.getStatus())
+                .mappings(mappings == null || mappings.isEmpty() ? null :
+                        mappings.stream().map(m -> DubboProtocolConfigEntity.ProtocolMappingEntity.builder()
+                                .mappingType(m.getMappingType())
+                                .parentPath(m.getParentPath())
+                                .fieldName(m.getFieldName())
+                                .mcpPath(m.getMcpPath())
+                                .mcpType(m.getMcpType())
+                                .mcpDesc(m.getMcpDesc())
+                                .isRequired(m.getIsRequired())
+                                .sortOrder(m.getSortOrder())
+                                .build()).collect(Collectors.toList()))
+                .build();
     }
 
 }

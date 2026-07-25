@@ -33,9 +33,6 @@ public class ApiTest {
     @Resource
     private OpenAiChatModel.Builder chatModelBuilder;
 
-    @Value("${baidu.api-key}")
-    private String baiduApiKey;
-
     @Test
     public void test() {
         log.info("测试完成");
@@ -50,17 +47,18 @@ public class ApiTest {
                         .toolCallbacks(new SyncMcpToolCallbackProvider(sseMcpClient03()).getToolCallbacks())
                         .build()
                 ).build();
-
+//
         Prompt prompt = new Prompt(
                 UserMessage.builder()
                         .text("""
-                                获取公司雇员信息，信息如下：
+                                通过 Dubbo RPC 获取公司雇员信息，信息如下：
                                 城市：北京
                                 公司：谷歌
                                 雇员：jasonlat
                                 """)
                         .build()
         );
+
         ChatResponse response = chatModel.call(prompt);
         System.out.println("测试结果：" + JSON.toJSONString(response));
 
@@ -96,18 +94,5 @@ public class ApiTest {
         return mcpSyncClient;
     }
 
-    public McpSyncClient sseMcpClient() {
-        log.info("sseMcpClient......");
-        HttpClientSseClientTransport sse = HttpClientSseClientTransport
-                .builder("http://appbuilder.baidu.com")
-                .sseEndpoint("/v2/ai_search/mcp/sse?api_key=" + baiduApiKey)
-                .build();
-
-        McpSyncClient mcpSyncClient = McpClient.sync(sse).requestTimeout(Duration.ofMillis(36000)).build();
-        McpSchema.InitializeResult initialize = mcpSyncClient.initialize();
-
-        log.info("initialize: {}", initialize);
-        return mcpSyncClient;
-    }
 
 }

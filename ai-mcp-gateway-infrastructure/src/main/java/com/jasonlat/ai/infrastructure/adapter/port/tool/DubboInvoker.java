@@ -1,20 +1,27 @@
 package com.jasonlat.ai.infrastructure.adapter.port.tool;
 
 import com.alibaba.fastjson2.JSON;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO.DubboConfig;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO.ProtocolMapping;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.service.GenericService;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Dubbo 协议工具调用器(Generic 模式)。
@@ -33,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 为什么不依赖 Dubbo 自带的 {@code ReferenceConfigCache}?
  * <ul>
  *   <li>Dubbo 3.2.x 把 API 换成了 {@code SimpleReferenceCache},3.3.x 又在变 — 与框架内部类耦合度高</li>
- *   <li>GenericService 代理本身线程安全、可复用,自己用 {@link ConcurrentHashMap} 缓存更可控</li>
+ *   <li>GenericService 代理本身线程安全、可复用,自己用 Caffeine 缓存更可控,顺带做 TTL</li>
  * </ul>
  * <p>
  * 调用流程:
@@ -51,16 +58,39 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DubboInvoker {
 
     /**
-     * ReferenceConfig 缓存:key=interfaceName#group#version,value=ReferenceConfig&lt;GenericService&gt;。
+     * ReferenceConfig 缓存:key=interfaceName#group#version,value=ReferenceConfig#GenericService#。
      * <p>
      * GenericService 代理线程安全,同一组 (interface, group, version) 复用同一代理即可。
+     * <p>
+     * 使用 Caffeine 实现过期回收:写后 30 分钟未访问即过期,下次访问时重建。
+     * 避免 Nacos Provider 实例变更后旧代理长期残留、连接地址陈旧。
      */
-    private final Map<String, ReferenceConfig<GenericService>> referenceCache = new ConcurrentHashMap<>();
-    // todo 1. 缓存似乎没必要？因为只用到了 没用从中缓存中取数据。
-    // todo 2. 当前仅支持nacos的格式，是否需要适配直连？直连网关又是否需要加入nacos?
+    private static final Duration REFERENCE_CACHE_TTL = Duration.ofMinutes(30);
+
+    private final Cache<String, ReferenceConfig<GenericService>> referenceCache = Caffeine.newBuilder()
+            .expireAfterAccess(REFERENCE_CACHE_TTL)
+            .maximumSize(500)
+            .removalListener((key, value, cause) -> {
+                if (value instanceof ReferenceConfig<?> ref) {
+                    try {
+                        ref.destroy();
+                    } catch (Exception e) {
+                        log.warn("[DubboInvoker] auto-destroy reference failed: {} cause={}", key, e.getMessage());
+                    }
+                }
+            })
+            .build();
 
     /**
      * Dubbo 远程调用(Generic 模式)。
+     * <p>
+     * 调用流程:
+     * <ol>
+     *   <li>解析直连 URL 列表(来自 cfg 或系统属性兜底);为空则走 Nacos 模式</li>
+     *   <li>按 mapping 把 params 拆成 Object[] args(对每个 URL 复用,避免重试时重算)</li>
+     *   <li>直连模式:按 URL 顺序故障转移,首个成功即返回;全部失败抛错</li>
+     *   <li>Nacos 模式:直接 $invoke,失败就抛错(不重试,重试交给 Dubbo 自身 retries)</li>
+     * </ol>
      *
      * @param protocolConfig 完整协议配置
      * @param params         MCP 客户端传入的参数(可能是 Map,也可能是别的结构)
@@ -72,20 +102,62 @@ public class DubboInvoker {
             throw new IllegalArgumentException("dubboConfig is null, protocolType mismatch?");
         }
 
+        // 1. 提前算好 args,故障转移的多次调用复用同一份参数(避免 mcpPath 解包每次都跑)
+        Object[] args = buildArgs(
+                cfg.getParameterTypes(),
+                params,
+                protocolConfig.getRequestProtocolMappings()
+        );
+
+        // 2. 解析直连 URL 列表
+        List<String> directUrls = resolveDirectUrls(cfg);
+
+        if (directUrls.isEmpty()) {
+            // Nacos 模式:单次调用
+            log.debug("[DubboInvoker] $invoke {}.{} via Nacos", cfg.getInterfaceName(), cfg.getMethodName());
+            return doInvoke(cfg, args, null);
+        }
+
+        // 3. 直连模式:按顺序故障转移
+        log.info("[DubboInvoker] $invoke {}.{} via DIRECT chain ({} URL(s)): {}",
+                cfg.getInterfaceName(), cfg.getMethodName(),
+                directUrls.size(), directUrls);
+
+        List<Throwable> failures = new ArrayList<>();
+        for (String url : directUrls) {
+            try {
+                return doInvoke(cfg, args, url);
+            } catch (RuntimeException e) {
+                if (isFailoverCandidate(e)) {
+                    log.warn("[DubboInvoker] direct URL [{}] failed: {}, try next", url, e.getMessage());
+                    failures.add(e);
+                    continue;
+                }
+                // 非故障转移类异常(参数错误、序列化错误):立即抛,不要浪费后面 URL 的预算
+                throw e;
+            }
+        }
+
+        // 4. 全部失败
+        log.error("[DubboInvoker] all {} direct URL(s) failed for {}.{}: {}",
+                directUrls.size(), cfg.getInterfaceName(), cfg.getMethodName(),
+                failures.stream().map(Throwable::getMessage).collect(Collectors.joining(" | ")));
+        throw new RuntimeException(
+                "all direct URLs failed [" + cfg.getInterfaceName() + "." + cfg.getMethodName() + "]: "
+                        + failures.stream().map(Throwable::getMessage).collect(Collectors.joining(" | ")),
+                failures.isEmpty() ? null : failures.get(failures.size() - 1));
+    }
+
+    /**
+     * 单次 $invoke 调用,带统一异常包装。
+     * <p>
+     * singleUrl 为 null 时走 Nacos,非 null 时只直连该 URL(与故障转移解耦)。
+     */
+    private Object doInvoke(DubboConfig cfg, Object[] args, String singleUrl) {
         try {
-            // 1. 获取/创建 GenericService 引用
-            GenericService genericService = getOrCreateGeneric(cfg);
+            GenericService genericService = getOrCreateGeneric(cfg, singleUrl);
 
-            // 2. 把 params 组装成 $invoke 用的 Object[]
-            //    按 mapping 解包 wrapper(如 xxxRequest01),让 Provider 端拿到 POJO 扁平结构
-            Object[] args = buildArgs(
-                    cfg.getParameterTypes(),
-                    params,
-                    protocolConfig.getRequestProtocolMappings()
-            );
-
-            // 3. 调用
-            log.info("[DubboInvoker] $invoke {}.{} parameterTypes={} args={}",
+            log.debug("[DubboInvoker] $invoke {}.{} parameterTypes={} args={}",
                     cfg.getInterfaceName(), cfg.getMethodName(),
                     JSON.toJSONString(cfg.getParameterTypes()),
                     JSON.toJSONString(args));
@@ -96,18 +168,19 @@ public class DubboInvoker {
                     args
             );
 
-            // 4. 返回结果序列化。Provider 端已经把 POJO 序列化成 Map(POJO 模式),或保持原值(Map 模式)
+            // Provider 端已经把 POJO 序列化成 Map(POJO 模式),或保持原值(Map 模式)
             String json = JSON.toJSONString(result);
-            log.info("[DubboInvoker] $invoke {}.{} success, result={}",
+            log.debug("[DubboInvoker] $invoke {}.{} success, result={}",
                     cfg.getInterfaceName(), cfg.getMethodName(), json);
             return json;
 
         } catch (RpcException e) {
-            log.error("[DubboInvoker] dubbo rpc failed: {}#{} {}",
-                    cfg.getInterfaceName(), cfg.getMethodName(), e.getMessage(), e);
+            log.error("[DubboInvoker] dubbo rpc failed: {}#{} url={} {}", cfg.getInterfaceName(), cfg.getMethodName(), singleUrl == null ? "Nacos" : singleUrl, e.getMessage(), e);
             throw new RuntimeException("dubbo call failed: " + e.getMessage(), e);
         } catch (Exception e) {
-            log.error("[DubboInvoker] invoke error: {}#{}", cfg.getInterfaceName(), cfg.getMethodName(), e);
+            log.error("[DubboInvoker] invoke error: {}#{} url={} {}",
+                    cfg.getInterfaceName(), cfg.getMethodName(),
+                    singleUrl == null ? "Nacos" : singleUrl, e.getMessage(), e);
             throw new RuntimeException("dubbo invoke error: " + e.getMessage(), e);
         }
     }
@@ -115,56 +188,63 @@ public class DubboInvoker {
     /**
      * 获取或创建一个 GenericService 代理。
      * <p>
+     * 单 URL 维度缓存:每次调用传一个明确的 singleUrl(直连)或 null(Nacos)。
+     * 多 URL 场景下,URL 列表由 {@link #invoke} 遍历,每次调用进入这里都是单一 URL。
+     * <p>
      * 关键点:setInterface 用 String(接口全限定名)+ setGeneric(true) — 不需要 Class<?>。
      * <p>
      * 注:ReferenceConfig 的 init() 是懒加载触发的(在第一次 get() 时自动执行),
      * 所以这里只需要 set 各种配置,不需要显式调用 init。
      */
-    private GenericService getOrCreateGeneric(DubboConfig cfg) {
-        String cacheKey = cfg.getInterfaceName() + "#"
-                + (cfg.getGroup() == null ? "" : cfg.getGroup()) + "#"
-                + (cfg.getVersion() == null ? "" : cfg.getVersion());
-
-        return referenceCache.computeIfAbsent(cacheKey, k -> {
-            ReferenceConfig<GenericService> reference = new ReferenceConfig<>();
-            reference.setInterface(cfg.getInterfaceName());  // 关键:String,无需 Class.forName
-            reference.setGeneric(true);                      // 关键:开启泛化调用
-            reference.setGroup(cfg.getGroup());
-            reference.setVersion(cfg.getVersion());
-            reference.setTimeout(cfg.getTimeoutMs() == null ? 5000 : cfg.getTimeoutMs());
-            reference.setRetries(cfg.getRetries() == null ? 0 : cfg.getRetries());
-            reference.setCheck(false);                       // 启动时不强制要求 Provider 在线
-            reference.setLazy(true);                        // 懒加载,首次调用时再连接 Nacos
-            // 可选直连旁路:当 dubbo.test.direct.url 这个 JVM system property 被显式声明时,
-            // 不走 Nacos 服务发现,直接连目标 IP:PORT,用于测试/排错场景。
-            // 不主动 setProperty(避免误改系统属性),只在确实声明了才使用。
-            String directUrl = System.getProperty("dubbo.test.direct.url");
-            log.info("[DubboInvoker] directUrl: {}", directUrl);
-            if (directUrl != null && !directUrl.isBlank()) {
-                reference.setUrl(directUrl);
-                log.info("[DubboInvoker] use DIRECT url (bypass Nacos): {}", directUrl);
-            }
-            log.info("[DubboInvoker] create GenericService ReferenceConfig: {}", cacheKey);
-            return reference;
-        }).get();
+    private GenericService getOrCreateGeneric(DubboConfig dubboConfig, String singleUrl) {
+        String cacheKey = buildCacheKey(dubboConfig, singleUrl);
+        return referenceCache.get(cacheKey, k -> createReference(dubboConfig, singleUrl)).get();
     }
 
     /**
-     * 在 DubboInvoker 加载时(早于 ReferenceConfig init)强制把 Consumer 切到
-     * 接口级服务发现(Interface-First)。这是修复 Dubbo 3.x "No provider available"
-     * 的关键:默认 Application-First 模式下,Consumer 需要 Provider 把 metadata
-     * 注册到 Nacos 才能拿到 invoker,GenericService + 普通 yml 配置下极易踩坑。
-     * 切回 Interface-First(2.x 行为)最稳定。
+     * 真正构造 ReferenceConfig 的工厂方法。
+     * <p>
+     * 单独抽出来是为了让 getter lambda 干净 — 不读 cfg 上的字段,只读参数。
      */
-    private static void forceInterfaceFirstServiceDiscovery() {
-        String key = "dubbo.application.service-discovery-migration.force";
-        if (!"INTERFACE_FIRST".equals(System.getProperty(key))) {
-            System.setProperty(key, "INTERFACE_FIRST");
-            log.info("[DubboInvoker] force service-discovery-migration=INTERFACE_FIRST");
+    private ReferenceConfig<GenericService> createReference(DubboConfig cfg, String singleUrl) {
+        ReferenceConfig<GenericService> reference = new ReferenceConfig<>();
+        reference.setInterface(cfg.getInterfaceName());        // 关键:String,无需 Class.forName
+        reference.setGeneric("true");                          // 关键:开启泛化调用
+        reference.setGroup(cfg.getGroup());
+        reference.setVersion(cfg.getVersion());
+        reference.setTimeout(cfg.getTimeoutMs() == null ? 5000 : cfg.getTimeoutMs());
+        reference.setRetries(cfg.getRetries() == null ? 0 : cfg.getRetries());
+        reference.setCheck(false);                             // 启动时不强制要求 Provider 在线
+        reference.setLazy(true);                               // 懒加载,首次调用时再连接 Nacos
+        if (StringUtils.isNotBlank(singleUrl)) {
+            // 直连本 URL,绕过 Nacos
+            log.debug("[DubboInvoker] create DIRECT reference: url={}", singleUrl);
+            reference.setUrl(singleUrl);
         }
+        return reference;
     }
-    static {
-        forceInterfaceFirstServiceDiscovery();
+
+    /**
+     * 判断异常是否值得故障转移到下一个 URL。
+     * <p>
+     * 仅网络/超时/注册中心/无可用 invoker 等"实例不通"类异常才重试;
+     * 参数序列化错误、Provider 业务异常(被 try-catch 抛出后会带业务码)立即抛,不要浪费后续 URL。
+     */
+    private boolean isFailoverCandidate(Throwable e) {
+        Throwable cur = e;
+        while (cur != null) {
+            if (cur instanceof RpcException rpc) {
+                int code = rpc.getCode();
+                return code == RpcException.NETWORK_EXCEPTION
+                        || code == RpcException.TIMEOUT_EXCEPTION
+                        || code == RpcException.REGISTRY_EXCEPTION
+                        || code == RpcException.NO_INVOKER_AVAILABLE_AFTER_FILTER
+                        || code == RpcException.FORBIDDEN_EXCEPTION
+                        || code == 0;  // 0: 部分 SerializationException 或初始化异常
+            }
+            cur = cur.getCause();
+        }
+        return false;
     }
 
     /**
@@ -253,7 +333,7 @@ public class DubboInvoker {
         if (paramMap.containsKey(root.getFieldName())) {
             Object inner = paramMap.get(root.getFieldName());
             if (inner instanceof Map) {
-                log.info("[DubboInvoker] unwrap root wrapper [{}] for type {}", root.getFieldName(), parameterType);
+                log.debug("[DubboInvoker] unwrap root wrapper [{}] for type {}", root.getFieldName(), parameterType);
                 return inner;
             }
         }
@@ -296,18 +376,60 @@ public class DubboInvoker {
     }
 
     /**
+     * 构造 ReferenceConfig 缓存 key。
+     * <p>
+     * - 直连模式:key = "DIRECT:singleUrl",URL 唯一决定引用身份;
+     *   不同 URL 在多实例场景下会得到不同的缓存项,各自独立。
+     * - Nacos 模式:key = "interfaceName#group#version",同一组配置复用同一代理。
+     */
+    private String buildCacheKey(DubboConfig dubboConfig, String singleUrl) {
+        if (StringUtils.isNotBlank(singleUrl)) {
+            return "DIRECT:" + singleUrl;
+        }
+        return dubboConfig.getInterfaceName() + "#"
+                + (dubboConfig.getGroup() == null ? "" : dubboConfig.getGroup()) + "#"
+                + (dubboConfig.getVersion() == null ? "" : dubboConfig.getVersion());
+    }
+
+    /**
+     * 解析直连 URL 列表(逗号分隔已经由 Repository 拆好,这里直接读)。
+     * <p>
+     * 优先级:
+     * 1) cfg.directEnabled=true 且 cfg.directUrls 非空 → 返回 cfg.directUrls
+     * 2) 系统属性 dubbo.direct.url 兜底(逗号分隔,trim 过滤)
+     * 3) 都没有 → 空列表(走 Nacos 模式)
+     */
+    private List<String> resolveDirectUrls(DubboConfig dubboConfig) {
+        if (Boolean.TRUE.equals(dubboConfig.getDirectEnabled())
+                && dubboConfig.getDirectUrls() != null
+                && !dubboConfig.getDirectUrls().isEmpty()) {
+            return dubboConfig.getDirectUrls();
+        }
+        String sysProp = System.getProperty("dubbo.direct.url");
+        if (StringUtils.isNotBlank(sysProp)) {
+            return Arrays.stream(sysProp.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    /**
      * 容器销毁时关闭所有 ReferenceConfig,释放连接。
      */
     @PreDestroy
     public void destroy() {
-        log.info("[DubboInvoker] destroying {} cached references", referenceCache.size());
-        for (ReferenceConfig<GenericService> reference : referenceCache.values()) {
+        Map<String, ReferenceConfig<GenericService>> snapshot = referenceCache.asMap();
+        log.debug("[DubboInvoker] destroying {} cached references", snapshot.size());
+        for (Map.Entry<String, ReferenceConfig<GenericService>> entry : snapshot.entrySet()) {
             try {
-                reference.destroy();
+                entry.getValue().destroy();
             } catch (Exception e) {
-                log.warn("[DubboInvoker] destroy reference failed: {}", e.getMessage());
+                log.warn("[DubboInvoker] destroy reference [{}] failed: {}", entry.getKey(), e.getMessage());
             }
         }
-        referenceCache.clear();
+        referenceCache.invalidateAll();
+        referenceCache.cleanUp();
     }
 }

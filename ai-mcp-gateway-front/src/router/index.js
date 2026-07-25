@@ -50,6 +50,12 @@ const routes = [
         meta: { title: '协议详情', hidden: true },
       },
       {
+        path: 'dubbo-protocols',
+        name: 'dubbo-protocols',
+        component: () => import('@/views/gateway/GatewayDubboProtocolListView.vue'),
+        meta: { title: 'Dubbo 协议', icon: 'Connection' },
+      },
+      {
         path: 'auth',
         name: 'auth',
         component: () => import('@/views/gateway/GatewayAuthView.vue'),

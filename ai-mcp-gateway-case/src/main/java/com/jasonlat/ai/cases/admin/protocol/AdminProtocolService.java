@@ -4,9 +4,11 @@ package com.jasonlat.ai.cases.admin.protocol;
 import com.jasonlat.ai.cases.admin.IAdminProtocolService;
 import com.jasonlat.ai.domain.protocol.model.entity.AnalysisCommandEntity;
 import com.jasonlat.ai.domain.protocol.model.entity.StorageCommandEntity;
+import com.jasonlat.ai.domain.protocol.model.valobj.dubbo.DubboProtocolVO;
 import com.jasonlat.ai.domain.protocol.model.valobj.http.HTTPProtocolVO;
 import com.jasonlat.ai.domain.protocol.service.IProtocolAnalysisService;
 import com.jasonlat.ai.domain.protocol.service.IProtocolStorageService;
+import com.jasonlat.ai.domain.protocol.service.dubbo.IDubboApiDocsAnalysisService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class AdminProtocolService implements IAdminProtocolService {
 
     @Resource
     private IProtocolAnalysisService protocolAnalysis;
+
+    @Resource
+    private IDubboApiDocsAnalysisService dubboAnalysis;
 
     @Override
     public void saveGatewayProtocol(StorageCommandEntity commandEntity) {
@@ -53,6 +58,20 @@ public class AdminProtocolService implements IAdminProtocolService {
     @Override
     public List<HTTPProtocolVO> analysisProtocol(AnalysisCommandEntity commandEntity) {
         return protocolAnalysis.analysis(commandEntity);
+    }
+
+    @Override
+    public void importDubboGatewayProtocol(AnalysisCommandEntity commandEntity) {
+        // 1. 解析
+        List<DubboProtocolVO> dubboProtocolVOS = dubboAnalysis.analysis(commandEntity.getOpenApiJson());
+
+        // 2. 落库
+        protocolStorage.storage(StorageCommandEntity.builder().dubboProtocolVOS(dubboProtocolVOS).build());
+    }
+
+    @Override
+    public List<DubboProtocolVO> analysisDubboProtocol(AnalysisCommandEntity commandEntity) {
+        return dubboAnalysis.analysis(commandEntity.getOpenApiJson());
     }
 
 

@@ -1,5 +1,6 @@
 package com.jasonlat.ai.infrastructure.adapter.repository;
 
+import com.jasonlat.ai.domain.session.model.valobj.enums.ProtocolType;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpGatewayConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolConfigVO;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
@@ -133,55 +134,55 @@ public class SessionRepository implements ISessionRepository {
         String protocolType = tool.getProtocolType();
         if (protocolType == null || protocolType.isBlank()) {
             // 兼容老数据:protocol_type 为空时按 HTTP 处理
-            protocolType = "HTTP";
+            protocolType = ProtocolType.HTTP.getValue();
         }
 
         // 2. 按 protocolType 分发加载具体协议配置
         McpToolProtocolConfigVO.McpToolProtocolConfigVOBuilder builder = McpToolProtocolConfigVO.builder()
-                .protocolType(protocolType);
+                .protocolType(ProtocolType.get(protocolType));
 
-        switch (protocolType.toUpperCase()) {
-            case "HTTP" -> {
-                McpProtocolHttpPO http = mcpProtocolHttpDao.queryMcpProtocolHttpByProtocolId(protocolId);
-                if (http == null) {
-                    log.warn("HTTP 协议配置缺失,protocolId:{}", protocolId);
-                    return null;
-                }
-                builder.httpConfig(McpToolProtocolConfigVO.HTTPConfig.builder()
-                        .url(http.getHttpUrl())
-                        .headers(http.getHttpHeaders())
-                        .method(http.getHttpMethod())
-                        .timeoutMs(http.getTimeout())
-                        .build());
+        if (ProtocolType.HTTP.getValue().equals(protocolType)) {
+            McpProtocolHttpPO http = mcpProtocolHttpDao.queryMcpProtocolHttpByProtocolId(protocolId);
+            if (http == null) {
+                log.warn("HTTP 协议配置缺失,protocolId:{}", protocolId);
+                return null;
             }
-            case "DUBBO" -> {
-                McpProtocolDubboPO dubbo = mcpProtocolDubboDao.queryMcpProtocolDubboByProtocolId(protocolId);
-                if (dubbo == null) {
-                    log.warn("DUBBO 协议配置缺失,protocolId:{}", protocolId);
-                    return null;
-                }
-                // parameter_types 是 JSON 字符串,反序列化给业务层用 List<String>
-                List<String> paramTypes;
-                try {
-                    paramTypes = (dubbo.getParameterTypes() == null || dubbo.getParameterTypes().isBlank())
-                            ? Collections.emptyList()
-                            : objectMapper.readValue(dubbo.getParameterTypes(), new TypeReference<List<String>>() {});
-                } catch (Exception e) {
-                    log.error("DUBBO parameter_types JSON 解析失败,protocolId:{} raw:{}",
-                            protocolId, dubbo.getParameterTypes(), e);
-                    throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
-                }
-                builder.dubboConfig(McpToolProtocolConfigVO.DubboConfig.builder()
-                        .interfaceName(dubbo.getInterfaceName())
-                        .group(dubbo.getGroupName())
-                        .version(dubbo.getVersion())
-                        .methodName(dubbo.getMethodName())
-                        .parameterTypes(paramTypes)
-                        .timeoutMs(dubbo.getTimeout())
-                        .retries(dubbo.getRetryTimes())
-                        .build());
+            builder.httpConfig(McpToolProtocolConfigVO.HTTPConfig.builder()
+                    .url(http.getHttpUrl())
+                    .headers(http.getHttpHeaders())
+                    .method(http.getHttpMethod())
+                    .timeoutMs(http.getTimeout())
+                    .build());
+        } else if (ProtocolType.DUBBO.getValue().equals(protocolType)) {
+            McpProtocolDubboPO dubbo = mcpProtocolDubboDao.queryMcpProtocolDubboByProtocolId(protocolId);
+            if (dubbo == null) {
+                log.warn("DUBBO 协议配置缺失,protocolId:{}", protocolId);
+                return null;
             }
-            default -> throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+            // parameter_types 是 JSON 字符串,反序列化给业务层用 List<String>
+            List<String> paramTypes;
+            try {
+                paramTypes = (dubbo.getParameterTypes() == null || dubbo.getParameterTypes().isBlank())
+                        ? Collections.emptyList()
+                        : objectMapper.readValue(dubbo.getParameterTypes(), new TypeReference<List<String>>() {});
+            } catch (Exception e) {
+                log.error("DUBBO parameter_types JSON 解析失败,protocolId:{} raw:{}",
+                        protocolId, dubbo.getParameterTypes(), e);
+                throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
+            }
+            builder.dubboConfig(McpToolProtocolConfigVO.DubboConfig.builder()
+                    .interfaceName(dubbo.getInterfaceName())
+                    .group(dubbo.getGroupName())
+                    .version(dubbo.getVersion())
+                    .methodName(dubbo.getMethodName())
+                    .parameterTypes(paramTypes)
+                    .timeoutMs(dubbo.getTimeout())
+                    .retries(dubbo.getRetryTimes())
+                    .directUrls(splitDirectUrls(dubbo.getDirectUrl()))
+                    .directEnabled(dubbo.getDirectEnabled())
+                    .build());
+        } else {
+            throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
         }
 
         // 3. 字段映射表共用 — 与具体协议无关,schema 描述的是 MCP 客户端入参/出参
@@ -203,5 +204,29 @@ public class SessionRepository implements ISessionRepository {
         builder.requestProtocolMappings(requestProtocolMappings);
 
         return builder.build();
+    }
+
+    /**
+     * 把数据库存的"英文逗号分隔直连 URL 字符串"解析为 List<String>。
+     * <p>
+     * 设计要点:
+     * - 入参为 null / 空白时返回空列表(由 DubboInvoker 决定是否走 Nacos)。
+     * - 元素按 trim + 过滤空串处理,避免运营误填 "a, b, ,c" 导致 NPE 或空请求。
+     * - 不在此处做 URL 格式校验,留给 DubboInvoker 在调用时检测,这样 SQL 录入时
+     *   不会因为一个手抖的空格导致整条配置都保存失败。
+     */
+    private static List<String> splitDirectUrls(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return Collections.emptyList();
+        }
+        String[] parts = raw.split(",");
+        List<String> result = new ArrayList<>(parts.length);
+        for (String p : parts) {
+            String trimmed = p.trim();
+            if (!trimmed.isEmpty()) {
+                result.add(trimmed);
+            }
+        }
+        return result;
     }
 }

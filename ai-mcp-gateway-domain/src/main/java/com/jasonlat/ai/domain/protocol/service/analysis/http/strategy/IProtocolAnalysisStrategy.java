@@ -1,4 +1,4 @@
-package com.jasonlat.ai.domain.protocol.service.analysis.strategy;
+package com.jasonlat.ai.domain.protocol.service.analysis.http.strategy;
 
 
 import com.alibaba.fastjson2.JSONObject;

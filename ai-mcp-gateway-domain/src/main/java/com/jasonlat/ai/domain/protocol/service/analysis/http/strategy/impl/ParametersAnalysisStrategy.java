@@ -1,9 +1,9 @@
-package com.jasonlat.ai.domain.protocol.service.analysis.strategy.impl;
+package com.jasonlat.ai.domain.protocol.service.analysis.http.strategy.impl;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.jasonlat.ai.domain.protocol.model.valobj.http.HTTPProtocolVO;
-import com.jasonlat.ai.domain.protocol.service.analysis.strategy.AbstractAnalysisStrategy;
+import com.jasonlat.ai.domain.protocol.service.analysis.http.strategy.AbstractAnalysisStrategy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  * 2026-07-03  19:06
  */
 @Service("parametersAnalysis")
-public class ParametersAnalysisStrategy extends AbstractAnalysisStrategy  {
+public class ParametersAnalysisStrategy extends AbstractAnalysisStrategy {
     /**
      * 执行解析
      *

@@ -60,6 +60,21 @@ public class AdminManageService implements IAdminManageService {
     }
 
     @Override
+    public List<DubboProtocolConfigEntity> queryDubboProtocolList() {
+        return adminService.queryDubboProtocolList();
+    }
+
+    @Override
+    public DubboProtocolPageEntity queryDubboProtocolPage(DubboProtocolQueryEntity queryEntity) {
+        return adminService.queryDubboProtocolPage(queryEntity);
+    }
+
+    @Override
+    public List<DubboProtocolConfigEntity> queryDubboProtocolListByGatewayId(String gatewayId) {
+        return adminService.queryDubboProtocolListByGatewayId(gatewayId);
+    }
+
+    @Override
     public List<GatewayAuthConfigEntity> queryGatewayAuthList() {
         return adminService.queryGatewayAuthList();
     }

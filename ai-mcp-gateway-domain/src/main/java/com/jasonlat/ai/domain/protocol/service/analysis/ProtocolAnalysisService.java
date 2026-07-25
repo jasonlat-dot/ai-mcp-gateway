@@ -6,7 +6,7 @@ import com.jasonlat.ai.domain.protocol.model.entity.AnalysisCommandEntity;
 import com.jasonlat.ai.domain.protocol.model.valobj.enums.AnalysisTypeEnum;
 import com.jasonlat.ai.domain.protocol.model.valobj.http.HTTPProtocolVO;
 import com.jasonlat.ai.domain.protocol.service.IProtocolAnalysisService;
-import com.jasonlat.ai.domain.protocol.service.analysis.strategy.IProtocolAnalysisStrategy;
+import com.jasonlat.ai.domain.protocol.service.analysis.http.strategy.IProtocolAnalysisStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

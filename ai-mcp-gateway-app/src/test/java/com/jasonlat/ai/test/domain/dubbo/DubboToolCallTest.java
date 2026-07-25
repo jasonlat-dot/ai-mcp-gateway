@@ -2,6 +2,7 @@ package com.jasonlat.ai.test.domain.dubbo;
 
 import com.alibaba.fastjson2.JSON;
 import com.jasonlat.ai.domain.session.model.valobj.McpSchemaVO;
+import com.jasonlat.ai.domain.session.model.valobj.enums.ProtocolType;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
 import com.jasonlat.ai.domain.session.adapter.repository.ISessionRepository;
 import com.jasonlat.ai.domain.session.service.message.handle.impl.ToolsCallHandler;
@@ -52,11 +53,11 @@ public class DubboToolCallTest {
     @Resource
     private DubboInvoker dubboInvoker;
 
-    @Resource
-    private ApplicationConfig applicationConfig;
-
-    @Resource
-    private RegistryConfig registryConfig;
+//    @Resource
+//    private ApplicationConfig applicationConfig;
+//
+//    @Resource
+//    private RegistryConfig registryConfig;
 
     // ============================================================
     // 全链路测试用 — 通过 ToolsCallHandler + Repository
@@ -84,8 +85,8 @@ public class DubboToolCallTest {
         System.setProperty("dubbo.application.service-discovery-migration.force", "APPLICATION_FIRST");
 
         log.info("========== DubboToolCallTest 前置检查 ==========");
-        log.info("Nacos registry: {}", registryConfig.getAddress());
-        log.info("Dubbo application: {}", applicationConfig.getName());
+//        log.info("Nacos registry: {}", registryConfig.getAddress());
+//        log.info("Dubbo application: {}", applicationConfig.getName());
         log.info("force INTERFACE_FIRST: {}", System.getProperty("dubbo.application.service-discovery-migration.force"));
         log.info("tool_name={}, gateway_id={}", TOOL_NAME, GATEWAY_ID);
         log.info("请确认以下服务已就绪:");
@@ -121,7 +122,7 @@ public class DubboToolCallTest {
         // 构造 protocolConfig(把 DubboConfig 包进去,模拟 repository 返回值)
         // 注:DubboInvoker.invoke 只需要 dubboConfig 和 requestProtocolMappings,不需要 protocolId/toolName
         McpToolProtocolConfigVO protocolConfig = McpToolProtocolConfigVO.builder()
-                .protocolType("DUBBO")
+                .protocolType(ProtocolType.DUBBO)
                 .dubboConfig(dubboConfig)
                 .build();
 
@@ -164,7 +165,7 @@ public class DubboToolCallTest {
                 .build();
 
         McpToolProtocolConfigVO protocolConfig = McpToolProtocolConfigVO.builder()
-                .protocolType("DUBBO")
+                .protocolType(ProtocolType.DUBBO)
                 .dubboConfig(dubboConfig)
                 .build();
 

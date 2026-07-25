@@ -5,6 +5,7 @@ import com.jasonlat.ai.domain.session.model.valobj.SessionForwardRequestVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionForwardResponseVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionSyncEventVO;
 import com.jasonlat.ai.domain.session.model.valobj.SessionSyncInfoVO;
+import com.jasonlat.ai.domain.session.model.valobj.enums.ProtocolType;
 import com.jasonlat.ai.domain.session.model.valobj.gateway.McpToolProtocolConfigVO;
 import com.jasonlat.ai.infrastructure.adapter.port.tool.DubboInvoker;
 import com.jasonlat.ai.infrastructure.adapter.port.tool.HttpInvoker;
@@ -65,10 +66,10 @@ public class SessionPort implements ISessionPort {
             throw new AppException(ResponseCode.ILLEGAL_PARAMETER);
         }
 
-        String protocolType = protocolConfig.getProtocolType();
+        ProtocolType protocolType = protocolConfig.getProtocolType();
         if (protocolType == null) {
             // 兼容老数据:没填就当 HTTP
-            protocolType = "HTTP";
+            protocolType = ProtocolType.HTTP;
         }
 
         // =========================================================================
@@ -76,12 +77,13 @@ public class SessionPort implements ISessionPort {
         // 这里 SessionPort 只做"按 protocolType 分发"的工厂职责,
         // 不再持有 HTTP/Dubbo 的调用细节,避免一处逻辑被两套代码各自维护。
         // =========================================================================
-        return switch (protocolType.toUpperCase()) {
-            case "HTTP"  -> httpInvoker.invoke(protocolConfig.getHttpConfig(), params);
-            case "DUBBO" -> dubboInvoker.invoke(protocolConfig, params);
-            default -> throw new AppException("unknown protocol type: " + protocolType);
-        };
-
+        if (protocolType.equals(ProtocolType.HTTP)) {
+            return httpInvoker.invoke(protocolConfig.getHttpConfig(), params);
+        } else if (protocolType.equals(ProtocolType.DUBBO)) {
+            return dubboInvoker.invoke(protocolConfig, params);
+        } else {
+            throw new AppException("unknown protocol type: " + protocolType);
+        }
     }
 
     /**

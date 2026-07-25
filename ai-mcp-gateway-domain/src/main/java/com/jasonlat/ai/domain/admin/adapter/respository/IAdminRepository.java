@@ -22,6 +22,12 @@ public interface IAdminRepository {
 
     List<GatewayProtocolConfigEntity> queryGatewayProtocolListByProtocolIds(List<Long> protocolIds);
 
+    List<DubboProtocolConfigEntity> queryDubboProtocolList();
+
+    DubboProtocolPageEntity queryDubboProtocolPage(DubboProtocolQueryEntity queryEntity);
+
+    List<DubboProtocolConfigEntity> queryDubboProtocolListByProtocolIds(List<Long> protocolIds);
+
     List<GatewayAuthConfigEntity> queryGatewayAuthList();
 
     GatewayAuthPageEntity queryGatewayAuthPage(GatewayAuthQueryEntity queryEntity);

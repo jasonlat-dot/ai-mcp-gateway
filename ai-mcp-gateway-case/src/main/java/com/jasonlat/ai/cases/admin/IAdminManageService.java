@@ -25,6 +25,12 @@ public interface IAdminManageService {
 
     List<GatewayProtocolConfigEntity> queryGatewayProtocolListByGatewayId(String gatewayId);
 
+    List<DubboProtocolConfigEntity> queryDubboProtocolList();
+
+    DubboProtocolPageEntity queryDubboProtocolPage(DubboProtocolQueryEntity queryEntity);
+
+    List<DubboProtocolConfigEntity> queryDubboProtocolListByGatewayId(String gatewayId);
+
     List<GatewayAuthConfigEntity> queryGatewayAuthList();
 
     GatewayAuthPageEntity queryGatewayAuthPage(GatewayAuthQueryEntity queryEntity);

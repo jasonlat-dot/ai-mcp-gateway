@@ -1,0 +1,112 @@
+{
+  "annotations": [
+    "@org.apache.dubbo.apidocs.annotations.ApiModule(version=\"v1.0\", value=\"\\u5458\\u5de5\\u67e5\\u8be2\\u670d\\u52a1\", apiInterface=com.jasonlat.ai.dubbo.api.EmployeeService.class)"
+  ],
+  "canonicalName": "com.jasonlat.ai.dubbo.api.EmployeeService",
+  "codeSource": "file:/E:/project/mcp-gateway/ai-mcp-gateway/ai-mcp-gateway-dubbo-test/ai-mcp-gateway-dubbo-api/target/classes/",
+  "methods": [
+    {
+      "annotations": [
+        "@org.apache.dubbo.apidocs.annotations.ApiDoc(version=\"v1.0\", description=\"\\u6839\\u636e\\u5165\\u53c2\\u57ce\\u5e02\\u4e0e\\u516c\\u53f8\\u4fe1\\u606f,\\u8fd4\\u56de\\u8be5\\u516c\\u53f8\\u5458\\u5de5\\u5217\\u8868\\u3002\\u5f53\\u524d Provider \\u5b9e\\u73b0\\u8fd4\\u56de mock \\u6570\\u636e\\u3002\", responseClassDescription=\"\\u516c\\u53f8\\u5458\\u5de5\\u4fe1\\u606f(\\u542b code/message/employeeCount/employees)\", value=\"\\u6309\\u57ce\\u5e02\\u4e0e\\u516c\\u53f8\\u67e5\\u8be2\\u5458\\u5de5\")"
+      ],
+      "name": "getCompanyEmployee",
+      "parameterTypes": [
+        "com.jasonlat.ai.dubbo.api.dto.EmployeeRequest"
+      ],
+      "parameters": [],
+      "returnType": "com.jasonlat.ai.dubbo.api.dto.EmployeeResponse"
+    }
+  ],
+  "parameters": {
+    "application": "ai-mcp-gateway-dubbo-provider",
+    "pid": "48160",
+    "interface": "com.jasonlat.ai.dubbo.api.EmployeeService",
+    "anyhost": "true",
+    "side": "provider",
+    "group": "default",
+    "release": "3.3.0",
+    "dubbo": "2.0.2",
+    "version": "1.0.0",
+    "executor-management-mode": "isolation",
+    "file-cache": "true",
+    "methods": "getCompanyEmployee",
+    "deprecated": "false",
+    "service-name-mapping": "true",
+    "timeout": "3000",
+    "bind.port": "20880",
+    "register-mode": "all",
+    "generic": "false",
+    "revision": "1.0.0",
+    "retries": "0",
+    "bind.ip": "172.29.240.1",
+    "prefer.serialization": "hessian2,fastjson2",
+    "background": "false",
+    "dynamic": "true",
+    "timestamp": "1784968926325"
+  },
+  "types": [
+    {
+      "enums": [],
+      "items": [],
+      "properties": {
+        "name": "java.lang.String",
+        "position": "java.lang.String",
+        "employeeNo": "java.lang.String",
+        "department": "java.lang.String"
+      },
+      "type": "com.jasonlat.ai.dubbo.api.dto.EmployeeInfo"
+    },
+    {
+      "enums": [],
+      "items": [],
+      "properties": {},
+      "type": "java.lang.String"
+    },
+    {
+      "enums": [],
+      "items": [],
+      "properties": {
+        "code": "java.lang.Integer",
+        "city": "java.lang.String",
+        "companyName": "java.lang.String",
+        "message": "java.lang.String",
+        "employees": "java.util.List<com.jasonlat.ai.dubbo.api.dto.EmployeeInfo>",
+        "employeeCount": "java.lang.Integer"
+      },
+      "type": "com.jasonlat.ai.dubbo.api.dto.EmployeeResponse"
+    },
+    {
+      "enums": [],
+      "items": [
+        "com.jasonlat.ai.dubbo.api.dto.EmployeeInfo"
+      ],
+      "properties": {},
+      "type": "java.util.List<com.jasonlat.ai.dubbo.api.dto.EmployeeInfo>"
+    },
+    {
+      "enums": [],
+      "items": [],
+      "properties": {
+        "name": "java.lang.String",
+        "type": "java.lang.String"
+      },
+      "type": "com.jasonlat.ai.dubbo.api.dto.CompanyInfo"
+    },
+    {
+      "enums": [],
+      "items": [],
+      "properties": {
+        "city": "java.lang.String",
+        "company": "com.jasonlat.ai.dubbo.api.dto.CompanyInfo"
+      },
+      "type": "com.jasonlat.ai.dubbo.api.dto.EmployeeRequest"
+    },
+    {
+      "enums": [],
+      "items": [],
+      "properties": {},
+      "type": "java.lang.Integer"
+    }
+  ],
+  "uniqueId": "com.jasonlat.ai.dubbo.api.EmployeeService@file:/E:/project/mcp-gateway/ai-mcp-gateway/ai-mcp-gateway-dubbo-test/ai-mcp-gateway-dubbo-api/target/classes/"
+}

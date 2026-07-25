@@ -12,6 +12,8 @@
         <result column="parameter_types" property="parameterTypes"/>
         <result column="timeout" property="timeout"/>
         <result column="retry_times" property="retryTimes"/>
+        <result column="direct_url" property="directUrl"/>
+        <result column="direct_enabled" property="directEnabled"/>
         <result column="status" property="status"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -19,7 +21,7 @@
 
     <sql id="Base_Column_List">
         id, protocol_id, interface_name, group_name, version, method_name,
-        parameter_types, timeout, retry_times, status, create_time, update_time
+        parameter_types, timeout, retry_times, direct_url, direct_enabled, status, create_time, update_time
     </sql>
 
     <insert id="insert" parameterType="com.jasonlat.ai.infrastructure.dao.po.McpProtocolDubboPO" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
@@ -33,6 +35,8 @@
             <if test="parameterTypes != null and parameterTypes.trim().length() > 0">parameter_types,</if>
             <if test="timeout != null">timeout,</if>
             <if test="retryTimes != null">retry_times,</if>
+            <if test="directUrl != null and directUrl.trim().length() > 0">direct_url,</if>
+            <if test="directEnabled != null">direct_enabled,</if>
             <if test="status != null">status,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateTime != null">update_time,</if>
@@ -47,6 +51,8 @@
             <if test="parameterTypes != null and parameterTypes.trim().length() > 0">#{parameterTypes},</if>
             <if test="timeout != null">#{timeout},</if>
             <if test="retryTimes != null">#{retryTimes},</if>
+            <if test="directUrl != null and directUrl.trim().length() > 0">#{directUrl},</if>
+            <if test="directEnabled != null">#{directEnabled},</if>
             <if test="status != null">#{status},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateTime != null">#{updateTime},</if>
@@ -76,6 +82,8 @@
             <if test="parameterTypes != null and parameterTypes.trim().length() > 0">parameter_types = #{parameterTypes},</if>
             <if test="timeout != null">timeout = #{timeout},</if>
             <if test="retryTimes != null">retry_times = #{retryTimes},</if>
+            <if test="directUrl != null and directUrl.trim().length() > 0">direct_url = #{directUrl},</if>
+            <if test="directEnabled != null">direct_enabled = #{directEnabled ? 1 : 0},</if>
             <if test="status != null">status = #{status},</if>
             update_time = CURRENT_TIMESTAMP
         </set>
@@ -137,6 +145,8 @@
         parameter_types,
         timeout,
         retry_times,
+        direct_url,
+        direct_enabled,
         status
         )
         VALUES
@@ -150,6 +160,8 @@
             #{item.parameterTypes},
             #{item.timeout},
             #{item.retryTimes},
+            #{item.directUrl},
+            #{item.directEnabled ? 1 : 0},
             #{item.status}
             )
         </foreach>
@@ -179,6 +191,8 @@
             <if test="parameterTypes != null and parameterTypes.trim().length() != 0">parameter_types = #{parameterTypes},</if>
             <if test="timeout != null">timeout = #{timeout},</if>
             <if test="retryTimes != null">retry_times = #{retryTimes},</if>
+            <if test="directUrl != null and directUrl.trim().length() != 0">direct_url = #{directUrl},</if>
+            <if test="directEnabled != null">direct_enabled = #{directEnabled},</if>
             <if test="status != null">status = #{status},</if>
             update_time = NOW()
         </set>

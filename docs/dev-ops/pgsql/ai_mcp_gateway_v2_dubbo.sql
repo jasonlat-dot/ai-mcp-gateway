@@ -23,6 +23,8 @@ CREATE TABLE mcp_protocol_dubbo (
                                     parameter_types TEXT,
                                     timeout INTEGER DEFAULT 3000,
                                     retry_times SMALLINT DEFAULT 0,
+                                    direct_url VARCHAR(2048) DEFAULT NULL,
+                                    direct_enabled SMALLINT NOT NULL DEFAULT 0,
                                     status SMALLINT NOT NULL DEFAULT 1,
                                     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                                     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -38,6 +40,8 @@ COMMENT ON COLUMN mcp_protocol_dubbo.method_name           IS '要调用的方�
 COMMENT ON COLUMN mcp_protocol_dubbo.parameter_types       IS '方法参数类型全限定名 JSON 数组,例:["com.xxx.dto.EmployeeRequest"]';
 COMMENT ON COLUMN mcp_protocol_dubbo.timeout               IS '单次调用超时(毫秒)';
 COMMENT ON COLUMN mcp_protocol_dubbo.retry_times           IS '失败重试次数(0=不重试)';
+COMMENT ON COLUMN mcp_protocol_dubbo.direct_url            IS '直连 URL 列表,英文逗号分隔。例:"dubbo://10.0.0.5:20880,dubbo://10.0.0.6:20880"。空则走 Nacos';
+COMMENT ON COLUMN mcp_protocol_dubbo.direct_enabled        IS '是否启用直连:0-否(走 Nacos),1-是(按 direct_url 顺序故障转移)';
 COMMENT ON COLUMN mcp_protocol_dubbo.status                IS '状态:0-禁用,1-启用';
 COMMENT ON COLUMN mcp_protocol_dubbo.create_time           IS '创建时间';
 COMMENT ON COLUMN mcp_protocol_dubbo.update_time           IS '更新时间';
